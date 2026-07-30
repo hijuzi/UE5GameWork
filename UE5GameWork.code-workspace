@@ -1,0 +1,33 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"files.exclude": {
+			"LyraStarterGame/Binaries": true,
+			"LyraStarterGame/Build": true,
+			"LyraStarterGame/DerivedDataCache": true,
+			"LyraStarterGame/Intermediate": true,
+			"LyraStarterGame/Platforms": true,
+			"LyraStarterGame/Saved": true,
+			"LyraStarterGame/Plugins/*/Binaries": true,
+			"LyraStarterGame/Plugins/*/Intermediate": true,
+			"LyraStarterGame/*.sln": true,
+			"LyraStarterGame/*.slnx": true
+		},
+		"search.exclude": {
+			"LyraStarterGame/Binaries": true,
+			"LyraStarterGame/Build": true,
+			"LyraStarterGame/DerivedDataCache": true,
+			"LyraStarterGame/Intermediate": true,
+			"LyraStarterGame/Platforms": true,
+			"LyraStarterGame/Saved": true,
+			"LyraStarterGame/Plugins/*/Binaries": true,
+			"LyraStarterGame/Plugins/*/Intermediate": true,
+			"LyraStarterGame/*.sln": true,
+			"LyraStarterGame/*.slnx": true
+		}
+	}
+}
