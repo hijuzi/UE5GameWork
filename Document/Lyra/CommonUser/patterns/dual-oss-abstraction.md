@@ -102,6 +102,6 @@ Epic 在 UE5 中引入了新一代在线服务框架 `OnlineServices`（OSSv2）
 
 ## 相关文件
 
-- [[/cross-cutting/oss-versioning|OSS 版本适配]]
-- [[/architecture/overview|架构概览]]
-- [[/health/report|代码健康报告 — OSS 分支复杂度]]
+- [OSS 版本适配](../cross-cutting/oss-versioning.md)
+- [架构概览](../architecture/overview.md)
+- [代码健康报告 — OSS 分支复杂度](../health/report.md)

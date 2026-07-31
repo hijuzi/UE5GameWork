@@ -22,31 +22,31 @@ CommonUser 是 Lyra 框架中的核心插件，负责管理本地用户身份、
 ## 快速导航
 
 ### 架构
-- [[architecture/overview|架构概览]] — 系统整体设计、模块划分与依赖关系
-- [[architecture/data-flow|数据流图]] — 用户登录与会话创建的完整数据流
+- [架构概览](architecture/overview.md) — 系统整体设计、模块划分与依赖关系
+- [数据流图](architecture/data-flow.md) — 用户登录与会话创建的完整数据流
 
 ### 模块
-- [[modules/CommonUserSubsystem/overview|CommonUserSubsystem]] — 核心用户管理（登录、权限、本地玩家）
-- [[modules/CommonUserSubsystem/api|CommonUserSubsystem API]] — 完整接口参考
-- [[modules/CommonSessionSubsystem/overview|CommonSessionSubsystem]] — 在线会话创建/搜索/加入
-- [[modules/CommonSessionSubsystem/api|CommonSessionSubsystem API]] — 完整接口参考
-- [[modules/CommonUserBasicPresence/overview|CommonUserBasicPresence]] — 在线状态自动更新
-- [[modules/AsyncAction_CommonUserInitialize/overview|AsyncAction_CommonUserInitialize]] — Blueprint 异步初始化节点
+- [CommonUserSubsystem](modules/CommonUserSubsystem/overview.md) — 核心用户管理（登录、权限、本地玩家）
+- [CommonUserSubsystem API](modules/CommonUserSubsystem/api.md) — 完整接口参考
+- [CommonSessionSubsystem](modules/CommonSessionSubsystem/overview.md) — 在线会话创建/搜索/加入
+- [CommonSessionSubsystem API](modules/CommonSessionSubsystem/api.md) — 完整接口参考
+- [CommonUserBasicPresence](modules/CommonUserBasicPresence/overview.md) — 在线状态自动更新
+- [AsyncAction_CommonUserInitialize](modules/AsyncAction_CommonUserInitialize/overview.md) — Blueprint 异步初始化节点
 
 ### 设计模式
-- [[patterns/login-state-machine|登录状态机]] — `FUserLoginRequest` 多步登录流程
-- [[patterns/dual-oss-abstraction|双 OSS 抽象]] — OSSv1/OSSv2 共存的抽象策略
-- [[patterns/context-resolution|OnlineContext 解析]] — 本地/在线上下文的优先级解析
+- [登录状态机](patterns/login-state-machine.md) — `FUserLoginRequest` 多步登录流程
+- [双 OSS 抽象](patterns/dual-oss-abstraction.md) — OSSv1/OSSv2 共存的抽象策略
+- [OnlineContext 解析](patterns/context-resolution.md) — 本地/在线上下文的优先级解析
 
 ### 横切关注点
-- [[cross-cutting/oss-versioning|OSS 版本适配]] — 编译期与运行时的版本适配
-- [[cross-cutting/platform-abstraction|平台抽象]] — PlatformUserId / InputDeviceId 抽象层
+- [OSS 版本适配](cross-cutting/oss-versioning.md) — 编译期与运行时的版本适配
+- [平台抽象](cross-cutting/platform-abstraction.md) — PlatformUserId / InputDeviceId 抽象层
 
 ### 健康与问题
-- [[health/report|代码健康报告]] — 质量评估、已知问题与改进建议
+- [代码健康报告](health/report.md) — 质量评估、已知问题与改进建议
 
 ### 入门
-- [[onboarding/quickstart|快速入门]] — 5 分钟了解如何使用 CommonUser
+- [快速入门](onboarding/quickstart.md) — 5 分钟了解如何使用 CommonUser
 
 ---
 

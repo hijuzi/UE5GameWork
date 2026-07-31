@@ -115,6 +115,6 @@ MyPresence->bEnableSessionsBasedPresence = true;
 
 ## 相关文件
 
-- [[/modules/CommonSessionSubsystem/overview|CommonSessionSubsystem]]
-- [[/architecture/data-flow|Presence 更新数据流]]
-- [[/cross-cutting/oss-versioning|OSS 版本适配]]
+- [CommonSessionSubsystem](../CommonSessionSubsystem/overview.md)
+- [Presence 更新数据流](../../architecture/data-flow.md)
+- [OSS 版本适配](../../cross-cutting/oss-versioning.md)

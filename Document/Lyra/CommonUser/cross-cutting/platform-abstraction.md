@@ -151,6 +151,6 @@ CommonUser 行为:
 
 ## 相关文件
 
-- [[/cross-cutting/oss-versioning|OSS 版本适配]]
-- [[/modules/CommonUserSubsystem/overview|CommonUserSubsystem]]
-- [[/architecture/overview|架构概览]]
+- [OSS 版本适配](oss-versioning.md)
+- [CommonUserSubsystem](../modules/CommonUserSubsystem/overview.md)
+- [架构概览](../architecture/overview.md)

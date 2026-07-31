@@ -94,6 +94,6 @@ bool TryToChangePrivilegeCheckContext(
 
 ## 相关文件
 
-- [[/modules/CommonUserSubsystem/overview|CommonUserSubsystem]]
-- [[/modules/AsyncAction_CommonUserInitialize/overview|AsyncAction 初始化]]
-- [[/architecture/data-flow|登录数据流]]
+- [CommonUserSubsystem](../modules/CommonUserSubsystem/overview.md)
+- [AsyncAction 初始化](../modules/AsyncAction_CommonUserInitialize/overview.md)
+- [登录数据流](../architecture/data-flow.md)

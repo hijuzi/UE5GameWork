@@ -143,6 +143,6 @@ UserSystem->TryToInitializeUser(Params);
 
 ## 相关文件
 
-- [[/modules/CommonUserSubsystem/api|API 参考]]
-- [[/architecture/data-flow|数据流图 — 登录流程]]
-- [[/patterns/login-state-machine|登录状态机模式]]
+- [API 参考](api.md)
+- [数据流图 — 登录流程](../../architecture/data-flow.md)
+- [登录状态机模式](../../patterns/login-state-machine.md)

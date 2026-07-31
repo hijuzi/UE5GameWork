@@ -96,6 +96,6 @@ UE5.3+:        默认 OSSv2 (OnlineServices 成为推荐)
 
 ## 相关文件
 
-- [[/patterns/dual-oss-abstraction|双 OSS 抽象模式]]
-- [[/cross-cutting/platform-abstraction|平台抽象]]
-- [[/health/report|代码健康报告 — OSS 分支复杂度]]
+- [双 OSS 抽象模式](../patterns/dual-oss-abstraction.md)
+- [平台抽象](platform-abstraction.md)
+- [代码健康报告 — OSS 分支复杂度](../health/report.md)

@@ -192,6 +192,6 @@ void UMyClass::OnSessionsFound(const TArray<UCommonSession_SearchResult*>& Resul
 
 ## 相关文件
 
-- [[/modules/CommonSessionSubsystem/api|API 参考]]
-- [[/architecture/data-flow|数据流图 — 会话创建/加入]]
-- [[/modules/CommonUserBasicPresence/overview|Presence 自动更新]]
+- [API 参考](api.md)
+- [数据流图 — 会话创建/加入](../../architecture/data-flow.md)
+- [Presence 自动更新](../CommonUserBasicPresence/overview.md)

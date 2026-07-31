@@ -119,6 +119,6 @@ UAsyncAction_CommonUserInitialize::LoginForOnlinePlay(
 
 ## 相关文件
 
-- [[/modules/CommonUserSubsystem/overview|CommonUserSubsystem]]
-- [[/architecture/data-flow|登录数据流]]
-- [[/patterns/login-state-machine|登录状态机]]
+- [CommonUserSubsystem](../CommonUserSubsystem/overview.md)
+- [登录数据流](../../architecture/data-flow.md)
+- [登录状态机](../../patterns/login-state-machine.md)

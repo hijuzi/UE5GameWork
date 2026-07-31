@@ -120,6 +120,6 @@ LogUserBasicPresence=Verbose
 
 ## 下一步
 
-- [[/architecture/overview|架构概览]] — 深入了解系统设计
-- [[/modules/CommonUserSubsystem/api|API 参考]] — 完整接口文档
-- [[/patterns/login-state-machine|登录状态机]] — 理解登录流程细节
+- [架构概览](../architecture/overview.md) — 深入了解系统设计
+- [API 参考](../modules/CommonUserSubsystem/api.md) — 完整接口文档
+- [登录状态机](../patterns/login-state-machine.md) — 理解登录流程细节

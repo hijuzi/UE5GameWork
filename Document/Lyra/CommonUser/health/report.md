@@ -97,5 +97,5 @@
 
 ## 相关文件
 
-- [[/cross-cutting/oss-versioning|OSS 版本适配问题]]
-- [[/architecture/overview|架构概览]]
+- [OSS 版本适配问题](../cross-cutting/oss-versioning.md)
+- [架构概览](../architecture/overview.md)
