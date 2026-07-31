@@ -9,12 +9,15 @@
 
 | 字段 | 值 |
 |------|-----|
-| 源码根目录 | `e:\UE_Project\UE5GameWork\LyraStarterGame` |
-| 文档输出根目录 | `e:\UE_Project\UE5GameWork\Document\Lyra` |
+| workspace 根目录 | 当前工作空间（即 `UE5GameWork/`） |
+| 源码相对路径 | `LyraStarterGame/` |
+| 文档相对路径 | `Document/Lyra/` |
 | 技能 | `code-to-docs` (完整模式 / full mode) |
 | 语言 | C++ (Unreal Engine 5) |
-| 已完成 | Batch 0: CommonUser（输出到 `CommonUser/`） |
+| 已完成 | Batch 0: CommonUser（输出到 `Document/Lyra/CommonUser/`） |
 | 总规模 | ~703 源文件，~7-9 万行 |
+
+> 以下所有路径均为**相对路径**，基于 workspace 根目录。
 
 ---
 
@@ -40,7 +43,7 @@ Document/Lyra/
 ### 分析范围
 
 ```
-e:\UE_Project\UE5GameWork\LyraStarterGame\Source\
+LyraStarterGame/Source\
   ├── LyraGame/          (457 文件 — 核心游戏逻辑)
   └── LyraEditor/        (25 文件 — 编辑器工具)
 ```
@@ -48,12 +51,12 @@ e:\UE_Project\UE5GameWork\LyraStarterGame\Source\
 ### 输出路径
 
 ```
-e:\UE_Project\UE5GameWork\Document\Lyra\Core\
+Document/Lyra/Core\
 ```
 
 ### 执行指令
 
-> 使用 code-to-docs 技能，完整模式(full mode)，分析 `e:\UE_Project\UE5GameWork\LyraStarterGame\Source` 目录下所有 C++ 源码，将文档输出到 `e:\UE_Project\UE5GameWork\Document\Lyra\Core`。
+> 使用 code-to-docs 技能，完整模式(full mode)，分析 `LyraStarterGame/Source` 目录下所有 C++ 源码，将文档输出到 `Document/Lyra/Core`。
 >
 > 注意：Source 包含 LyraGame（457 文件）和 LyraEditor（25 文件），两者耦合紧密，一起分析。LyraGame 子模块包括：AbilitySystem、Character、Camera、Equipment、Weapons、UI、Settings、GameModes、GameFeatures、Interaction、Inventory、Input、Teams、Player、System、Feedback、Cosmetics、Performance、Replays、Hotfix、Development、Animation、Audio、Messages、Physics、Tests 等。
 
@@ -66,10 +69,10 @@ e:\UE_Project\UE5GameWork\Document\Lyra\Core\
 ### 分析范围
 
 ```
-e:\UE_Project\UE5GameWork\LyraStarterGame\Plugins\CommonGame\
-e:\UE_Project\UE5GameWork\LyraStarterGame\Plugins\AsyncMixin\
-e:\UE_Project\UE5GameWork\LyraStarterGame\Plugins\ModularGameplayActors\
-e:\UE_Project\UE5GameWork\LyraStarterGame\Plugins\UIExtension\
+LyraStarterGame/Plugins\CommonGame\
+LyraStarterGame/Plugins\AsyncMixin\
+LyraStarterGame/Plugins\ModularGameplayActors\
+LyraStarterGame/Plugins\UIExtension\
 ```
 
 | 插件 | 文件数 | 作用 |
@@ -82,12 +85,12 @@ e:\UE_Project\UE5GameWork\LyraStarterGame\Plugins\UIExtension\
 ### 输出路径
 
 ```
-e:\UE_Project\UE5GameWork\Document\Lyra\Infrastructure\
+Document/Lyra/Infrastructure\
 ```
 
 ### 执行指令
 
-> 使用 code-to-docs 技能，完整模式(full mode)，分析 `e:\UE_Project\UE5GameWork\LyraStarterGame\Plugins` 下的 CommonGame、AsyncMixin、ModularGameplayActors、UIExtension 四个插件，将文档输出到 `e:\UE_Project\UE5GameWork\Document\Lyra\Infrastructure`。这四个插件构成 Lyra 基础框架层，需要一起分析以展示依赖关系。
+> 使用 code-to-docs 技能，完整模式(full mode)，分析 `LyraStarterGame/Plugins` 下的 CommonGame、AsyncMixin、ModularGameplayActors、UIExtension 四个插件，将文档输出到 `Document/Lyra/Infrastructure`。这四个插件构成 Lyra 基础框架层，需要一起分析以展示依赖关系。
 
 ---
 
@@ -98,9 +101,9 @@ e:\UE_Project\UE5GameWork\Document\Lyra\Infrastructure\
 ### 分析范围
 
 ```
-e:\UE_Project\UE5GameWork\LyraStarterGame\Plugins\GameSettings\
-e:\UE_Project\UE5GameWork\LyraStarterGame\Plugins\GameSubtitles\
-e:\UE_Project\UE5GameWork\LyraStarterGame\Plugins\GameplayMessageRouter\
+LyraStarterGame/Plugins\GameSettings\
+LyraStarterGame/Plugins\GameSubtitles\
+LyraStarterGame/Plugins\GameplayMessageRouter\
 ```
 
 | 插件 | 文件数 | 作用 |
@@ -112,12 +115,12 @@ e:\UE_Project\UE5GameWork\LyraStarterGame\Plugins\GameplayMessageRouter\
 ### 输出路径
 
 ```
-e:\UE_Project\UE5GameWork\Document\Lyra\Systems\
+Document/Lyra/Systems\
 ```
 
 ### 执行指令
 
-> 使用 code-to-docs 技能，完整模式(full mode)，分析 `e:\UE_Project\UE5GameWork\LyraStarterGame\Plugins` 下的 GameSettings、GameSubtitles、GameplayMessageRouter 三个插件，将文档输出到 `e:\UE_Project\UE5GameWork\Document\Lyra\Systems`。
+> 使用 code-to-docs 技能，完整模式(full mode)，分析 `LyraStarterGame/Plugins` 下的 GameSettings、GameSubtitles、GameplayMessageRouter 三个插件，将文档输出到 `Document/Lyra/Systems`。
 
 ---
 
@@ -128,9 +131,9 @@ e:\UE_Project\UE5GameWork\Document\Lyra\Systems\
 ### 分析范围
 
 ```
-e:\UE_Project\UE5GameWork\LyraStarterGame\Plugins\CommonLoadingScreen\
-e:\UE_Project\UE5GameWork\LyraStarterGame\Plugins\CommonStartupLoadingScreen\
-e:\UE_Project\UE5GameWork\LyraStarterGame\Plugins\LyraExtTool\
+LyraStarterGame/Plugins\CommonLoadingScreen\
+LyraStarterGame/Plugins\CommonStartupLoadingScreen\
+LyraStarterGame/Plugins\LyraExtTool\
 ```
 
 | 插件 | 文件数 | 作用 |
@@ -142,12 +145,12 @@ e:\UE_Project\UE5GameWork\LyraStarterGame\Plugins\LyraExtTool\
 ### 输出路径
 
 ```
-e:\UE_Project\UE5GameWork\Document\Lyra\Loading\
+Document/Lyra/Loading\
 ```
 
 ### 执行指令
 
-> 使用 code-to-docs 技能，完整模式(full mode)，分析 `e:\UE_Project\UE5GameWork\LyraStarterGame\Plugins` 下的 CommonLoadingScreen、CommonStartupLoadingScreen、LyraExtTool 三个插件，将文档输出到 `e:\UE_Project\UE5GameWork\Document\Lyra\Loading`。
+> 使用 code-to-docs 技能，完整模式(full mode)，分析 `LyraStarterGame/Plugins` 下的 CommonLoadingScreen、CommonStartupLoadingScreen、LyraExtTool 三个插件，将文档输出到 `Document/Lyra/Loading`。
 
 ---
 
@@ -158,9 +161,9 @@ e:\UE_Project\UE5GameWork\Document\Lyra\Loading\
 ### 分析范围
 
 ```
-e:\UE_Project\UE5GameWork\LyraStarterGame\Plugins\GameFeatures\ShooterCore\
-e:\UE_Project\UE5GameWork\LyraStarterGame\Plugins\GameFeatures\ShooterTests\
-e:\UE_Project\UE5GameWork\LyraStarterGame\Plugins\GameFeatures\TopDownArena\
+LyraStarterGame/Plugins\GameFeatures\ShooterCore\
+LyraStarterGame/Plugins\GameFeatures\ShooterTests\
+LyraStarterGame/Plugins\GameFeatures\TopDownArena\
 ```
 
 | 插件 | 文件数 | 作用 |
@@ -172,12 +175,12 @@ e:\UE_Project\UE5GameWork\LyraStarterGame\Plugins\GameFeatures\TopDownArena\
 ### 输出路径
 
 ```
-e:\UE_Project\UE5GameWork\Document\Lyra\GameFeatures\
+Document/Lyra/GameFeatures\
 ```
 
 ### 执行指令
 
-> 使用 code-to-docs 技能，完整模式(full mode)，分析 `e:\UE_Project\UE5GameWork\LyraStarterGame\Plugins\GameFeatures` 下的 ShooterCore、ShooterTests、TopDownArena 三个 GameFeature 子插件，将文档输出到 `e:\UE_Project\UE5GameWork\Document\Lyra\GameFeatures`。
+> 使用 code-to-docs 技能，完整模式(full mode)，分析 `LyraStarterGame/Plugins\GameFeatures` 下的 ShooterCore、ShooterTests、TopDownArena 三个 GameFeature 子插件，将文档输出到 `Document/Lyra/GameFeatures`。
 
 ---
 
@@ -188,8 +191,8 @@ e:\UE_Project\UE5GameWork\Document\Lyra\GameFeatures\
 ### 分析范围
 
 ```
-e:\UE_Project\UE5GameWork\LyraStarterGame\Plugins\PocketWorlds\
-e:\UE_Project\UE5GameWork\LyraStarterGame\Plugins\LyraExampleContent\
+LyraStarterGame/Plugins\PocketWorlds\
+LyraStarterGame/Plugins\LyraExampleContent\
 ```
 
 | 插件 | 文件数 | 作用 |
@@ -200,27 +203,27 @@ e:\UE_Project\UE5GameWork\LyraStarterGame\Plugins\LyraExampleContent\
 ### 输出路径
 
 ```
-e:\UE_Project\UE5GameWork\Document\Lyra\Worlds\
+Document/Lyra/Worlds\
 ```
 
 ### 执行指令
 
-> 使用 code-to-docs 技能，完整模式(full mode)，分析 `e:\UE_Project\UE5GameWork\LyraStarterGame\Plugins` 下的 PocketWorlds、LyraExampleContent 两个插件，将文档输出到 `e:\UE_Project\UE5GameWork\Document\Lyra\Worlds`。如果 LyraExampleContent 无 C++ 源码则跳过。
+> 使用 code-to-docs 技能，完整模式(full mode)，分析 `LyraStarterGame/Plugins` 下的 PocketWorlds、LyraExampleContent 两个插件，将文档输出到 `Document/Lyra/Worlds`。如果 LyraExampleContent 无 C++ 源码则跳过。
 
 ---
 
 ## 跨 Vault 索引（全部完成后创建）
 
-**输出路径**: `e:\UE_Project\UE5GameWork\Document\Lyra\README.md`
+**输出路径**: `Document/Lyra/README.md`
 
 ### 执行指令
 
-> 扫描 `e:\UE_Project\UE5GameWork\Document\Lyra\` 下所有子目录中的 `index.md` 文件，整合生成为一个总 README.md，包含：
+> 扫描 `Document/Lyra/` 下所有子目录中的 `index.md` 文件，整合生成为一个总 README.md，包含：
 > 1. 所有 Batch 的导航链接
 > 2. 核心架构关系图（哪个模块依赖哪个）
 > 3. 推荐阅读顺序（新人入门路径）
 >
-> 输出到 `e:\UE_Project\UE5GameWork\Document\Lyra\README.md`。
+> 输出到 `Document/Lyra/README.md`。
 
 ---
 
