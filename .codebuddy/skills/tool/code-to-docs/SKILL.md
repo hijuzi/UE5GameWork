@@ -5,7 +5,7 @@ description: Use when generating documentation from a codebase, creating archite
 
 ## Overview
 
-Analyze a codebase and produce an Obsidian-native documentation vault containing architecture diagrams, API references, and teaching-focused explanations written at three audience levels: beginner (language constructs explained), intermediate (patterns and integration), and advanced (failure modes, concurrency, edge cases). Output is ready to open directly in Obsidian with working wikilinks, Mermaid diagrams, and Dataview queries.
+Analyze a codebase and produce a documentation vault containing architecture diagrams, API references, and teaching-focused explanations written at three audience levels: beginner (language constructs explained), intermediate (patterns and integration), and advanced (failure modes, concurrency, edge cases). Output uses standard Markdown links, Mermaid diagrams, and Dataview queries, and is ready to open in Obsidian or any Markdown viewer.
 
 ### Related Skills
 
@@ -67,7 +67,7 @@ See `../code-to-docs-references/output-structure.md` "The Reference-Passing Rule
 Read `../code-to-docs-references/analysis-guide.md` for detailed instructions.
 
 1. Survey the codebase — entry points, config files, directory structure
-2. Identify independent modules, recording each one's name, slug, and root paths — these become durable wikilink and lookup identities in `module_index`. Roots are a **list** and may be shared between modules; file-level ownership in `files_analyzed` is what distinguishes them
+2. Identify independent modules, recording each one's name, slug, and root paths — these become durable link identities in `module_index`. Roots are a **list** and may be shared between modules; file-level ownership in `files_analyzed` is what distinguishes them
 3. Dispatch parallel analysis agents (MUST parallelize if 3+ modules):
    - **Haiku agents** extract sections 1-6 (architecture, API, patterns, dependencies, complexity, key files), **write them to `_state/modules/<slug>.md`**, and return a receipt (report path, purpose, roots, complexity, LOC, `file_count`, deps, `escalate` flag — **not** the file list, which goes in the report's `files:` frontmatter)
    - **Sonnet or Opus agents** then produce section 7 (limitations & improvements). Each is given the **path** to its module's report, reads it itself, **appends** section 7 to that same file, and returns structured issue records. Tier comes from `escalate_final` = `escalate OR loc > 1000 OR complexity == "high" OR language ∈ {bash, sh, zsh, shell, powershell}`, recomputed from the receipt — never the raw flag alone.
@@ -84,7 +84,7 @@ Dispatch in parallel where possible:
 
 1. **Sonnet agent**: `Architecture/System Overview.md` — reads `_state/synthesis.md` §§ Architecture Narrative, Architecture Type, System-Wide Patterns
 2. **Haiku agents** (parallel): `Architecture/System Map.canvas`, `Architecture/Dependency Map.md`, `Health/Health Summary.md` (severity charts), `Documentation.base`, `Index.md` — mechanical transforms over the dependency graph, `module_index`, and issue counts, all compact enough to pass inline
-3. **Sonnet agents** (parallel, one per module): `Modules/{Name}.md` — each is given the **path** to its module's `_state/modules/<slug>.md` plus the `module_index` name→purpose pairs (inline, one line each) for wikilink context
+3. **Sonnet agents** (parallel, one per module): `Modules/{Name}.md` — each is given the **path** to its module's `_state/modules/<slug>.md` plus the `module_index` name→purpose pairs (inline, one line each) for link context
 4. **Sonnet agent**: `Health/Limitations.md` and `Health/Code Review.md` — issue records inline plus the report paths whose § Limitations & Improvements supplies the before/after snippets. `Health/Health Summary.md` is a mechanical chart transform — it is a **Haiku** task in step 2, per the authoritative Phase 2 dispatch table in `output-structure.md`, not a Sonnet task.
 5. (Full mode) **Sonnet agents**: `Patterns/`, `Onboarding/`, `Cross-Cutting/` — each reads the `_state/synthesis.md` sections named in the dispatch table, plus report paths for the modules involved
 
@@ -96,7 +96,7 @@ Dispatch in parallel where possible:
 |-------|-------|-------|--------|-----------|
 | Verification | **haiku** | vault file list (generate) / files written + inbound links to deletions (update) | broken links + frontmatter report | always |
 
-1. **Haiku agent**: Verify every `[[wikilink]]` resolves to an existing generated file, verify every file has complete frontmatter. On a baseline generate this is the whole vault; on an update it is scoped per `../code-to-docs-references/analysis-guide.md` "Scoping Verification"
+1. **Haiku agent**: Verify every internal Markdown link (`[text](path.md)`) resolves to an existing generated file, verify every file has complete frontmatter. On a baseline generate this is the whole vault; on an update it is scoped per `../code-to-docs-references/analysis-guide.md` "Scoping Verification"
 2. Report: file count, module count, mode, broken links (if any)
 
 ---
@@ -107,7 +107,7 @@ Dispatch in parallel where possible:
 2. Analyzing 3+ independent modules sequentially instead of in parallel
 3. Reading `node_modules/`, `vendor/`, `.git/`, or build output
 4. Generating PNG/SVG instead of Mermaid inline
-5. Skipping wikilink verification in Phase 3
+5. Skipping link verification in Phase 3
 6. Documenting third-party dependencies instead of project code
 7. Fabricating design rationale — say "Rationale not documented" instead
 8. Fabricating code issues — only report limitations/bugs/improvements that are evidently present in the code
@@ -123,9 +123,9 @@ Dispatch in parallel where possible:
 18. **Addressing an artifact section by its heading text** instead of its `<!-- c2d:sN -->` marker — report prose quotes heading names, so heading counts give false passes
 19. **Matching a marker as a bare substring** instead of anchored to a whole line (`^<!-- c2d:s[1-7] -->$`) — report prose quotes marker strings too, so a loose count over-reports and condemns a healthy report as damaged
 20. **Taking a Pass 1 receipt's `escalate` at face value** — recompute `escalate_final` from the receipt's own fields; extraction runs at the cheapest tier and should not be the sole arbiter of arithmetic, nor of whether shell code is security-sensitive
-21. **Accepting `deps` entries that are not exact module names** — file paths, directory names, or external commands there become phantom nodes in the dependency graph and broken wikilinks in the Canvas
+21. **Accepting `deps` entries that are not exact module names** — file paths, directory names, or external commands there become phantom nodes in the dependency graph and broken links in the Canvas
 22. **Analyzing a directory that is itself a generated vault** — check for `_state/analysis.json` or `generated-by: code-to-docs` frontmatter and exclude it, or the skill will document its own output as source
-23. **Verifying wikilinks without first stripping code fences and inline code spans** — bash's test syntax is `[[ ... ]]`, and the mandated `> [!warning]` callout style nests fences inside blockquotes, writing them as ```` > ```bash ````, so a fence detector that requires the backticks at the very start of the line never toggles. On a live run this made 21% of all `[[…]]` tokens false positives (see `../code-to-docs-references/analysis-guide.md` "What counts as a wikilink")
+23. **Verifying Markdown links without checking that the target path exists on disk** — standard Markdown links use `[text](path.md)` syntax, so verification is a simple file-existence check against the vault directory. Code fence content does not need special stripping since `[text](path.md)` is unambiguous and never appears in code as a link by accident (see `../code-to-docs-references/analysis-guide.md` "What counts as a link")
 
 ---
 

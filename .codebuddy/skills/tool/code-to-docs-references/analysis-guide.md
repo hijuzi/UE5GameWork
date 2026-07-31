@@ -54,8 +54,8 @@ A **module** is an independent subsystem that can be understood without reading 
 
 | Field | Content |
 |---|---|
-| Name | Title Case label (e.g., Auth, Payments, Worker Queue). **Write `and`, never `&`** — and likewise avoid smart quotes, en-dashes and non-breaking spaces. The name becomes a filename and the text of every `[[wikilink]]` pointing at it, and agents silently "tidy" an ampersand into `and` when writing links, inconsistently. Normalise here, at identification time, so no later agent has the chance. `Packaging and Release`, not `Packaging & Release` |
-| Purpose | One sentence, under 20 words — what the module is for. Becomes the wikilink context every later agent uses |
+| Name | Title Case label (e.g., Auth, Payments, Worker Queue). **Write `and`, never `&`** — and likewise avoid smart quotes, en-dashes and non-breaking spaces. The name becomes a filename and the display text of every Markdown link pointing at it, and agents silently "tidy" an ampersand into `and` when writing links, inconsistently. Normalise here, at identification time, so no later agent has the chance. `Packaging and Release`, not `Packaging & Release` |
+| Purpose | One sentence, under 20 words — what the module is for. Becomes the link context every later agent uses |
 | Slug | Name lowercased, non-alphanumerics collapsed to single hyphens (`Worker Queue` → `worker-queue`, `Packaging and Release` → `packaging-and-release`) |
 | Root paths | **List** of the narrowest directories covering this module's files, relative to repo root |
 | Language | Primary language of this module |
@@ -69,7 +69,7 @@ A **module** is an independent subsystem that can be understood without reading 
 
 That is why `files_analyzed` (path → owning module) is the primary lookup in later updates and `roots` is only the fallback for files that did not exist yet. See `output-structure.md` "Resolving a Changed File to Its Module".
 
-The name and root paths settled here are **durable**: they are written to `module_index` and become the module's wikilink identity and the key that future updates use to map changed files back to it. Renaming a module or redrawing its roots in a later run orphans its `Modules/{Name}.md` and breaks inbound wikilinks, so treat these as decisions rather than labels.
+The name and root paths settled here are **durable**: they are written to `module_index` and become the module's link identity and the key that future updates use to map changed files back to it. Renaming a module or redrawing its roots in a later run orphans its `Modules/{Name}.md` and breaks inbound links, so treat these as decisions rather than labels.
 
 ---
 
@@ -237,7 +237,7 @@ Otherwise set `escalate` to false and `escalate_reason` to null. Keep `escalate_
 | `report` | The Pass 2 prompt is a path, not a pasted report |
 | `deps` | The dependency graph builds from receipts alone — no report reads during synthesis |
 | `escalate` / `escalate_reason` | Feeds the Pass 2 model tier without the orchestrator reading the report's Complexity and Architecture prose to judge it. The agent that read the code makes the *subjective* call; the orchestrator recomputes the objective ones and ORs them in, so this flag can only add escalation, never withhold it |
-| `purpose` | Populates `module_index`, which is the single source for module one-liners — used as wikilink context by module-doc writers and as digest's module inventory, so neither ever opens a report |
+| `purpose` | Populates `module_index`, which is the single source for module one-liners — used as link context by module-doc writers and as digest's module inventory, so neither ever opens a report |
 | `roots` / `entry_points` / `language` / `complexity` / `loc` | Populate `module_index` directly |
 | `file_count` | A sanity check only. The **file list itself lives in the report frontmatter**, not here |
 
@@ -361,7 +361,7 @@ Pass the receipt list inline (they are small) and the report **paths**. Never pa
 1. **Verify report completeness** — for each module, confirm the report file exists and contains each of the seven `<!-- c2d:sN -->` markers **exactly once**, matched anchored: `grep -cE '^<!-- c2d:s[1-7] -->$' <report>` must return `7`. Grep for the markers, not the headings, and anchor the pattern rather than matching the bare `<!-- c2d:s` substring: report prose legitimately quotes both heading names and marker strings, so counting headings gives false passes and a loose marker count gives false *failures*. Do not read the files in full. Flag any missing or duplicated marker before proceeding.
 2. **Build the cross-module dependency graph** — from the `deps` field of each receipt. Identify cycles or bidirectional dependencies. No report reads are needed for this step.
 3. **Identify system-wide patterns** — patterns that appear in 3+ modules are architectural conventions worth documenting at the top level. Read the `c2d:s3` section of each report rather than the whole file: from the anchored `^<!-- c2d:s3 -->$` line to the next anchored marker line.
-4. **Resolve naming consistency** — standardize module names if agents used different labels for the same module. Whatever names are settled on here become the wikilink identities for the whole vault and are recorded in `module_index`.
+4. **Resolve naming consistency** — standardize module names if agents used different labels for the same module. Whatever names are settled on here become the link identities for the whole vault and are recorded in `module_index`.
 5. **Determine architecture type** — classify the system as one of: monolith, microservices, modular monolith, plugin-based, or hybrid. Justify the classification.
 6. **Generate the top-level architecture narrative** — a 3–5 paragraph description of the system that a new engineer could read to understand how the pieces fit together.
 7. **Aggregate limitations and improvements** — from the Pass 2 issue records (already in hand), deduplicate, identify system-wide themes (e.g., "no error handling strategy across 4 modules"), and rank by severity. This feeds the Health/ directory in Phase 2.
@@ -427,7 +427,7 @@ Field-by-field, this is a direct transform of receipt data — no judgment, whic
 | `issues` | Pass 2 issue records, each with the module name added and `status: "open"` |
 | `architecture_type`, `system_patterns` | The synthesis receipt |
 
-None of `purpose`, `architecture_type` or `system_patterns` is optional: they are what the `purposes_changed` and `patterns_changed` gates compare, what supplies wikilink context to module-doc writers, and what digest reads for its module inventory. A state file missing them leaves the next update unable to tell whether `Architecture/System Overview.md` needs regenerating, so it goes stale silently.
+None of `purpose`, `architecture_type` or `system_patterns` is optional: they are what the `purposes_changed` and `patterns_changed` gates compare, what supplies link context to module-doc writers, and what digest reads for its module inventory. A state file missing them leaves the next update unable to tell whether `Architecture/System Overview.md` needs regenerating, so it goes stale silently.
 
 Cross-check each report's `file_count` receipt field against the number of `files:` entries it actually read, and report any mismatch rather than silently writing a partial `files_analyzed` — an incomplete ownership map degrades the next update into re-surveying.
 
@@ -553,7 +553,7 @@ This is a **lookup, not a survey.** `files_analyzed` maps every previously analy
 
 Resolve each changed file using the four-case order in `output-structure.md` "Resolving a Changed File to Its Module": exact `files_analyzed` hit, then a *unique* root prefix match, then an *ambiguous* match where modules share a root, then no match at all. A `files_analyzed` value may be an **array** — a shared file marks all of its owners affected.
 
-**Never re-derive module roots by re-surveying the codebase.** `module_index` is authoritative for boundaries. A re-survey may draw a boundary differently and rename a module, which silently invalidates every `[[wikilink]]` pointing at the old name and orphans its `Modules/{Name}.md`.
+**Never re-derive module roots by re-surveying the codebase.** `module_index` is authoritative for boundaries. A re-survey may draw a boundary differently and rename a module, which silently invalidates every Markdown link pointing at the old name and orphans its `Modules/{Name}.md`.
 
 Classify the changes:
 
@@ -674,7 +674,7 @@ Report what was skipped and why: `"Regenerated 3 files; skipped System Overview,
 2. Remove its entry from `modules`, `module_index`, and `dependency_graph` — including edges *pointing at* it from other modules' dependency lists
 3. Drop its files from `files_analyzed`
 4. **Regenerate the doc of every module that referenced it** — see "the relink set" below
-5. Note the removed title so Step 9 sweeps for any remaining inbound `[[wikilinks]]`
+5. Note the removed title so Step 9 sweeps for any remaining inbound links
 
 Its issues were already marked `resolved` during the Step 6 merge — that belongs with the rest of the issue merging, not here.
 
@@ -684,8 +684,8 @@ Skipping step 1 leaves an orphan report that every future update dutifully carri
 
 A deleted module does not only leave its own artifacts behind. Every module that depended on it has, in its **own** doc:
 
-- a `dependencies:` frontmatter entry `"[[Deleted Module]]"`
-- `[[Deleted Module]]` wikilinks in its prose
+- a `dependencies:` frontmatter entry `"Deleted Module"`
+- `[Deleted Module](Modules/Deleted Module.md)` links in its prose
 
 Those modules are **not affected for analysis** — their code did not change, so re-running Pass 1 and Pass 2 on them would be waste. But the "preserve unchanged module docs" rule cannot apply to them either: preserved, their links dangle permanently. Verification would report the breakage once, and on every later run scoped verification has no deletion to sweep for, so the broken links become invisible.
 
@@ -696,7 +696,7 @@ So distinguish two kinds of affected:
 | **affected** | Code changed (or its report is damaged) → re-run Pass 1 + Pass 2, then regenerate its doc | Full two-pass |
 | **relink** | Analysis unchanged, but the doc references a module that was removed or renamed → regenerate the doc **from its existing, untouched report** | One Sonnet doc write, no analysis |
 
-Build the relink set from the `dependency_graph` edges you removed in step 2: any module that had an edge pointing at a deleted module. Add any module whose doc contains a `[[wikilink]]` to a removed title, found with the **exact** Step 9 sweep pattern — `!?\[\[<removed title>([#|][^\]]*)?\]\]`, covering aliased, section, block-reference and embed forms, not just the bare `[[Title]]` (see "[The removed-title sweep pattern](#the-removed-title-sweep-pattern)"). If this step uses a narrower pattern than Step 9, Step 9 finds dangling links that Step 7 was never given the chance to repair. A module in both sets is simply **affected** — the fuller treatment wins.
+Build the relink set from the `dependency_graph` edges you removed in step 2: any module that had an edge pointing at a deleted module. Add any module whose doc contains a Markdown link to a removed title, found with the **exact** Step 9 sweep pattern — `\[[^\]]*\]\([Mm]odules/<removed title>\.md\)` (see "[The removed-title sweep pattern](#the-removed-title-sweep-pattern)"). If this step uses a narrower pattern than Step 9, Step 9 finds dangling links that Step 7 was never given the chance to repair. A module in both sets is simply **affected** — the fuller treatment wins.
 
 This is the one case where an unchanged module's doc is legitimately regenerated. State it in the run summary so it does not look like a violation of the preserve rule: `"Regenerated 2 docs to drop links to the removed Scheduler module (analysis unchanged, reports reused)."`
 
@@ -723,7 +723,7 @@ A carried-forward module whose `analyzed_at` silently advances to now is a bug: 
 
 ### Update Step 9: Verify
 
-Dispatch a **Haiku** agent to check wikilinks and frontmatter, scoped as described in "Scoping Verification" below.
+Dispatch a **Haiku** agent to check links and frontmatter, scoped as described in "Scoping Verification" below.
 
 ---
 
@@ -757,22 +757,18 @@ All four checks are frontmatter and marker greps — one line per module, no sec
 
 ## Scoping Verification
 
-Verification checks two things: every `[[wikilink]]` resolves to an existing file, and every file has complete frontmatter. On a baseline generate run, that means the whole vault — every file is new.
+Verification checks two things: every standard Markdown link (`[text](path.md)`) resolves to an existing file, and every file has complete frontmatter. On a baseline generate run, that means the whole vault — every file is new.
 
-### What counts as a wikilink — exclude code before matching
+### What counts as a link — exclude code before matching
 
-**A `[[…]]` token inside a code fence or an inline code span is not a link.** Obsidian does not resolve it, and neither may verification. Before matching, strip:
+**A `[text](path.md)` token inside a code fence or an inline code span is not a link.** Before matching, strip:
 
-1. **Fenced blocks** — ```` ``` ```` and `~~~` — **after removing any leading blockquote prefix (`> `)**. This is not an edge case: `obsidian-templates.md` §7 *mandates* Code Review Notes as `> [!warning]` callouts, so their fences are written as ```` > ```bash ````, and in any vault documenting shell code every code block is a fence nested inside a blockquote. A fence detector that requires the backticks at the very start of the line never toggles on these, and the whole block is treated as prose.
+1. **Fenced blocks** — ```` ``` ```` and `~~~` — **after removing any leading blockquote prefix (`> `)**. This is not an edge case: `obsidian-templates.md` §7 *mandates* Code Review Notes as `> [!warning]` callouts, so their fences are written as ```` > ```bash ````. A fence detector that requires the backticks at the very start of the line never toggles on these, and the whole block is treated as prose.
 2. **Inline code spans**, including multi-backtick spans (`` `x` ``, ``` ``x`` ``` ). Docs about this pipeline quote link syntax constantly.
 
-Then match links as `(?<!!)\[\[([^\]|#]+)` and resolve the captured title.
+Then match links as `\[[^\]]*\]\(([^)]+\.md)\)` and resolve the captured path relative to the file it appears in.
 
-**Why this is load-bearing.** Bash's test syntax is `[[ ... ]]` — identical to a wikilink. On a live run of this pipeline against its own repository, a vault of 132 wikilink-shaped tokens contained **18** bash conditionals in blockquoted fences and **10** inline-code quotations: 21% of all tokens, none of them links, every one of them resolving to nothing. A verifier that skipped this step would have reported 28 broken links against a vault whose 104 real links all resolved — and the natural response to a 28-link failure is to "fix" documents that were correct.
-
-The failure is asymmetric and favours precision here: a false positive triggers edits to good files, while the real breakage this check exists to catch — a renamed or deleted target — still surfaces, because those links live in prose, not in code blocks.
-
-**Do not "solve" this by asking writers to avoid `[[` in code.** The code being documented is not the vault's to change, and a doc that cannot quote `[[ -z "$REPO" ]]` cannot document a shell script.
+**Why this is load-bearing.** Failing to exclude code blocks means over-matching — any documentation that quotes `[text](path.md)` as an example will report phantom broken links, and the natural response is to "fix" documents that were correct. A false positive triggers edits to good files, while the real breakage — a renamed or deleted target — still surfaces because those links live in prose, not in code blocks.
 
 On an **update**, a full-vault sweep re-reads files that provably cannot have changed. Only two sets can newly break:
 
@@ -782,24 +778,15 @@ On an **update**, a full-vault sweep re-reads files that provably cannot have ch
 | Files linking to a **removed** title | An unchanged file's link breaks when its target is deleted or renamed | Only when a module was deleted or renamed: sweep the vault with the pattern below |
 
 <a id="the-removed-title-sweep-pattern"></a>
-**The sweep pattern must cover every wikilink form, not just the bare one:**
+**The sweep pattern — find all links to a removed module:**
 
 ```
-!?\[\[<removed title>([#|][^\]]*)?\]\]
+\[[^\]]*\]\([Mm]odules/<removed title>\.md\)
 ```
 
-A bare `grep '\[\[<removed title>\]\]'` misses four forms Obsidian treats as links to the same note, and each one dangles just as badly:
+This captures every standard Markdown link to the removed module's overview file. Standard Markdown links have a single canonical form — `[display text](Modules/Title.md)` — so there is no risk of missing aliased, section, or embed forms.
 
-| Form | Example |
-|------|---------|
-| Aliased | `[[Scheduler\|the scheduler]]` |
-| Section | `[[Scheduler#Public API]]` |
-| Block reference | `[[Scheduler#^a1b2c3]]` |
-| Embed | `![[Scheduler]]` |
-
-The aliased form is the one that matters most in practice: prose links are written aliased far more often than bare, precisely because a raw title rarely reads well mid-sentence. A sweep that misses it reports **clean** on a vault whose most natural-sounding links are all broken.
-
-Match the title itself literally — escape regex metacharacters in it — and match it case-insensitively only if the vault's filesystem is case-insensitive, as macOS's default is. The same pattern is what Step 7 uses to build the relink set, so the two must stay identical: a link form the sweep can find but the relink set cannot is a guaranteed dangling link, reported and never repaired.
+Match the title itself literally — escape regex metacharacters in it — and use a case-insensitive prefix for `Modules/` since case conventions vary. The same pattern is what Step 7 uses to build the relink set, so the two must stay identical: a link form the sweep can find but the relink set cannot is a guaranteed dangling link, reported and never repaired.
 
 On a deletion the second sweep should come back **clean**, because Step 7 regenerated the relink set specifically to drop those links. A hit here means a dangling link survived — report it as a failure of the relink step, not just as a broken link.
 

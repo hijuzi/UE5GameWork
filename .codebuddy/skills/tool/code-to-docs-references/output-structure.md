@@ -18,7 +18,7 @@ The analysis artifacts written in Phase 1 (see "Analysis Artifacts" below) exist
 |--------------------|---------------------|
 | A module's 7-section analysis report | `_state/modules/<slug>.md` |
 | The full synthesis output | `_state/synthesis.md`, naming the `c2d:yN` markers needed |
-| One-line purposes of every module (wikilink context) | `module_index` purposes — compact, pass inline |
+| One-line purposes of every module (link context) | `module_index` purposes — compact, pass inline |
 | A module's issue prose and before/after snippets | `_state/modules/<slug>.md` marker `s7` |
 
 Small structured data — the dependency graph, the module list, issue records — is already compact and may be passed inline.
@@ -36,7 +36,7 @@ Dispatch as parallel agents where possible. The Input column is a **reference sp
 | `Architecture/System Overview.md` | **Sonnet** | `_state/synthesis.md` markers `y1`,`y2`,`y3` (Narrative, Type, Patterns) + `dependency_graph` (inline) | Narrative architecture writing |
 | `Architecture/Dependency Map.md` | **Haiku** | `dependency_graph` + `modules` (inline — already compact) | Data → Mermaid + table transform |
 | `Architecture/System Map.canvas` | **Haiku** | `dependency_graph` + `modules` (inline) | Data → JSON Canvas transform |
-| `Modules/{Name}.md` (×N) | **Sonnet** | `_state/modules/<slug>.md` (all 7 sections) + `module_index` name→purpose pairs (inline) for wikilink context | One agent per module, parallel |
+| `Modules/{Name}.md` (×N) | **Sonnet** | `_state/modules/<slug>.md` (all 7 sections) + `module_index` name→purpose pairs (inline) for link context | One agent per module, parallel |
 | `Health/Health Summary.md` | **Haiku** | Issue counts by severity/type/module (inline) | Data → Mermaid chart transform |
 | `Health/Limitations.md` + `Health/Code Review.md` | **Sonnet** | `issues` filtered by type (inline) + `_state/modules/<slug>.md` marker `s7` for the modules covered | Requires judgment for framing; the §7 prose supplies the before/after snippets |
 | `Patterns/{Name}.md` (full mode) | **Sonnet** | `_state/synthesis.md` marker `y3` + report paths of the modules exhibiting the pattern | Pattern identification + writing |
@@ -89,7 +89,7 @@ docs-vault/
 - One pattern = one file in `Patterns/`
 - One cross-cutting concern = one file in `Cross-Cutting/`
 - Sanitize illegal filename characters (`/`, `:`, `?`, `*`, `<`, `>`, `|`) — replace with hyphens
-- **Normalise `&` to `and` in the module *name* itself, at identification time** — so the title is `Packaging and Release`, not `Packaging & Release`. This is not a filename-legality issue; `&` is legal in a filename. It is that agents silently "tidy" an ampersand into `and` when writing a wikilink, and inconsistently: on one live run a Haiku agent wrote `[[Packaging and Release]]` in the Dependency Map and Canvas while a Sonnet agent wrote `[[Packaging & Release]]` in the System Overview, against a file actually named `Packaging & Release.md`. Every one of those links silently failed to resolve. Removing the character from the title removes the temptation. Apply the same reasoning to any character an agent might normalise — smart quotes, en-dashes, non-breaking spaces.
+- **Normalise `&` to `and` in the module *name* itself, at identification time** — so the title is `Packaging and Release`, not `Packaging & Release`. This is not a filename-legality issue; `&` is legal in a filename. It is that agents silently "tidy" an ampersand into `and` when writing a link, and inconsistently: on one live run a Haiku agent wrote `[Packaging and Release](Modules/Packaging and Release.md)` in the Dependency Map and Canvas while a Sonnet agent wrote `[Packaging & Release](Modules/Packaging & Release.md)` in the System Overview, against a file actually named `Packaging & Release.md`. Every one of those links silently failed to resolve. Removing the character from the title removes the temptation. Apply the same reasoning to any character an agent might normalise — smart quotes, en-dashes, non-breaking spaces.
 
 ---
 
@@ -245,7 +245,7 @@ If available **and** Obsidian is running (the CLI requires a running instance), 
 
 | Operation | Command | Benefit over direct file write |
 |-----------|---------|-------------------------------|
-| Create note | `obsidian create name="{title}" content="{content}" path="{vault-path}" silent` | Wikilink resolution, property validation |
+| Create note | `obsidian create name="{title}" content="{content}" path="{vault-path}" silent` | Link resolution, property validation |
 | Set property | `obsidian property:set name="{key}" value="{val}" file="{title}"` | Obsidian-native property storage |
 | Verify backlinks | `obsidian backlinks file="{title}"` | Uses Obsidian's live graph, not grep |
 
@@ -467,7 +467,7 @@ The five `<!-- c2d:yN -->` markers are the addressable interface, each appearing
 
 **`module_index`** — the module map, keyed by module name. This is the field that makes an incremental update a lookup instead of a re-survey: it persists each module's **root paths**, which `code-to-docs:code-to-docs-update` needs to decide which module a changed file belongs to and whether a path lies outside every module.
 
-`module_index` is **authoritative for module boundaries**. Never re-derive roots by re-surveying the codebase when it is present — a re-survey can draw a boundary differently, rename a module, and silently invalidate every `[[wikilink]]` pointing at the old name.
+`module_index` is **authoritative for module boundaries**. Never re-derive roots by re-surveying the codebase when it is present — a re-survey can draw a boundary differently, rename a module, and silently invalidate every link pointing at the old name.
 
 The `report` and `doc` fields are vault-relative paths, so any agent can be handed a pointer without the orchestrator reconstructing it. `analyzed_at` / `source_commit` are **per module**, refreshed only when that module is re-analyzed — so an update can distinguish a freshly analyzed module from one carried forward, and the carry-forward is auditable.
 
