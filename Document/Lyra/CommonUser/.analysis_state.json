@@ -1,0 +1,53 @@
+{
+  "vault_name": "CommonUser Plugin",
+  "analysis_version": "1.0",
+  "generated_at": "2026-07-31",
+  "mode": "full",
+  "codebase_root": "LyraStarterGame/Plugins/CommonUser",
+  "language": "C++ (Unreal Engine 5)",
+  "total_files": 13,
+  "total_lines": "~2100",
+  "pass1_summary": {
+    "modules_identified": 1,
+    "classes_analyzed": 8,
+    "patterns_found": ["Dual OSS Abstraction", "Subsystem Manager", "State Machine (Login)", "Delegate-Driven Events"],
+    "cross_cutting": ["OSS Versioning (v1/v2)", "Platform Abstraction", "Input-to-User Mapping"]
+  },
+  "pass2_summary": {
+    "issues_found": 3,
+    "warnings": 2,
+    "notes": 5
+  },
+  "modules": [
+    {
+      "name": "CommonUserSubsystem",
+      "role": "Core user management: login flow, privilege checks, local player creation",
+      "type": "UGameInstanceSubsystem",
+      "key_classes": ["UCommonUserSubsystem", "UCommonUserInfo", "FUserLoginRequest", "FPendingLocalUserOperation"]
+    },
+    {
+      "name": "CommonSessionSubsystem",
+      "role": "Online session creation, search, and join with cross-play and reservation support",
+      "type": "UGameInstanceSubsystem",
+      "key_classes": ["UCommonSessionSubsystem", "FCommonSession_HostSessionRequest", "FCommonSession_SearchSessionRequest"]
+    },
+    {
+      "name": "CommonUserBasicPresence",
+      "role": "Updates online presence based on session state changes",
+      "type": "UGameInstanceSubsystem",
+      "key_classes": ["UCommonUserBasicPresence"]
+    },
+    {
+      "name": "AsyncAction_CommonUserInitialize",
+      "role": "Blueprint-exposed async node for user initialization",
+      "type": "UBlueprintAsyncActionBase",
+      "key_classes": ["UAsyncAction_CommonUserInitialize", "FCommonUserInitializeParams"]
+    }
+  ],
+  "health": {
+    "overall": "good",
+    "test_coverage": "none",
+    "documentation_in_code": "moderate",
+    "cyclic_complexity_risk": "low"
+  }
+}

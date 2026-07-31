@@ -1,0 +1,12 @@
+{
+  "vault_name": "CommonUser Plugin Documentation",
+  "version": "1.0",
+  "generated_at": "2026-07-31",
+  "source_repository": "LyraStarterGame/Plugins/CommonUser",
+  "engine_version": "UE5.x",
+  "mode": "full",
+  "tags": ["UE5", "Plugin", "CommonUser", "Online", "Subsystem", "Session", "Presence"],
+  "maintainers": ["Epic Games, Inc."],
+  "last_code_commit": "unknown",
+  "entry_points": ["index.md"]
+}
