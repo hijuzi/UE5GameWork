@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile>
+  <diagram name="Page-1" id="d1">
+<mxGraphModel page="1" pageWidth="1169" pageHeight="827" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+
+    <!-- ===== LAYER 1: Extension Points (扩展点/订阅方) ===== -->
+    <mxCell id="2" value="Extension Points&#xa;（扩展点 / 订阅方）" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=13;fontStyle=1;fontColor=#333333;" vertex="1" parent="1">
+      <mxGeometry x="380" y="30" width="340" height="30" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="10" value="HUD Layout&#xa;(扩展点)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;fontStyle=1;align=center;" vertex="1" parent="1">
+      <mxGeometry x="100" y="80" width="160" height="55" as="geometry"/>
+    </mxCell>
+    <mxCell id="11" value="Pause Menu&#xa;(扩展点)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;fontStyle=1;align=center;" vertex="1" parent="1">
+      <mxGeometry x="350" y="80" width="160" height="55" as="geometry"/>
+    </mxCell>
+    <mxCell id="12" value="Settings&#xa;(扩展点)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;fontStyle=1;align=center;" vertex="1" parent="1">
+      <mxGeometry x="600" y="80" width="160" height="55" as="geometry"/>
+    </mxCell>
+    <mxCell id="13" value="Team Info&#xa;(扩展点)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;fontStyle=1;align=center;" vertex="1" parent="1">
+      <mxGeometry x="850" y="80" width="160" height="55" as="geometry"/>
+    </mxCell>
+
+    <!-- Arrow: ExtensionPoints → Subsystem -->
+    <mxCell id="14" value="" style="endArrow=block;endFill=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;edgeStyle=orthogonalEdgeStyle;strokeWidth=1.5;strokeColor=#6c8ebf;fontSize=11;" edge="1" parent="1" source="11">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="430" y="135"/>
+        <mxPoint x="430" y="220"/>
+        <Array as="points">
+          <mxPoint x="430" y="160"/>
+          <mxPoint x="430" y="180"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="14a" value="RegisterExtensionPoint()" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=10;fontColor=#6c8ebf;fontStyle=2;" vertex="1" parent="14">
+      <mxGeometry x="-0.3" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+    </mxCell>
+
+    <!-- ===== LAYER 2: Subsystem (中介/邮局) ===== -->
+    <mxCell id="20" value="UUIExtensionSubsystem（邮局 / 中介）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=13;fontStyle=1;fontColor=#333333;dashed=1;dashPattern=8 4;" vertex="1" parent="1">
+      <mxGeometry x="60" y="220" width="990" height="150" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="21" value="ExtensionPointRegistry&#xa;(注册的扩展点)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;fontStyle=1;align=center;" vertex="1" parent="1">
+      <mxGeometry x="130" y="265" width="240" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="22" value="ExtensionRegistry&#xa;(注册的扩展)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;fontStyle=1;align=center;" vertex="1" parent="1">
+      <mxGeometry x="620" y="265" width="240" height="60" as="geometry"/>
+    </mxCell>
+
+    <!-- Arrow between registries: 匹配通知 -->
+    <mxCell id="23" value="" style="endArrow=block;endFill=1;startArrow=block;startFill=1;edgeStyle=orthogonalEdgeStyle;strokeWidth=1.5;strokeColor=#82b366;fontSize=10;" edge="1" parent="1" source="21" target="22">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="23a" value="匹配 &amp; 通知" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=11;fontColor=#82b366;fontStyle=2;" vertex="1" parent="23">
+      <mxGeometry x="-0.2" y="-10" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+    </mxCell>
+
+    <!-- ===== LAYER 3: Extension Providers (扩展提供方/发布方) ===== -->
+    <mxCell id="3" value="Extension Providers&#xa;（扩展提供方 / 发布方）" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=13;fontStyle=1;fontColor=#333333;" vertex="1" parent="1">
+      <mxGeometry x="340" y="440" width="400" height="30" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="30" value="GameFeature:&#xa;UI_HealthBar&#xa;(扩展)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;fontStyle=1;align=center;" vertex="1" parent="1">
+      <mxGeometry x="100" y="490" width="160" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="31" value="GameFeature:&#xa;UI_KillFeed&#xa;(扩展)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;fontStyle=1;align=center;" vertex="1" parent="1">
+      <mxGeometry x="350" y="490" width="160" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="32" value="GameFeature:&#xa;UI_QuickBar&#xa;(扩展)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;fontStyle=1;align=center;" vertex="1" parent="1">
+      <mxGeometry x="600" y="490" width="160" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="33" value="GameFeature:&#xa;UI_MiniMap&#xa;(扩展)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;fontStyle=1;align=center;" vertex="1" parent="1">
+      <mxGeometry x="850" y="490" width="160" height="70" as="geometry"/>
+    </mxCell>
+
+    <!-- Arrow: ExtensionProviders → Subsystem -->
+    <mxCell id="34" value="" style="endArrow=block;endFill=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;edgeStyle=orthogonalEdgeStyle;strokeWidth=1.5;strokeColor=#9673a6;fontSize=10;" edge="1" parent="1" source="31" target="22">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="430" y="490"/>
+        <mxPoint x="740" y="325"/>
+        <Array as="points">
+          <mxPoint x="430" y="460"/>
+          <mxPoint x="740" y="415"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="34a" value="RegisterExtension()" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=10;fontColor=#9673a6;fontStyle=2;" vertex="1" parent="34">
+      <mxGeometry x="-0.2" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+    </mxCell>
+
+    <!-- Arrow: Subsystem → ExtensionProviders (notification) -->
+    <mxCell id="35" value="" style="endArrow=open;endFill=0;dashed=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;endSize=6;edgeStyle=orthogonalEdgeStyle;strokeWidth=1;strokeColor=#82b366;fontSize=10;" edge="1" parent="1" source="22" target="31">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="740" y="325"/>
+        <mxPoint x="430" y="490"/>
+        <Array as="points">
+          <mxPoint x="740" y="430"/>
+          <mxPoint x="430" y="445"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="35a" value="NotifyExtensionPointsOfExtension()&#xa;(双向回放)" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=10;fontColor=#82b366;fontStyle=2;" vertex="1" parent="35">
+      <mxGeometry x="0.28" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+    </mxCell>
+
+    <!-- ===== LEGEND ===== -->
+    <mxCell id="40" value="图例" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=11;fontStyle=1;fontColor=#666666;" vertex="1" parent="1">
+      <mxGeometry x="60" y="610" width="40" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="41" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="110" y="612" width="14" height="14" as="geometry"/>
+    </mxCell>
+    <mxCell id="41a" value="扩展点（订阅方）" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;fontColor=#666666;" vertex="1" parent="1">
+      <mxGeometry x="130" y="610" width="110" height="18" as="geometry"/>
+    </mxCell>
+    <mxCell id="42" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="250" y="612" width="14" height="14" as="geometry"/>
+    </mxCell>
+    <mxCell id="42a" value="扩展（发布方）" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;fontColor=#666666;" vertex="1" parent="1">
+      <mxGeometry x="270" y="610" width="110" height="18" as="geometry"/>
+    </mxCell>
+    <mxCell id="43" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;dashed=1;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="390" y="612" width="14" height="14" as="geometry"/>
+    </mxCell>
+    <mxCell id="43a" value="中介（邮局）" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;fontColor=#666666;" vertex="1" parent="1">
+      <mxGeometry x="410" y="610" width="80" height="18" as="geometry"/>
+    </mxCell>
+    <mxCell id="44" value="" style="endArrow=block;endFill=1;edgeStyle=orthogonalEdgeStyle;strokeWidth=1.5;strokeColor=#82b366;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="530" y="612" as="sourcePoint"/>
+        <mxPoint x="570" y="612" as="targetPoint"/>
+        <Array as="points">
+          <mxPoint x="545" y="612"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="44a" value="实线 = 注册 / 调用" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;fontColor=#666666;" vertex="1" parent="1">
+      <mxGeometry x="575" y="610" width="110" height="18" as="geometry"/>
+    </mxCell>
+    <mxCell id="45" value="" style="endArrow=open;endFill=0;dashed=1;edgeStyle=orthogonalEdgeStyle;strokeWidth=1;strokeColor=#82b366;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="690" y="612" as="sourcePoint"/>
+        <mxPoint x="730" y="612" as="targetPoint"/>
+        <Array as="points">
+          <mxPoint x="710" y="612"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="45a" value="虚线 = 通知 / 回放" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;fontColor=#666666;" vertex="1" parent="1">
+      <mxGeometry x="735" y="610" width="120" height="18" as="geometry"/>
+    </mxCell>
+
+  </root>
+</mxGraphModel>
+  </diagram>
+</mxfile>
