@@ -87,7 +87,7 @@ int32 UCommonGameInstance::AddLocalPlayer(ULocalPlayer* NewPlayer, FPlatformUser
 
 `UCommonLocalPlayer` 继承自引擎基类 `ULocalPlayer`，在 CommonGame 插件中定义。它本身不包含任何游戏逻辑——它的职责纯粹是提供三个事件钩子和一个 UI 导航方法。
 
-#### 三个生命周期委托
+#### 3.2.1 三个生命周期委托
 
 ```cpp
 // CommonLocalPlayer.h
@@ -133,7 +133,7 @@ void ACommonPlayerController::SetPawn(APawn* InPawn)
 
 这就是 3.4 节 Policy 监听 `OnPlayerControllerSet` 的原因——当 Controller 就绪时，Policy 才真正把 Layout 挂到屏幕上。
 
-#### GetRootUILayout：从玩家直达 UI 根节点
+#### 3.2.2 GetRootUILayout：从玩家直达 UI 根节点
 
 ```cpp
 UPrimaryGameLayout* UCommonLocalPlayer::GetRootUILayout() const
@@ -144,7 +144,7 @@ UPrimaryGameLayout* UCommonLocalPlayer::GetRootUILayout() const
 
 这是 UI 框架中最常用的"入口方法"。任何拥有 `LocalPlayer` 指针的地方，都可以通过 `GetRootUILayout()` 直接拿到该玩家的 `PrimaryGameLayout`，然后往对应的 Layer 推入 Widget。
 
-#### 配置装配：LyraLocalPlayer 的集成
+#### 3.2.3 配置装配：LyraLocalPlayer 的集成
 
 Lyra 通过 `DefaultEngine.ini` 将 `ULyraLocalPlayer` 设为项目的 LocalPlayer 类：
 
@@ -440,11 +440,11 @@ void ULyraUIManagerSubsystem::SyncRootLayoutVisibilityToShowHUD()
 
 ### 3.8 输入模式控制：LyraActivatableWidget
 
-#### 问题背景
+#### 3.8.1 问题背景
 
 UE 原生的 `APlayerController::SetInputMode` 决定输入流向（Game Only / UI Only / Game And UI）。在复杂 UI 层级（嵌套弹窗、异步加载、多人分屏）下，手动维护输入模式极易出错。Lyra 的方案是：**让每个 Widget 声明自己期望的输入模式，框架自动维护输入模式栈。**
 
-#### 四种输入模式
+#### 3.8.2 四种输入模式
 
 `ULyraActivatableWidget` 定义了 `ELyraWidgetInputMode` 枚举：
 
@@ -455,7 +455,7 @@ UE 原生的 `APlayerController::SetInputMode` 决定输入流向（Game Only / 
 | `Game` | 仅游戏输入 | `FInputModeGameOnly` | 过场动画覆盖层、纯显示层 |
 | `Menu` | 仅 UI 输入，完全吞噬游戏输入 | `FInputModeUIOnly` | 暂停菜单、设置面板、主菜单 |
 
-#### 核心机制：GetDesiredInputConfig
+#### 3.8.3 核心机制：GetDesiredInputConfig
 
 覆盖自 `UCommonActivatableWidget` 的虚函数，根据 `InputConfig` 枚举返回 `FUIInputConfig`：
 
@@ -466,7 +466,7 @@ UE 原生的 `APlayerController::SetInputMode` 决定输入流向（Game Only / 
 
 关键点：**Menu 模式下鼠标捕获强制为 `NoCapture`**，与 Game/GameAndMenu 的逻辑不同——菜单场景需要玩家能自由移动鼠标。
 
-#### 自动驱动：栈式输入管理
+#### 3.8.4 自动驱动：栈式输入管理
 
 设计者不需要手动调 `SetInputMode`。当 Widget 通过 `PushWidgetToLayerStack` 压入 Layer 时：
 
@@ -476,7 +476,7 @@ UE 原生的 `APlayerController::SetInputMode` 决定输入流向（Game Only / 
 
 输入模式形成一个 **Widget 激活栈**，始终和顶层 Widget 保持一致。
 
-#### 过渡期输入保护
+#### 3.8.5 过渡期输入保护
 
 Widget 切换期间（如从主菜单切到设置面板），两个 Widget 短暂共存会导致输入冲突。`PrimaryGameLayout` 通过 `SuspendInputForPlayer` / `ResumeInputForPlayer` 机制保护：
 
@@ -490,11 +490,11 @@ else
 
 `SuspendInputTokens` 用 `TArray<FName>` 栈管理，支持嵌套挂起——异步加载 UI 期间也使用同一套机制。
 
-#### 编辑器编译期校验
+#### 3.8.6 编辑器编译期校验
 
 `ValidateCompiledWidgetTree` 在**蓝图编译时**检查子类是否实现了 `BP_GetDesiredFocusTarget`。未实现则输出 Warning：手柄操作下无法确定焦点落点。这是防御性设计——在保存时就暴露问题，而非到测试阶段才发现。
 
-#### 设计师控制面板
+#### 3.8.7 设计师控制面板
 
 ```cpp
 UPROPERTY(EditDefaultsOnly, Category = Input)
@@ -506,7 +506,7 @@ EMouseCaptureMode GameMouseCaptureMode = CapturePermanently;  // 鼠标锁定策
 
 两个 `UPROPERTY` 暴露给蓝图，设计师按需配置，无需触碰 C++。
 
-#### 实际使用对照
+#### 3.8.8 实际使用对照
 
 | Widget | InputConfig | 理由 |
 |--------|------------|------|
