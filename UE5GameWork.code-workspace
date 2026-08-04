@@ -5,6 +5,7 @@
 		}
 	],
 	"settings": {
+		"search.useIgnoreFiles": false,
 		"files.exclude": {
 			"LyraStarterGame/Binaries": true,
 			"LyraStarterGame/Build": true,

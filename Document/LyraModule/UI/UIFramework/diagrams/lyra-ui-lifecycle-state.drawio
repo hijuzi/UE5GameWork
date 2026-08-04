@@ -1,0 +1,256 @@
+<mxGraphModel dx="1100" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="1400" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+
+    <!-- Phase labels (left margin) -->
+    <mxCell id="ph1" value="阶段一&lt;br&gt;构造" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BBDEFB;strokeColor=#1E88E5;strokeWidth=2;fontSize=13;fontColor=#0D47A1;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="30" y="50" width="80" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="ph2" value="阶段二&lt;br&gt;激活运行" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C8E6C9;strokeColor=#43A047;strokeWidth=2;fontSize=13;fontColor=#1B5E20;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="30" y="230" width="80" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="ph3" value="阶段三&lt;br&gt;停用移除" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE0B2;strokeColor=#FB8C00;strokeWidth=2;fontSize=13;fontColor=#BF360C;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="30" y="510" width="80" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="ph4" value="阶段四&lt;br&gt;销毁/复用" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1BEE7;strokeColor=#8E24AA;strokeWidth=2;fontSize=13;fontColor=#4A148C;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="30" y="740" width="80" height="50" as="geometry"/>
+    </mxCell>
+
+    <!-- ============ STAGE 1: 构造 ============ -->
+    <mxCell id="s0" value="开始" style="ellipse;whiteSpace=wrap;html=1;fillColor=#333333;strokeColor=#333333;strokeWidth=2;fontSize=12;fontColor=#ffffff;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="760" y="50" width="80" height="40" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="s1_a" value="NewObject&lt;br&gt;CreateWidget 创建 UObject" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BBDEFB;strokeColor=#1E88E5;strokeWidth=2;fontSize=12;fontColor=#0D47A1;" vertex="1" parent="1">
+      <mxGeometry x="700" y="120" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="e0" value="" style="endArrow=block;endFill=1;strokeColor=#1E88E5;strokeWidth=2;" edge="1" parent="1" source="s0" target="s1_a">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="s1_b" value="AddToParent&lt;br&gt;挂入 Slate 树 + 存入 Container 数组" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BBDEFB;strokeColor=#1E88E5;strokeWidth=2;fontSize=12;fontColor=#0D47A1;" vertex="1" parent="1">
+      <mxGeometry x="680" y="200" width="240" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="e1" value="" style="endArrow=block;endFill=1;strokeColor=#1E88E5;strokeWidth=2;" edge="1" parent="1" source="s1_a" target="s1_b">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- ============ STAGE 2: 激活运行 ============ -->
+    <mxCell id="s2_a" value="ActivateWidget&lt;br&gt;OnActivated 回调 | 输入模式入栈 | 获取焦点" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C8E6C9;strokeColor=#43A047;strokeWidth=2;fontSize=12;fontColor=#1B5E20;" vertex="1" parent="1">
+      <mxGeometry x="650" y="280" width="300" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2" value="" style="endArrow=block;endFill=1;strokeColor=#43A047;strokeWidth=2;" edge="1" parent="1" source="s1_b" target="s2_a">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- Main Active box -->
+    <mxCell id="s2_b" value="正常运行中&lt;br&gt;UObject 有效 · Slate 可见 · Activated 态 · Container 持有引用" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#81C784;strokeColor=#2E7D32;strokeWidth=3;fontSize=13;fontColor=#1B5E20;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="600" y="365" width="400" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="e3" value="" style="endArrow=block;endFill=1;strokeColor=#43A047;strokeWidth=2;" edge="1" parent="1" source="s2_a" target="s2_b">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- Sub-states: Running ⇄ Suspended -->
+    <mxCell id="s2_sub1" value="手柄焦点在 Widget&lt;br&gt;可交互" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#66BB6A;strokeWidth=2;fontSize=11;fontColor=#2E7D32;" vertex="1" parent="1">
+      <mxGeometry x="650" y="440" width="140" height="45" as="geometry"/>
+    </mxCell>
+    <mxCell id="s2_sub2" value="输入被挂起&lt;br&gt;SuspendInputForPlayer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#FF9800;strokeWidth=2;fontSize=11;fontColor=#E65100;" vertex="1" parent="1">
+      <mxGeometry x="850" y="440" width="140" height="45" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_sus" value="Suspend" style="endArrow=block;endFill=1;strokeColor=#FF9800;strokeWidth=2;fontSize=10;fontColor=#E65100;" edge="1" parent="1" source="s2_sub1" target="s2_sub2">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_res" value="Resume" style="endArrow=block;endFill=1;strokeColor=#66BB6A;strokeWidth=2;fontSize=10;fontColor=#2E7D32;exitX=0.5;exitY=1;" edge="1" parent="1" source="s2_sub2" target="s2_sub1">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points"><mxPoint x="920" y="510"/><mxPoint x="720" y="510"/></Array>
+      </mxGeometry>
+    </mxCell>
+
+    <mxCell id="e4" value="" style="endArrow=block;endFill=1;strokeColor=#FB8C00;strokeWidth=2;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="800" y="415" as="sourcePoint"/>
+        <mxPoint x="800" y="555" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- ============ STAGE 3: 停用移除 ============ -->
+    <mxCell id="s3_a" value="PopContentFromLayer&lt;br&gt;业务层调用 Pop" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE0B2;strokeColor=#FB8C00;strokeWidth=2;fontSize=12;fontColor=#BF360C;" vertex="1" parent="1">
+      <mxGeometry x="680" y="558" width="240" height="50" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="s3_b" value="DeactivateWidget&lt;br&gt;OnDeactivated 回调 | 输入模式出栈" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE0B2;strokeColor=#FB8C00;strokeWidth=2;fontSize=12;fontColor=#BF360C;" vertex="1" parent="1">
+      <mxGeometry x="670" y="640" width="260" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="e5" value="" style="endArrow=block;endFill=1;strokeColor=#FB8C00;strokeWidth=2;" edge="1" parent="1" source="s3_a" target="s3_b">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="s3_c" value="RemoveFromParent&lt;br&gt;从 Slate 树摘除 | Container 释放 TArray 引用" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFCC80;strokeColor=#EF6C00;strokeWidth=2;fontSize=12;fontColor=#BF360C;" vertex="1" parent="1">
+      <mxGeometry x="650" y="720" width="300" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="e6" value="" style="endArrow=block;endFill=1;strokeColor=#FB8C00;strokeWidth=2;" edge="1" parent="1" source="s3_b" target="s3_c">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- Branch arrow down -->
+    <mxCell id="e7" value="" style="endArrow=block;endFill=1;strokeColor=#8E24AA;strokeWidth=2;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="800" y="770" as="sourcePoint"/>
+        <mxPoint x="800" y="810" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- ============ STAGE 4: 销毁/复用 ============ -->
+    <mxCell id="s4_dec" value="业务层还持有&lt;br&gt;UPROPERTY 引用？" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFF9C4;strokeColor=#F9A825;strokeWidth=2;fontSize=12;fontColor=#5D4037;" vertex="1" parent="1">
+      <mxGeometry x="680" y="815" width="240" height="85" as="geometry"/>
+    </mxCell>
+    <mxCell id="e8" value="" style="endArrow=block;endFill=1;strokeColor=#8E24AA;strokeWidth=2;" edge="1" parent="1" source="s3_c" target="s4_dec">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points"><mxPoint x="800" y="810"/></Array>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- NO: GC -->
+    <mxCell id="s4_no" value="GC 回收&lt;br&gt;UObject 彻底销毁&lt;br&gt;生命周期结束" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFCDD2;strokeColor=#C62828;strokeWidth=3;fontSize=12;fontColor=#B71C1C;" vertex="1" parent="1">
+      <mxGeometry x="960" y="820" width="150" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_no" value="无引用" style="endArrow=block;endFill=1;strokeColor=#C62828;strokeWidth=2;fontSize=11;fontColor=#B71C1C;exitX=1;exitY=0.5;" edge="1" parent="1" source="s4_dec" target="s4_no">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- YES: Reuse -->
+    <mxCell id="s4_yes" value="存活待复用&lt;br&gt;Widget 未销毁&lt;br&gt;可重新 Push" style="ellipse;whiteSpace=wrap;html=1;fillColor=#A5D6A7;strokeColor=#2E7D32;strokeWidth=3;fontSize=12;fontColor=#1B5E20;" vertex="1" parent="1">
+      <mxGeometry x="500" y="820" width="150" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_yes" value="有引用" style="endArrow=block;endFill=1;strokeColor=#2E7D32;strokeWidth=2;fontSize=11;fontColor=#1B5E20;exitX=0;exitY=0.5;" edge="1" parent="1" source="s4_dec" target="s4_yes">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- Loop back -->
+    <mxCell id="e_loop" value="可再次 Push（回到 ActivateWidget）" style="endArrow=block;endFill=1;strokeColor=#1E88E5;strokeWidth=2;fontSize=10;fontColor=#1565C0;fontStyle=2;dashed=1;exitX=0.5;exitY=0;" edge="1" parent="1" source="s4_yes">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="800" y="290" as="targetPoint"/>
+        <Array as="points"><mxPoint x="575" y="80"/></Array>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- ============ RIGHT: 四层对照表 ============ -->
+    <mxCell id="tbl_bg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FAFAFA;strokeColor=#BDBDBD;strokeWidth=1;" vertex="1" parent="1">
+      <mxGeometry x="160" y="940" width="850" height="380" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="tbl_title" value="四层生命周期对照表&lt;br&gt;同一个 Widget 在四个层次分别处于什么状态？" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FAFAFA;strokeColor=none;fontSize=15;fontColor=#333333;align=center;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="260" y="950" width="650" height="45" as="geometry"/>
+    </mxCell>
+
+    <!-- Headers -->
+    <mxCell id="th0" value="生命周期阶段" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#EEEEEE;strokeColor=#BDBDBD;fontSize=11;fontColor=#333333;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="180" y="1000" width="130" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="th1" value="UObject 层" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11;fontColor=#1A3A5C;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="310" y="1000" width="150" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="th2" value="Slate 层" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontSize=11;fontColor=#1A3A1A;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="460" y="1000" width="150" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="th3" value="CommonUI 层" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFE6CC;strokeColor=#D79B00;fontSize=11;fontColor=#5C3D00;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="610" y="1000" width="150" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="th4" value="Container 层" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#9673A6;fontSize=11;fontColor=#2D1B3D;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="760" y="1000" width="230" height="30" as="geometry"/>
+    </mxCell>
+
+    <!-- Row 1: 构造中 -->
+    <mxCell id="r1_l" value="构造中" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#BBDEFB;strokeColor=#90CAF9;fontSize=11;fontColor=#0D47A1;" vertex="1" parent="1">
+      <mxGeometry x="180" y="1035" width="130" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="r1_1" value="NewObject 完成" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#BBDEFB;fontSize=11;fontColor=#1A3A5C;" vertex="1" parent="1">
+      <mxGeometry x="310" y="1035" width="150" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="r1_2" value="未挂载" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#C8E6C9;fontSize=11;fontColor=#1A3A1A;" vertex="1" parent="1">
+      <mxGeometry x="460" y="1035" width="150" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="r1_3" value="未激活" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFE6CC;strokeColor=#FFF3E0;fontSize=11;fontColor=#5C3D00;" vertex="1" parent="1">
+      <mxGeometry x="610" y="1035" width="150" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="r1_4" value="—" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#F3E5F5;fontSize=11;fontColor=#2D1B3D;" vertex="1" parent="1">
+      <mxGeometry x="760" y="1035" width="230" height="30" as="geometry"/>
+    </mxCell>
+
+    <!-- Row 2: 运行中 -->
+    <mxCell id="r2_l" value="运行中" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#C8E6C9;strokeColor=#A5D6A7;fontSize=11;fontColor=#1B5E20;" vertex="1" parent="1">
+      <mxGeometry x="180" y="1070" width="130" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="r2_1" value="UObject 有效" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#BBDEFB;fontSize=11;fontColor=#1A3A5C;" vertex="1" parent="1">
+      <mxGeometry x="310" y="1070" width="150" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="r2_2" value="可见" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#C8E6C9;fontSize=11;fontColor=#1A3A1A;" vertex="1" parent="1">
+      <mxGeometry x="460" y="1070" width="150" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="r2_3" value="Activated 态" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFE6CC;strokeColor=#FFF3E0;fontSize=11;fontColor=#5C3D00;" vertex="1" parent="1">
+      <mxGeometry x="610" y="1070" width="150" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="r2_4" value="TArray 持有 UPROPERTY 引用" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#F3E5F5;fontSize=11;fontColor=#2D1B3D;" vertex="1" parent="1">
+      <mxGeometry x="760" y="1070" width="230" height="30" as="geometry"/>
+    </mxCell>
+
+    <!-- Row 3: Pop 后 -->
+    <mxCell id="r3_l" value="Pop 后" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFE0B2;strokeColor=#FFCC80;fontSize=11;fontColor=#BF360C;" vertex="1" parent="1">
+      <mxGeometry x="180" y="1105" width="130" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="r3_1" value="可能存活（等 GC）" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#BBDEFB;fontSize=11;fontColor=#1A3A5C;" vertex="1" parent="1">
+      <mxGeometry x="310" y="1105" width="150" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="r3_2" value="已摘除" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#C8E6C9;fontSize=11;fontColor=#1A3A1A;" vertex="1" parent="1">
+      <mxGeometry x="460" y="1105" width="150" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="r3_3" value="Deactivated 态" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFE6CC;strokeColor=#FFF3E0;fontSize=11;fontColor=#5C3D00;" vertex="1" parent="1">
+      <mxGeometry x="610" y="1105" width="150" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="r3_4" value="引用已释放" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#F3E5F5;fontSize=11;fontColor=#2D1B3D;" vertex="1" parent="1">
+      <mxGeometry x="760" y="1105" width="230" height="30" as="geometry"/>
+    </mxCell>
+
+    <!-- Row 4: GC -->
+    <mxCell id="r4_l" value="GC 回收" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFCDD2;strokeColor=#EF9A9A;fontSize=11;fontColor=#B71C1C;" vertex="1" parent="1">
+      <mxGeometry x="180" y="1140" width="130" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="r4_1" value="UObject 销毁" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#BBDEFB;fontSize=11;fontColor=#1A3A5C;" vertex="1" parent="1">
+      <mxGeometry x="310" y="1140" width="150" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="r4_2" value="—" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#C8E6C9;fontSize=11;fontColor=#1A3A1A;" vertex="1" parent="1">
+      <mxGeometry x="460" y="1140" width="150" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="r4_3" value="—" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFE6CC;strokeColor=#FFF3E0;fontSize=11;fontColor=#5C3D00;" vertex="1" parent="1">
+      <mxGeometry x="610" y="1140" width="150" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="r4_4" value="—" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#F3E5F5;fontSize=11;fontColor=#2D1B3D;" vertex="1" parent="1">
+      <mxGeometry x="760" y="1140" width="230" height="30" as="geometry"/>
+    </mxCell>
+
+    <!-- Row 5: 复用 -->
+    <mxCell id="r5_l" value="复用（可选）" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#A5D6A7;strokeColor=#81C784;fontSize=11;fontColor=#1B5E20;" vertex="1" parent="1">
+      <mxGeometry x="180" y="1175" width="130" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="r5_1" value="UObject 存活" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#BBDEFB;fontSize=11;fontColor=#1A3A5C;" vertex="1" parent="1">
+      <mxGeometry x="310" y="1175" width="150" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="r5_2" value="需重新 Push" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#C8E6C9;fontSize=11;fontColor=#1A3A1A;" vertex="1" parent="1">
+      <mxGeometry x="460" y="1175" width="150" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="r5_3" value="重新 Activate" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFE6CC;strokeColor=#FFF3E0;fontSize=11;fontColor=#5C3D00;" vertex="1" parent="1">
+      <mxGeometry x="610" y="1175" width="150" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="r5_4" value="重新加回 TArray" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#F3E5F5;fontSize=11;fontColor=#2D1B3D;" vertex="1" parent="1">
+      <mxGeometry x="760" y="1175" width="230" height="30" as="geometry"/>
+    </mxCell>
+
+    <!-- Key insight -->
+    <mxCell id="insight" value="核心理解： Pop 不是 Destroy，只是 Container 释放引用。&lt;br&gt;Widget 是否销毁由 GC 决定，取决于是否还有其他 UPROPERTY 强引用。" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#FFB300;strokeWidth=2;fontSize=12;fontColor=#5D4037;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="180" y="1230" width="850" height="50" as="geometry"/>
+    </mxCell>
+
+  </root>
+</mxGraphModel>
