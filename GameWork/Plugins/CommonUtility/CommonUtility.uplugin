@@ -1,0 +1,23 @@
+﻿{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.0",
+	"FriendlyName": "CommonUtility",
+	"Description": "公共的工具集",
+	"Category": "Other",
+	"CreatedBy": "xiele",
+	"CreatedByURL": "Common",
+	"DocsURL": "",
+	"MarketplaceURL": "",
+	"CanContainContent": true,
+	"IsBetaVersion": false,
+	"IsExperimentalVersion": false,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "CommonUtility",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	]
+}

@@ -1,0 +1,26 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.0",
+	"FriendlyName": "SVFloatingText",
+	"Description": "飘字/浮字系统插件 - 包含浮动文本组件、Widget 和数据配置",
+	"Category": "Gameplay",
+	"CreatedBy": "SegameVictory Team",
+	"CanContainContent": true,
+	"IsBetaVersion": false,
+	"IsExperimentalVersion": false,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "SVFloatingText",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "CommonUtility",
+			"Enabled": true
+		}
+	]
+}

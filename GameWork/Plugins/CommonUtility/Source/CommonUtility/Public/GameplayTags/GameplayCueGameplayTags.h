@@ -1,0 +1,35 @@
+// Copyright Epic Games, Inc. All Rights Reserved.
+
+#pragma once
+
+#include "NativeGameplayTags.h"
+
+/**
+ * GameplayCue 相关 GameplayTag（公开）。
+ * 外部请统一通过 #include "GameplayTags/CommonGameplayTags.h" 引入。
+ */
+namespace CommonGameplayTags
+{
+	// ========================================================================
+	//  NumberFloatingText Tags（GameplayCue.NumberFloatingText.*）
+	// ========================================================================
+
+	COMMONUTILITY_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_GAMEPLAYCUE_NUMBER_FLOATING_TEXT);
+
+	// ========================================================================
+	//  FloatingText Tags（GameplayCue.FloatingText.*）
+	// ========================================================================
+
+	COMMONUTILITY_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_GAMEPLAYCUE_FLOATING_TEXT);
+	COMMONUTILITY_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_GAMEPLAYCUE_FLOATING_TEXT_DAMAGETAKEN);
+	COMMONUTILITY_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_GAMEPLAYCUE_FLOATING_TEXT_DAMAGETAKEN_CRITDAMAGE);
+	COMMONUTILITY_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_GAMEPLAYCUE_FLOATING_TEXT_HEALING);
+	COMMONUTILITY_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_GAMEPLAYCUE_FLOATING_TEXT_FROZEN);
+	COMMONUTILITY_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_GAMEPLAYCUE_FLOATING_TEXT_DODGE);
+	COMMONUTILITY_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_GAMEPLAYCUE_FLOATING_TEXT_BLOCK);
+	COMMONUTILITY_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_GAMEPLAYCUE_FLOATING_TEXT_APPLYSTACKFAIL);
+
+
+	
+	COMMONUTILITY_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_GAMEPLAYCUE_VFX_BOUNCE);
+};
