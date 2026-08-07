@@ -11,6 +11,7 @@ public class CatPopupManager : ModuleRules
 			"Core",
 			"CoreUObject",
 			"Engine",
+			"DeveloperSettings",
 			"UMG",
 		});
 

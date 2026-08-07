@@ -70,29 +70,63 @@ description: |
 
 ### 3. 源码/代码分析 —— 精准截取，逐行解读
 
-**功能**：用代码说话，展示技术的真实面貌。
+**功能**：用代码说话，展示技术的真实面貌。**这是全文的核心章节**——概念解释和设计思考都必须建立在代码证据之上。
 
-**代码选取原则**：
-- 只摘录 **关键实现路径**，不堆砌无关代码
-- 每个代码块 **不超过 20 行**
-- 每段代码有**明确的论证目标**
-- 可以适当精简（去掉日志、边界检查等噪声）
+#### 3.1 代码选取原则
 
-**注释规范**：
-- 行内注释解释 **行为意图**，而非重复代码
-- 对比并列时左右对照展示（如两个 API 的实现差异）
+**核心标准：选取具备实际功能作用的代码，每一行都在"做事"。**
+
+**✅ 应该选取的代码**：
+
+| 类型 | 说明 | 示例 |
+|------|------|------|
+| **核心算法/逻辑** | 体现设计思想的关键实现路径 | 状态流转、资源分配、事件分发 |
+| **关键数据结构** | 决定行为方式的成员变量声明 | 优先级队列、任务链表、状态标志 |
+| **接口契约** | 定义模块边界的关键函数签名 | `virtual void Activate()`、`bool ClaimResource()` |
+| **决策/分支** | 体现设计策略的条件判断 | `if (bIsActive) return;` 说明惰性激活策略 |
+| **数据流** | 展示数据如何在不同模块间传递 | 参数组装 → 调度 → 回调的调用链 |
+
+**❌ 应该剔除的代码**：
+
+| 类型 | 为什么剔除 | 示例 |
+|------|-----------|------|
+| **日志/断言** | 不影响逻辑理解 | `UE_LOG(...)`、`check(...)` |
+| **空值/边界检查** | 噪音，干扰主线理解 | `if (Ptr == nullptr) return;` |
+| **纯样板代码** | 框架强制，无分析价值 | `GENERATED_BODY()`、`Super::Tick(...)` |
+| **冗长参数列表** | 只留关键 2-3 个参数即可 | 省略掉 `const FObjectInitializer&` |
+| **已注释代码** | 历史残留 | `// TODO: remove this` |
+
+**选取原则细化**：
+
+1. **功能性优先**：每一行截取的代码都必须在"做一件事"——改变状态、转移所有权、触发回调。如果某行代码只是"存在"而没有"动作"，就不要放进去。
+
+2. **控制行数**：每个代码块 **不超过 20 行**。如果函数很长，只截取与当前论点相关的连续段落，中间用 `// ...` 省略。
+
+3. **一行一个论证点**：每段代码对应一个明确的论证目标。写代码块前先问自己："这段代码要证明什么？"如果答不上来，就不要放。
+
+4. **精简命名空间噪声**：去掉 `UE::Gameplay::` 等长前缀，只在首次出现时说明命名空间。
+
+#### 3.2 注释规范
+
+- 行内注释解释 **行为意图**（这行代码要达成什么效果），而非重复代码字面意思
+- 对比并列时左右对照展示（如 Virtual 函数和 Override 函数的差异）
 
 **示例**：
 ```cpp
-// ✅ 好的注释：解释意图
+// ✅ 注释解释意图
 void AActor::SetOwner(AActor* NewOwner)
 {
-    // 所有权转移前先通知旧Owner
-    if (Owner != NewOwner) { ... }
+    // 转移所有权前先通知旧 Owner —— 这是 Actor 生命周期的重要节点
+    if (Owner != NewOwner)
+    {
+        Owner->OnLostOwnership(this);
+        Owner = NewOwner;
+        NewOwner->OnGainedOwnership(this);
+    }
 }
 
-// ❌ 避免的注释：重复代码
-// 设置Owner为NewOwner...
+// ❌ 注释重复字面意思
+// 设置 Owner 为 NewOwner —— 说了等于没说
 ```
 
 ### 4. 设计思考 —— 文章的灵魂
@@ -224,11 +258,20 @@ UE 的解决方案是：用 SceneComponent 作为根组件承载 Transform。
 - [ ] 关键架构/流程是否通过 drawio-generator 技能绘制的图表？（禁止自行手写 draw.io XML）
 - [ ] 图表是否遵循 drawio-generator 的类型规则（CLASS.md / SEQUENCE.md 等）？
 - [ ] 图表是否符合 §8.4.1~8.4.4 的配色/字体/布局规范（间距 ≥120px/≥100px）？
-- [ ] 节点是否重叠？连线是否穿过表头/类名区域？斜线是否改用正交路由？
-- [ ] 是否已通过 drawio-generator 导出 PNG（`--scale 2`）并与文章同目录存放？
-- [ ] Markdown 中是否用文件名直接引用图片，且每张图有图注？
+- [ ] 节点是否重叠？连线是否穿过图框内部区域？是否遵循 §8.4.5 间隙寻路规则？
+- [ ] 是否已通过 drawio-generator 导出 PNG（`--scale 2`）到 `diagrams/` 子目录？是否已清理文章根目录残留的冗余 PNG？
+- [ ] Markdown 中是否以 `diagrams/xxx.png` 路径引用图片，且每张图有图注？
 - [ ] 每个代码块是否 ≤20 行？
 - [ ] 段落是否过长？（每段不超过 5-6 行）
+
+### Humanizer 润色检查
+- [ ] 是否已通过 `humanizer` 技能对全文进行润色？
+- [ ] AI 高频词汇是否已替换（如 "crucial", "pivotal", "showcase", "underscore" 等）？
+- [ ] 是否有增删语义的假大空表述（如 "serves as a testament", "marks a pivotal moment"）？
+- [ ] 是否有 vague attributions（如 "Industry experts believe"）？是否已替换为具体来源？
+- [ ] 是否去除了 em dash 过度使用、规则三（rule of three）堆砌等 AI 痕迹？
+- [ ] 润色后是否保留了技术准确性和核心论断？
+- [ ] 文章读起来是否像人类作者所写（有观点、有节奏变化、有人情味）？
 
 ### 系列化检查（如适用）
 - [ ] 标题格式是否统一？
@@ -247,7 +290,7 @@ UE 的解决方案是：用 SceneComponent 作为根组件承载 Transform。
 | **深度** | 追问设计哲学和权衡 | 停留在"怎么用" |
 | **风格** | 拟人化、设问、故事化 | 枯燥的文档翻译体 |
 | **系列** | 品牌化标题、目录索引、社群 | 零散单篇，无关联 |
-| **图表** | 通过 drawio-generator 技能绘制（禁止手动 XML），按 §8.4 配色，导出 PNG 同级引用 | 纯文字无图、ASCII 拼凑、手写 drawio XML、配无关截图 |
+| **图表** | 通过 drawio-generator 技能绘制（禁止手动 XML），按 §8.4 配色，导出 PNG 到 `diagrams/` 子目录并按 `diagrams/xxx.png` 引用 | 纯文字无图、ASCII 拼凑、手写 drawio XML、配无关截图 |
 | **注释** | 解释意图，解答"为什么" | 重复代码，只说"是什么" |
 
 ---
@@ -263,9 +306,10 @@ UE 的解决方案是：用 SceneComponent 作为根组件承载 Transform。
 5. **源码定位**（如涉及）：确定需要分析的关键代码路径
 6. **图表规划**：确定需要配图的关键点（架构图/类图/时序图/流程图），列出清单
 7. **逐段撰写**：按大纲顺序编写，控制每段粒度
-8. **图表绘制与导出**：调用 `drawio-generator` 技能（严格按 §8 规范，不可自行手写 draw.io XML）。传入图表类型 + 内容 + 样式约束，由 drawio-generator 生成 .drawio 并导出 PNG 到文章同目录，在 Markdown 中引用并添加图注
+8. **图表绘制与导出**：调用 `drawio-generator` 技能（严格按 §8 规范，不可自行手写 draw.io XML）。传入图表类型 + 内容 + 样式约束，由 drawio-generator 生成 .drawio 到 `diagrams/` 子目录并导出 PNG，在 Markdown 中以 `diagrams/xxx.png` 引用并添加图注。**生成后必须检查文章根目录，删除可能残留的冗余 PNG**
 9. **质量检查**：对照检查清单逐项确认（含图表样式检查）
-10. **优化润色**：增强可读性，添加拟人化和设问
+10. **AI 痕迹去除（Humanizer 润色）**：调用 `humanizer` 技能对全文进行润色，去除 AI 写作痕迹（详见 §九），确保文章读起来像人类写的
+11. **最终确认**：确认 humanizer 润色后文章意思未变、技术准确性未受损
 
 ---
 
@@ -324,18 +368,21 @@ UE 的解决方案是：用 SceneComponent 作为根组件承载 Transform。
 
 ### 8.2 文件组织规范
 
-所有图表文件（.drawio 源文件 + .png 导出文件）**直接放在文章同一目录下**：
+所有图表文件（.drawio 源文件 + .png 导出文件）**统一放在文章目录下的 `diagrams/` 子目录**，避免 PNG 散落在文章根目录造成杂乱：
 
 ```
 Document/LyraModule/UI/UIExtension/
 ├── UIExtension深度分析.md              ← 文章正文
-├── architecture.drawio                 ← 架构图源文件
-├── architecture.png                    ← 导出的架构图
-├── sequence-hud-setup.drawio           ← 时序图源文件
-├── sequence-hud-setup.png              ← 导出的时序图
-├── class-diagram.drawio                ← 类图源文件
-└── class-diagram.png                   ← 导出的类图
+└── diagrams/                           ← 所有图表统一放这里
+    ├── architecture.drawio             ← 架构图源文件
+    ├── architecture.png                ← 导出的架构图
+    ├── sequence-hud-setup.drawio       ← 时序图源文件
+    ├── sequence-hud-setup.png          ← 导出的时序图
+    ├── class-diagram.drawio            ← 类图源文件
+    └── class-diagram.png               ← 导出的类图
 ```
+
+**严禁将 PNG 放在文章根目录** —— .drawio 源文件和 .png 导出文件都必须在 `diagrams/` 子目录内。生成图表后，必须检查并删除可能残留在文章根目录的冗余 PNG。
 
 **命名规则**：
 - 使用英文小写 + 连字符，如 `sequence-widget-lifecycle.drawio`
@@ -344,22 +391,22 @@ Document/LyraModule/UI/UIExtension/
 
 ### 8.3 Markdown 引用格式
 
-由于图片和文章在同一目录，直接使用文件名引用：
+图片统一存放在 `diagrams/` 子目录，引用时使用相对路径：
 
 ```markdown
-![UExtensionSystem 整体架构](architecture.png)
+![UExtensionSystem 整体架构](diagrams/architecture.png)
 
 *图1：UExtensionSystem 整体架构*
 ```
 
 ```markdown
-![HUD 就位到 Widget 注入时序](sequence-hud-setup.png)
+![HUD 就位到 Widget 注入时序](diagrams/sequence-hud-setup.png)
 
 *图2：HUD 就位到 Widget 注入的完整时序*
 ```
 
 **要求**：
-- 直接使用文件名作为引用路径（同级目录）
+- 引用路径必须为 `diagrams/xxx.png`，禁止只用文件名（`xxx.png`）或绝对路径
 - 每个图片下方必须加一行**斜体图注**，格式为 `*图N：图表说明*`
 - 图片插入位置紧邻相关文字段落的上方或下方
 
@@ -400,13 +447,151 @@ Document/LyraModule/UI/UIExtension/
 - **水平间距**：≥120px（类图/架构图并列时至少留这个间距，避免连线重叠）
 - **垂直间距**：≥100px（时序图各 lifeline 之间、流程图各步骤之间）
 - 节点之间不得重叠，连线不得穿过表头或类名称区域
-- 布局方向优先采用**自上而下**（流程图、时序图）或**自左向右**（类图、架构图）
+- **整体布局优先矩形化**：用多列网格（如 2×3、3×3、3×4）分摊节点，避免极端窄高或扁平。页面宽高比控制在 **1:1 ~ 1.6:1**（接近 4:3 或 16:10），杜绝"一根柱子"或"一根面条"式的长图
 - 同类节点对齐，同层级元素保持统一坐标（如多个类的 y 坐标一致）
 - 关系线尽量**水平或垂直**，避免斜线；需要拐弯时用正交路由（orthogonal edge）
 
 > **注意**：drawio-generator 的间距规则（≥120px / ≥100px）优先级高于此处建议值，实际生成时以 drawio-generator 规则为准。
 
-#### 8.4.5 导出设置（由 drawio-generator 技能自动处理）
+#### 8.4.5 连线避让（强制约束）
+
+所有关系线**不得穿过任何图框（swimlane / rect / rounded rect）的内部区域**。这是硬性约束，绘制完成后必须逐线检查。
+
+**核心思路**：利用图框之间的**天然间隙**（gap）走线，而非一律绕到布局最外围——折线应该"见缝插针"，就近穿过空闲通道。
+
+##### 8.4.5.1 间隙寻路算法
+
+**Step 1：建立障碍地图**
+
+为每个图框计算"禁区"矩形（含 20px margin）：
+
+```
+禁区 = [x - 20, y - 20, x + w + 20, y + h + 20]
+```
+
+所有图框的禁区合集 = 连线不可穿越的区域。
+
+**Step 2：计算可用的间隙通道**
+
+- **垂直通道**：相邻两列图框之间的 x 区间（水平间距 ≥120px 的区域），从页面顶部贯穿到底部
+- **水平通道**：相邻两行图框之间的 y 区间（垂直间距 ≥100px 的区域），从页面左侧贯穿到右侧
+
+对每个通道，记录它的坐标范围 `[start, end]` 和中心线坐标 `center`。
+
+```
+示例布局（3 列 2 行，间距 120px / 100px）：
+
+        col-gap-1       col-gap-2
+        (x=420~540)     (x=960~1080)
+   ┌─────────┐   ┌─────────┐   ┌─────────┐
+   │ Box A   │   │ Box D   │   │ Box G   │  ← row 0, y=100
+   │ x=0~300 │   │ x=540~840│   │ x=1080~1380│
+   └─────────┘   └─────────┘   └─────────┘
+        | row-gap-1 (y=360~460)
+   ┌─────────┐   ┌─────────┐   ┌─────────┐
+   │ Box B   │   │ Box E   │   │ Box H   │  ← row 1, y=460
+   └─────────┘   └─────────┘   └─────────┘
+        | row-gap-2 (y=720~820)
+   ┌─────────┐   ┌─────────┐   ┌─────────┐
+   │ Box C   │   │ Box F   │   │ Box I   │  ← row 2, y=820
+   └─────────┘   └─────────┘   └─────────┘
+
+可用垂直通道: v1=(420,540,center=480), v2=(960,1080,center=1020)
+可用水平通道: h1=(360,460,center=410), h2=(720,820,center=770)
+```
+
+**Step 3：为每条边选择路由**（按优先级尝试，命中即停止）
+
+| 优先级 | 策略 | 条件 | 折线形状 |
+|--------|------|------|----------|
+| **P1** | 直连 | 源和目标在同一列（x 重叠 ≥40px）且纵轴上无障碍 | `│` 或 `─`（零折点） |
+| **P1** | 直连 | 源和目标在同一行（y 重叠 ≥40px）且横轴上无障碍 | `─`（零折点） |
+| **P2** | 单折 | 源和目标不在同行/同列，但存在一条垂直通道 v 使得 (sx → v → tx) 全程无障碍 | `└┐`（一个折点） |
+| **P3** | 双折·垂直通道 | 源和目标在不同列，取**距离两端中点最近**的垂直间隙 v，走 s→(v, sy)→(v, ty)→t | `│─│`（两个折点） |
+| **P4** | 双折·水平通道 | 源和目标在不同行，取**距离两端中点最近**的水平间隙 h，走 s→(sx, h)→(tx, h)→t | `──┐└──`（两个折点） |
+| **P5** | 外围绕行 | 以上均失败（布局极度拥挤），走最左侧或最右侧外围 | 兜底方案 |
+
+> **关键原则**：优先 P3/P4 的"就近间隙"方案，而非 P5 的"一刀切外围绕行"。折线应该在图框之间的合理空隙中穿行，保持视觉紧凑。
+
+**Step 4：生成 waypoint XML**
+
+确定了走线方案后，将折点坐标写为 `<Array as="points">`：
+
+```xml
+<!-- P3 示例：Box B(左列, y=560) → Box G(右列, y=100)
+     选取 col-gap-1 (x=480) 作为垂直通道 -->
+<mxCell id="edge-1" value="uses"
+  style="edgeStyle=orthogonalEdgeStyle;...;exitX=1;exitY=0.5;entryX=0;entryY=0.5;"
+  edge="1" parent="1" source="box-B" target="box-G">
+  <mxGeometry relative="1" as="geometry">
+    <Array as="points">
+      <mxPoint x="480" y="560"/>   <!-- 从 Box B 右侧横走到 col-gap-1 -->
+      <mxPoint x="480" y="100"/>   <!-- 沿 col-gap-1 垂直走到 Box G 高度 -->
+    </Array>
+  </mxGeometry>
+</mxCell>
+```
+
+##### 8.4.5.2 折点坐标计算规则
+
+折点必须落在**通道安全区**内：
+
+- **水平段**：y 坐标在水平通道范围内，两端各留 10px margin
+- **垂直段**：x 坐标在垂直通道范围内，两端各留 10px margin
+- **折点**：x 取垂直通道中心线，y 取水平通道中心线，确保折点本身不在任何禁区上
+
+##### 8.4.5.3 连线美化
+
+- 多条线共用一个垂直通道时，在通道内**均匀分布**（如通道宽 120px，3 条线各间隔 30px），避免视觉重叠
+- `exitX/exitY` 和 `entryX/entryY` 设置为源/目标框距通道最近的那个面的中心
+
+##### 8.4.5.4 连线文字约束
+
+连线上的标签文字（如 `uses`、`manages`、`implements`）默认放在线段中间位置，但**必须确保文字 bounding box 不与任何图框重叠**。
+
+**放置规则**：
+
+| 线段类型 | 默认位置 | 冲突时调整 |
+|----------|---------|-----------|
+| 水平段 | 线段中点，文字在线**上方**（y 偏移 -8px） | 若上方有图框，改到下方（y 偏移 +8px） |
+| 垂直段 | 线段中点，文字在线**左侧**（x 偏移 -8px） | 若左侧有图框，改到右侧（x 偏移 +8px） |
+| 折点附近 | 放在不会与折角线重叠的一侧 | 远离折角 20px 以上 |
+
+**冲突检测**：文字标签的 bounding box ≈ 文字宽度 × 14px 高度。计算标签矩形是否与任何图框的禁区矩形相交。若相交，尝试以下调整（按顺序）：
+
+1. **换侧**：从线上方换到下方（或左换右）
+2. **沿线段平移**：保持同侧，沿线段方向往远离冲突点移动 20~40px，直到脱离禁区
+3. **移到相邻段**：当前线段全部处于禁区 → 标签移到相邻折线段上
+
+**XML 实现**：通过 label 的 `mxGeometry` offset 控制位置：
+
+```xml
+<mxCell id="edge-1" value="uses"
+  style="edgeStyle=orthogonalEdgeStyle;...;labelBackgroundColor=none;"
+  edge="1" parent="1" source="box-A" target="box-B">
+  <mxGeometry relative="1" as="geometry">
+    <Array as="points">
+      <mxPoint x="480" y="560"/>
+      <mxPoint x="480" y="100"/>
+    </Array>
+    <!-- 标签放在首段水平线中点上方 -->
+    <mxPoint x="390" y="552" as="offset"/>
+  </mxGeometry>
+</mxCell>
+```
+
+> 注意：`labelBackgroundColor=none` 保持透明背景，避免标签遮挡线条。如果走线区域背景复杂（图框密集），可设置为 `labelBackgroundColor=#FFFFFF` 增加可读性。
+
+##### 8.4.5.5 检查清单
+
+- [ ] 每条连线的每一段（折点之间）是否穿入了任何图框的禁区矩形？
+- [ ] 折点坐标是否在间隙通道内（不在任何图框内部）？
+- [ ] 连线上的文字标签是否与任何图框重叠？（逐标签检查 bounding box vs 禁区）
+- [ ] 标签冲突时是否已按 §8.4.5.4 规则调整位置（换侧 → 平移 → 移段）？
+- [ ] 多条线共用同一通道时是否有 ≥20px 间距？
+- [ ] `entryX/entryY` 和 `exitX/exitY` 是否与 waypoint 路径一致（不冲突）？
+
+#### 8.4.6 导出设置（由 drawio-generator 技能自动处理）
 - **格式**：PNG
 - **缩放**：200%（2x 分辨率，保证 Retina 屏幕清晰度）
 - **导出位置**：与 .drawio 源文件同一目录
@@ -422,19 +607,19 @@ Document/LyraModule/UI/UIExtension/
    - 图表类型（Class / Sequence / Flowchart / Architecture）
    - 内容描述（参与者、关系、关键节点）
    - 输出目录 = 文章同目录
-   - 样式约束 = §8.4.1~8.4.4
+   - 样式约束 = §8.4.1~8.4.5
 4. drawio-generator 自动：
    → 按类型规则写 XML（CLASS.md / SEQUENCE.md 等）
-   → 输出 .drawio 文件
-   → 导出 PNG（2x 缩放）到同目录
-5. 在 Markdown 正文中用文件名引用 PNG + 添加图注
+   → 输出 .drawio 文件到 `diagrams/`
+   → 导出 PNG（2x 缩放）到 `diagrams/`
+5. 在 Markdown 正文中用 `diagrams/xxx.png` 路径引用 PNG + 添加图注
 ```
 
 **关键提醒**：
 - 每篇文章至少 1-2 张架构/类图，时序图按需添加
 - 如果分析某个流程涉及 3 个以上参与方，优先使用时序图
 - 复杂类继承关系（3 层以上）必须有 UML 类图
-- **样式规范（8.4.1~8.4.4）作为约束传入，但 drawio-generator 的类型结构规则优先**
+- **样式规范（8.4.1~8.4.5）作为约束传入，但 drawio-generator 的类型结构规则优先**
 
 ### 8.6 drawio-generator 规则要点速查
 
@@ -446,9 +631,66 @@ Document/LyraModule/UI/UIExtension/
 | **唯一 ID** | 所有 mxCell 使用唯一连续数字 ID |
 | **专有 shape** | 类图用 swimlane，时序图用 lifeline，禁止通用矩形 |
 | **间距** | 水平 ≥120px，垂直 ≥100px |
+| **矩形化** | 多列网格布局，页面宽高比 1:1~1.6:1，禁止极端窄高或扁平长图（见 §8.4.4） |
+| **连线避让** | 每条连线不得穿过任何图框内部区域。折线就近走图框间隙（gap），优先 P1~P4 策略，外围绕行仅作兜底（见 §8.4.5） |
 | **导出 (macOS)** | `/Applications/draw.io.app/Contents/MacOS/draw.io -x -f png --scale 2 -o <output>.png <input>.drawio` |
 | **导出 (Windows)** | `& "$env:LOCALAPPDATA\Programs\draw.io\draw.io.exe" -x -f png --scale 2 -o <output>.png <input>.drawio` |
 | **简化** | 内容过多时先缩减（见 §8.1.1），再调用技能生成
+
+---
+
+## 九、Humanizer 润色规范
+
+### 9.1 为什么需要 Humanizer？
+
+技术文章由 AI 辅助撰写后，即使内容结构严谨、技术准确，也容易带有 AI 写作痕迹——这些痕迹会让读者下意识觉得"这像机器写的"，降低文章的可信度和阅读体验。
+
+`humanizer` 技能基于 Wikipedia "Signs of AI writing" 方法论，专门识别和去除以下 AI 写作模式：
+
+| 模式类别 | 典型表现 | 对技术文章的危害 |
+|----------|---------|----------------|
+| **夸大重要性** | "serves as a testament", "marks a pivotal moment" | 让技术分析显得浮夸、不够客观 |
+| **假深度的 -ing 分句** | "highlighting its importance", "ensuring optimal performance" | 读起来像产品宣传而非技术分析 |
+| **AI 高频词汇** | crucial, pivotal, showcase, underscore, delve, intricate | 暴露 AI 写作身份 |
+| **模糊归因** | "Industry experts believe", "Observers have cited" | 缺乏具体引用，降低权威性 |
+| **过度强调** | em dash 连用、规则三（rule of three）堆砌 | 显得刻意摆布读者 |
+| **空洞结语** | "The future looks bright", "Exciting times lie ahead" | 技术文章不应以鸡汤收尾 |
+
+### 9.2 使用时机与流程
+
+Humanizer 润色必须在文章主体写完后、最终交付前执行：
+
+```
+文章撰写完成 → 质量自查 → 【Humanizer 润色】 → 润色后复核 → 最终交付
+```
+
+### 9.3 Humanizer 调用方式
+
+直接调用 `humanizer` 技能，传入完整文章正文：
+
+1. **加载 humanizer 技能**
+2. **传入待润色的文章全文**（Markdown 格式）
+3. **humanizer 返回润色后的文本**
+4. **人工复核**：确保技术术语、代码片段、图表引用未被错误修改
+
+### 9.4 润色边界（重要！）
+
+Humanizer 润色时，以下内容**不可修改**：
+
+- **代码块**（```cpp ... ``` 等）：代码必须保持原样
+- **图表引用**（`![图注](xxx.png)` 格式）：路径和文件名不可变
+- **技术术语**：UE 专有名词（如 UObject、AActor、UPROPERTY）不可被改写
+- **关键论断**：经过论证的技术结论不可因润色而弱化或删除
+- **设问自答结构**：`### 思考：为什么...？` 这类小标题是文章特色，必须保留
+
+### 9.5 润色后复核清单
+
+对照 §四 中的「Humanizer 润色检查」逐项确认。特别关注：
+
+1. 技术准确性是否无损？
+2. 文章的"观点态度"是否依然鲜明？
+3. 代码和图表是否未被改动？
+4. 设问自答、拟人化等写作手法是否保留？
 
 ---
 
