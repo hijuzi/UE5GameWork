@@ -27,6 +27,8 @@ GameplayTasks 系统的设计非常克制——整个模块只有 4 个头文件
 
 ![GameplayTasks 核心类图](diagrams/GameplayTasks-ClassDiagram.png)
 
+*图1：GameplayTasks 核心类关系 —— AActor 持有 Component，Component 管理 Task，Task 声明 Resource*
+
 ### 1.2 Owner 与 Component 的关系
 
 这里有个容易混淆的点：**`UGameplayTasksComponent` 不是 Owner**，它只是 Owner 身上的一个"任务管理器"。
@@ -37,6 +39,7 @@ GameplayTasks 系统的设计非常克制——整个模块只有 4 个头文件
 // 来自 Actor 自身（作为 Owner）
 UClass* AActor::GetGameplayTaskOwnerDefaultComponent() const
 {
+    // 不需要显式创建 Component —— UE 反射系统在 Actor Spawn 时按此返回值自动挂载
     return UGameplayTasksComponent::StaticClass();
 }
 ```
@@ -66,6 +69,8 @@ enum class EGameplayTaskState : uint8
 ```
 
 ![GameplayTask 状态机](diagrams/GameplayTasks-Statemachine.png)
+
+*图2：UGameplayTask 五态状态机 —— Paused 和 Resume 均经过 AwaitingActivation 重新排队*
 
 ### 2.1 激活的起点：Activate()
 
@@ -102,23 +107,63 @@ void UGameplayTask::BeginPlay()
 
 ### 2.3 暂停与继续
 
-暂停流程：`Pause()` → `TaskState = Paused` → 子类 `OnPaused()`
+Pause 做的事很直接——切状态，通知子类：
 
-继续流程：`Resume()` → `TaskState = AwaitingActivation` → 重新加入 Component 的等待队列 → 等调度。
+```cpp
+void UGameplayTask::Pause()
+{
+    if (TaskState == EGameplayTaskState::Active)
+    {
+        TaskState = EGameplayTaskState::Paused;
+        OnPaused(*this); // 子类在这里停止 Tick、暂停计时器等
+    }
+}
+```
 
-这里的细节是：**Resume 不是直接恢复 Active，而是重新排队**。为什么呢？因为暂停期间可能有更高优先级的任务进来了——如果直接恢复到 Active 就绕过了调度。
+Resume 则有一个关键设计：
+
+```cpp
+void UGameplayTask::Resume()
+{
+    if (TaskState == EGameplayTaskState::Paused)
+    {
+        TaskState = EGameplayTaskState::AwaitingActivation;
+        UGameplayTasksComponent* Comp = GetGameplayTasksComponent();
+        if (Comp)
+        {
+            Comp->AddTaskReadyForActivation(*this); // 重新排队，不是直接恢复
+        }
+    }
+}
+```
+
+**Resume 不是直接恢复到 Active，而是回到 AwaitingActivation 重新排队**。为什么？因为暂停期间可能有更高优先级的任务进来了——如果直接恢复到 Active，就绕过了 Component 的调度，优先级形同虚设。
 
 ### 2.4 结束与清理
 
-`EndTask()` 设置 `TaskState = Finished`，然后调用 `UGameplayTask::OnDestroy()`。在 `OnDestroy()` 中：释放所有资源声明 → 从 Component 的列表里移除自己 → 广播 `OnGameplayTaskDeactivated` 事件 → 标记为待 GC。
+```cpp
+void UGameplayTask::EndTask()
+{
+    TaskState = EGameplayTaskState::Finished;
+    OnDestroy(); // 清理入口：释放资源、从 Component 中移除、广播事件
+}
 
-理解 `EndTask()` 的时机很重要：只有任务**自己**调用它，或者 Component 强行终止它。任务永远不会莫名其妙地消失。
+void UGameplayTask::OnDestroy()
+{
+    ReleaseClaimedResources();          // 归还所有独占资源，唤醒排队等待的任务
+    RemoveFromComponentTaskList();       // 从 TaskPriorityQueue 中移除
+    OnGameplayTaskDeactivated.Broadcast(*this); // 通知外部监听者
+    MarkAsGarbage();                    // 不再需要了，交 GC
+}
+```
+
+`EndTask()` 只有任务**自己**可以调用，或者 Component 强行终止它。任务永远不会莫名其妙地消失。
 
 ---
 
 ## 三、资源系统：最被低估的设计
 
-### 问题场景
+### 3.0 问题场景
 
 假设你有一个 AI 角色，同时开启了两个任务：
 1. "举起武器"——需要占用右手
@@ -146,10 +191,22 @@ protected:
 
 ### 3.2 声明资源
 
-任务通过 `AddRequiredResource()` 和 `AddClaimedResource()` 声明自己需要的资源：
+任务的资源需求在 `Activate()` 之前就确定了——这是声明式的核心：
 
-- **RequiredResource**：必须独占，否则不激活。Component 在激活任务前检查，如果资源被其他任务占用，当前任务就排队等。
-- **ClaimedResource**：共享型资源，多个任务可以同时 Claim 同一个 Resource，但有一个上限（失败则也排队等）。
+```cpp
+void UGameplayTask::AddRequiredResource(TSubclassOf<UGameplayTaskResource> Resource)
+{
+    RequiredResources.AddUnique(Resource);  // 独占型：有我没他
+}
+
+void UGameplayTask::AddClaimedResource(TSubclassOf<UGameplayTaskResource> Resource)
+{
+    ClaimedResources.AddUnique(Resource);   // 共享型：多个任务可同时持有
+}
+```
+
+- **RequiredResource**：必须独占。Component 在激活前检查，如果资源被其他任务占用，当前任务就留在 `AwaitingActivation` 排队等。
+- **ClaimedResource**：共享型。多个任务可以同时 Claim 同一个 Resource，但 Provider 可以设置上限（达到上限后也排队）。
 
 核心判断逻辑在 `UGameplayTasksComponent::ClaimTaskResources()` 里。
 
@@ -157,11 +214,33 @@ protected:
 
 你可能会想：这不就是一个加了排队机制的 Mutex 吗？
 
-先解释一下 Mutex（互斥锁）是什么意思：一种最常见的并发控制手段——多个线程想访问同一个东西时，谁先拿到了锁谁就用，其他人在外面等。问题是等的人通常只能忙等（while 循环猛查"锁开了没"）或者在操作系统层面阻塞，不管是哪种，都不是为"游戏角色的右手该归谁"这种问题设计的。
+Mutex（互斥锁）是最常见的并发控制手段——谁先拿到锁谁用，其他人等。问题在于等的人通常忙等（while 循环查锁）或在内核层面阻塞，都不是为"游戏角色的右手该归谁"设计的。
 
-GameplayTask 的资源声明走的是另一条路。它是**声明式的**——任务在 `Activate()` 之前就把自己需要什么资源说清楚了。Component 在调度时做全局判断，而不是任务自己在 `Tick()` 里抢锁。这意味着死锁的可能性被降到极低，因为不存在"持有 A 等 B"的嵌套等待。
+GameplayTask 走的是**声明式全局判断**：
 
-而且，任务也不会因为锁竞争而空耗 CPU——如果资源不可用，任务就停在 `AwaitingActivation` 状态，不 Tick、不消耗，等着就行。
+```cpp
+bool UGameplayTasksComponent::ClaimTaskResources(UGameplayTask& Task)
+{
+    for (const auto& Res : Task.RequiredResources)
+    {
+        if (ClaimedResources.Contains(Res))  // 有冲突：资源已被占用
+        {
+            return false; // 本轮放弃，留在 AwaitingActivation，下个 Tick 重试
+        }
+    }
+    for (const auto& Res : Task.RequiredResources)
+    {
+        ClaimedResources.Add(Res);  // 通过检查后才真正占用
+    }
+    return true;
+}
+```
+
+关键差异在于角色：**不是任务自己在抢锁，而是 Component 在做全局判断**。这意味着：
+
+- **无死锁**：不存在"持有 A 等 B"的嵌套等待——检查是一次性原子操作，要么全拿要么全放弃
+- **零 CPU 空耗**：资源不可用时任务停在 `AwaitingActivation`，不 Tick、不消耗，等 Component 下次调度时自动重试
+- **优先级自然生效**：Component 按 TaskPriorityQueue 顺序遍历，高优先级的先通过检查
 
 ---
 
@@ -193,24 +272,16 @@ TArray<FName> KnownEventNames;
 调度的核心流程：
 
 ```cpp
-// 简化的调度逻辑
 void UGameplayTasksComponent::TickComponent(float DeltaTime, ...)
 {
-    // 1. 处理本轮需要激活的任务
     for (auto& Task : TasksToProcess)
     {
-        if (Task->GetState() == AwaitingActivation)
+        if (Task->GetState() == AwaitingActivation && ClaimTaskResources(*Task))
         {
-            // 检查资源可用性
-            if (ClaimTaskResources(*Task))
-            {
-                Task->BeginPlay(); // 真正激活
-            }
-            // 如果资源不可用，任务留在 AwaitingActivation，等下次 Tick 重试
+            Task->BeginPlay(); // 资源就位，真正激活
         }
+        // 资源不可用 → 留在 AwaitingActivation，下次 Tick 重试
     }
-    
-    // 2. 更新所有 Active 的任务
     for (auto& Task : ActiveTasks)
     {
         Task->TickTask(DeltaTime);
@@ -234,12 +305,14 @@ GameplayTasks 对网络有内置支持，但使用方式很克制：
 
 说了这么多，自己写一个试试。假设我们需要一个"引导技能"任务——需要占用技能槽资源，可以被暂停，可以被取消。
 
+先说**类声明**——继承 `UGameplayTask`，暴露工厂方法，重写 `Activate` 和 `PerformActivation`：
+
 ```cpp
 UCLASS()
 class UTask_ChannelSpell : public UGameplayTask
 {
-    GENERATED_BODY()
 public:
+    // 工厂方法声明：返回裸指针，调用者无需担心 GC
     static UTask_ChannelSpell* ChannelSpell(
         IGameplayTaskOwnerInterface& InOwner,
         FName InSpellName,
@@ -252,12 +325,14 @@ protected:
     virtual void PerformActivation() override;
 
     FName SpellName;
-
     void CompleteSpell();
     void InterruptSpell();
 };
+```
 
-// --- 实现 ---
+工厂方法的职责是**配置而非执行**——创建 UObject、设置参数、声明资源需求，但不触发任何逻辑：
+
+```cpp
 UTask_ChannelSpell* UTask_ChannelSpell::ChannelSpell(
     IGameplayTaskOwnerInterface& InOwner,
     FName InSpellName,
@@ -268,22 +343,22 @@ UTask_ChannelSpell* UTask_ChannelSpell::ChannelSpell(
     Task->SpellName = InSpellName;
     Task->Priority = InPriority;
     Task->AddRequiredResource(InAbilitySlot);
-    // NewTask 返回后，Task 状态为 Uninitialized
-    // 调用者需要显式调用 Task->ReadyForActivation() 或外部调用 Activate()
+    // 此时 Task 仍为 Uninitialized，等待调用者选择激活时机
     return Task;
 }
+```
 
+`Activate()` 只有一行——把任务加入 Component 的等待队列。真正的初始化逻辑写在 `PerformActivation()` 里：
+
+```cpp
 void UTask_ChannelSpell::Activate()
 {
-    Super::Activate(); // 把自己加到 Component 的等待队列
+    Super::Activate(); // Uninitialized → AwaitingActivation，加入 Component 调度队列
 }
 
 void UTask_ChannelSpell::PerformActivation()
 {
-    // 资源检查通过，Component 已经调了 BeginPlay()，现在到子类干活了
-    // 开始读条、播放动画、生成特效等
-    UE_LOG(LogTemp, Log, TEXT("ChannelSpell [%s] started"), *SpellName.ToString());
-
+    // 此时 Component 已通过 BeginPlay() 完成资源锁定，子类只需关心业务逻辑
     FTimerHandle TimerHandle;
     GetWorld()->GetTimerManager().SetTimer(
         TimerHandle,
@@ -293,27 +368,23 @@ void UTask_ChannelSpell::PerformActivation()
 
 void UTask_ChannelSpell::CompleteSpell()
 {
-    // 正常完成
-    UE_LOG(LogTemp, Log, TEXT("ChannelSpell [%s] completed"), *SpellName.ToString());
-    EndTask();
+    EndTask(); // 正常结束 → Finishing → Finished
 }
 
 void UTask_ChannelSpell::InterruptSpell()
 {
-    // 被外部中断
-    UE_LOG(LogTemp, Log, Warning, TEXT("ChannelSpell [%s] interrupted"), *SpellName.ToString());
-    EndTask();
+    EndTask(); // 外部中断 → Finishing → Finished
 }
 ```
 
-使用方只需要这样：
+使用方：
 
 ```cpp
 auto* SpellTask = UTask_ChannelSpell::ChannelSpell(*this, "Fireball", AbilitySlotResource);
-SpellTask->ReadyForActivation(); // Component 会收走并按优先级排队
+SpellTask->ReadyForActivation(); // Component 收走并按优先级排队
 ```
 
-没什么样板代码。不需要行为树节点、不需要黑板键值——就是一个工厂方法创建任务，然后任务自己管理生命周期。
+不需要行为树节点、黑板键值——工厂方法创建，任务自己管理生命周期。
 
 ---
 
@@ -321,7 +392,7 @@ SpellTask->ReadyForActivation(); // Component 会收走并按优先级排队
 
 读完代码，有几个设计选择值得单独聊一下。
 
-### 为什么 GameplayTask 是 UObject 而不是 UActorComponent？
+### 思考：为什么是 UObject 而不是 UActorComponent？
 
 **Task 是"一件事"，Component 是"一个功能模块"。**
 
@@ -330,7 +401,7 @@ SpellTask->ReadyForActivation(); // Component 会收走并按优先级排队
 
 把 Task 做成 UObject，利用 UE 的 GC 系统自动管理生命周期，比手动管理 Component 干净得多。
 
-### 为什么资源系统不直接用 Tag？
+### 思考：为什么资源系统不直接用 Tag？
 
 GameplayAbilitySystem 用 GameplayTag 做能力互斥，为什么不直接复用？
 
@@ -338,7 +409,7 @@ GameplayAbilitySystem 用 GameplayTag 做能力互斥，为什么不直接复用
 
 对于 GameplayTasks 这种轻量设计来说，用 Resource 类而不是 Tag 让约束更直观，也更容易在蓝图里可视化。
 
-### 优先级为什么要排队重试？
+### 思考：优先级为什么要排队重试？
 
 之前分析过：Resume 不是直接恢复 Active，而是重新加入 `AwaitingActivation` 队列。这意味着一个被暂停的高优先级任务，Resume 后可以挤掉正在运行的优先级较低的任务。
 
