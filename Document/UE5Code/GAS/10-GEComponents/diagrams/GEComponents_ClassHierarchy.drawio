@@ -1,0 +1,197 @@
+<mxGraphModel dx="1900" dy="1000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1200" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+
+    <!-- Header comment -->
+    <mxCell id="2" value="UE 5.3+ GE Components 模块化架构 —— 单个GE可按需组合任意Component"
+      style="text;strokeColor=none;fillColor=none;align=center;fontSize=14;fontStyle=1;fontColor=#333333;"
+      vertex="1" parent="1">
+      <mxGeometry x="200" y="20" width="800" height="30" as="geometry"/>
+    </mxCell>
+
+    <!-- ROOT: UGameplayEffect (核心数据容器) -->
+    <mxCell id="10" value="UGameplayEffect"
+      style="swimlane;fontStyle=1;align=center;startSize=30;fontSize=14;fillColor=#f5f5f5;strokeColor=#666666;"
+      vertex="1" parent="1">
+      <mxGeometry x="560" y="70" width="260" height="60" as="geometry"/>
+    </mxCell>
+
+    <!-- BASE: UGameplayEffectComponent -->
+    <mxCell id="20" value="UGameplayEffectComponent&lt;Abstract&gt;"
+      style="swimlane;fontStyle=2;align=center;startSize=30;fontSize=14;fillColor=#e1d5e7;strokeColor=#9673a6;"
+      vertex="1" parent="1">
+      <mxGeometry x="540" y="170" width="300" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="21" value="#virtual OnGameplayEffectChanged()&#xa;#virtual OnGameplayEffectExecuted()"
+      style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;fontSize=11;"
+      vertex="1" parent="20">
+      <mxGeometry y="30" width="300" height="50" as="geometry"/>
+    </mxCell>
+
+    <!-- DEPENDENCY: GE contains Components -->
+    <mxCell id="15" value="1..* Components"
+      style="edgeStyle=orthogonalEdgeStyle;endArrow=open;startArrow=diamondThin;startFill=1;fontSize=11;"
+      edge="1" parent="1" source="10" target="20">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- Row 1: 显示/UI -->
+    <mxCell id="30" value="UGameplayEffectUIDataComponent"
+      style="swimlane;fontStyle=1;align=center;startSize=30;fontSize=12;fillColor=#d5e8d4;strokeColor=#82b366;"
+      vertex="1" parent="1">
+      <mxGeometry x="40" y="320" width="240" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="31" value="显示名称/描述/图标"
+      style="text;strokeColor=none;fillColor=none;align=center;verticalAlign=top;fontSize=11;fontColor=#666666;"
+      vertex="1" parent="30">
+      <mxGeometry y="30" width="240" height="30" as="geometry"/>
+    </mxCell>
+
+    <!-- Row 1: Tags -->
+    <mxCell id="40" value="UGameplayEffectTagsComponent"
+      style="swimlane;fontStyle=1;align=center;startSize=30;fontSize=12;fillColor=#dae8fc;strokeColor=#6c8ebf;"
+      vertex="1" parent="1">
+      <mxGeometry x="310" y="320" width="240" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="41" value="AssetTags / GrantedTags /&#xa;OngoingTagRequirements&#xa;(原GE的Tag容器迁移至此)"
+      style="text;strokeColor=none;fillColor=none;align=center;verticalAlign=top;fontSize=11;fontColor=#666666;"
+      vertex="1" parent="40">
+      <mxGeometry y="30" width="240" height="50" as="geometry"/>
+    </mxCell>
+
+    <!-- Row 1: BlockedTag -->
+    <mxCell id="50" value="UBlockedTagRequirementsComponent"
+      style="swimlane;fontStyle=1;align=center;startSize=30;fontSize=11;fillColor=#dae8fc;strokeColor=#6c8ebf;"
+      vertex="1" parent="1">
+      <mxGeometry x="580" y="320" width="240" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="51" value="ApplicationTagRequirements"
+      style="text;strokeColor=none;fillColor=none;align=center;verticalAlign=top;fontSize=11;fontColor=#666666;"
+      vertex="1" parent="50">
+      <mxGeometry y="30" width="240" height="30" as="geometry"/>
+    </mxCell>
+
+    <!-- Row 1: TargetTag -->
+    <mxCell id="60" value="UTargetTagRequirementsComponent"
+      style="swimlane;fontStyle=1;align=center;startSize=30;fontSize=11;fillColor=#dae8fc;strokeColor=#6c8ebf;"
+      vertex="1" parent="1">
+      <mxGeometry x="850" y="320" width="240" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="61" value="TargetTagRequirements"
+      style="text;strokeColor=none;fillColor=none;align=center;verticalAlign=top;fontSize=11;fontColor=#666666;"
+      vertex="1" parent="60">
+      <mxGeometry y="30" width="240" height="30" as="geometry"/>
+    </mxCell>
+
+    <!-- Row 1: Chance -->
+    <mxCell id="70" value="UChanceToApplyComponent"
+      style="swimlane;fontStyle=1;align=center;startSize=30;fontSize=12;fillColor=#fff2cc;strokeColor=#d6b656;"
+      vertex="1" parent="1">
+      <mxGeometry x="1120" y="320" width="220" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="71" value="概率应用 (0.0~1.0)"
+      style="text;strokeColor=none;fillColor=none;align=center;verticalAlign=top;fontSize=11;fontColor=#666666;"
+      vertex="1" parent="70">
+      <mxGeometry y="30" width="220" height="30" as="geometry"/>
+    </mxCell>
+
+    <!-- Row 2: Modifier -->
+    <mxCell id="80" value="UGameplayEffectModifierComponent"
+      style="swimlane;fontStyle=1;align=center;startSize=30;fontSize=12;fillColor=#f8cecc;strokeColor=#b85450;"
+      vertex="1" parent="1">
+      <mxGeometry x="40" y="440" width="240" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="81" value="Modifiers + Execution&#xa;(原GE.Modifiers迁移至此)"
+      style="text;strokeColor=none;fillColor=none;align=center;verticalAlign=top;fontSize=11;fontColor=#666666;"
+      vertex="1" parent="80">
+      <mxGeometry y="30" width="240" height="50" as="geometry"/>
+    </mxCell>
+
+    <!-- Row 2: PeriodInhibition -->
+    <mxCell id="90" value="UPeriodInhibitionComponent"
+      style="swimlane;fontStyle=1;align=center;startSize=30;fontSize:11;fillColor=#f8cecc;strokeColor=#b85450;"
+      vertex="1" parent="1">
+      <mxGeometry x="310" y="440" width="240" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="91" value="Periodic执行抑制条件"
+      style="text;strokeColor=none;fillColor=none;align=center;verticalAlign=top;fontSize=11;fontColor=#666666;"
+      vertex="1" parent="90">
+      <mxGeometry y="30" width="240" height="30" as="geometry"/>
+    </mxCell>
+
+    <!-- Row 2: CustomApplication -->
+    <mxCell id="100" value="UCustomApplicationRequirementComponent"
+      style="swimlane;fontStyle=1;align=center;startSize=30;fontSize:10;fillColor=#fff2cc;strokeColor=#d6b656;"
+      vertex="1" parent="1">
+      <mxGeometry x="580" y="440" width="240" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="101" value="自定义应用条件 (CanApplyGE)"
+      style="text;strokeColor=none;fillColor=none;align=center;verticalAlign=top;fontSize:11;fontColor=#666666;"
+      vertex="1" parent="100">
+      <mxGeometry y="30" width="240" height="30" as="geometry"/>
+    </mxCell>
+
+    <!-- Row 2: Abilities -->
+    <mxCell id="110" value="UAbilitiesGameplayEffectComponent"
+      style="swimlane;fontStyle=1;align=center;startSize=30;fontSize=12;fillColor=#e1d5e7;strokeColor=#9673a6;"
+      vertex="1" parent="1">
+      <mxGeometry x="850" y="440" width="240" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="111" value="Grant Abilities (原GE.Ability)"
+      style="text;strokeColor=none;fillColor=none;align=center;verticalAlign=top;fontSize=11;fontColor=#666666;"
+      vertex="1" parent="110">
+      <mxGeometry y="30" width="240" height="30" as="geometry"/>
+    </mxCell>
+
+    <!-- Row 2: AdditionalEffects -->
+    <mxCell id="120" value="UAdditionalEffectsComponent"
+      style="swimlane;fontStyle=1;align=center;startSize=30;fontSize=12;fillColor=#e1d5e7;strokeColor=#9673a6;"
+      vertex="1" parent="1">
+      <mxGeometry x="1120" y="440" width="220" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="121" value="附加效果 (Combo GE)"
+      style="text;strokeColor=none;fillColor=none;align=center;verticalAlign=top;fontSize=11;fontColor=#666666;"
+      vertex="1" parent="120">
+      <mxGeometry y="30" width="220" height="30" as="geometry"/>
+    </mxCell>
+
+    <!-- Row 3: Cue -->
+    <mxCell id="130" value="UGameplayEffectCueComponent"
+      style="swimlane;fontStyle=1;align=center;startSize=30;fontSize=12;fillColor=#d5e8d4;strokeColor=#82b366;"
+      vertex="1" parent="1">
+      <mxGeometry x="310" y="560" width="240" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="131" value="GameplayCue 配置"
+      style="text;strokeColor=none;fillColor=none;align=center;verticalAlign=top;fontSize=11;fontColor=#666666;"
+      vertex="1" parent="130">
+      <mxGeometry y="30" width="240" height="30" as="geometry"/>
+    </mxCell>
+
+    <!-- All inheritance arrows from abstract base -->
+    <mxCell id="200" value="" style="edgeStyle=orthogonalEdgeStyle;endArrow=block;endFill=0;startArrow=none;" edge="1" parent="1" source="30" target="20"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="201" value="" style="edgeStyle=orthogonalEdgeStyle;endArrow=block;endFill=0;startArrow=none;" edge="1" parent="1" source="40" target="20"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="202" value="" style="edgeStyle=orthogonalEdgeStyle;endArrow=block;endFill=0;startArrow=none;" edge="1" parent="1" source="50" target="20"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="203" value="" style="edgeStyle=orthogonalEdgeStyle;endArrow=block;endFill=0;startArrow=none;" edge="1" parent="1" source="60" target="20"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="204" value="" style="edgeStyle=orthogonalEdgeStyle;endArrow=block;endFill=0;startArrow=none;" edge="1" parent="1" source="70" target="20"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="205" value="" style="edgeStyle=orthogonalEdgeStyle;endArrow=block;endFill=0;startArrow=none;" edge="1" parent="1" source="80" target="20"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="206" value="" style="edgeStyle=orthogonalEdgeStyle;endArrow=block;endFill=0;startArrow=none;" edge="1" parent="1" source="90" target="20"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="207" value="" style="edgeStyle=orthogonalEdgeStyle;endArrow=block;endFill=0;startArrow=none;" edge="1" parent="1" source="100" target="20"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="208" value="" style="edgeStyle=orthogonalEdgeStyle;endArrow=block;endFill=0;startArrow=none;" edge="1" parent="1" source="110" target="20"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="209" value="" style="edgeStyle=orthogonalEdgeStyle;endArrow=block;endFill=0;startArrow=none;" edge="1" parent="1" source="120" target="20"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="210" value="" style="edgeStyle=orthogonalEdgeStyle;endArrow=block;endFill=0;startArrow=none;" edge="1" parent="1" source="130" target="20"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+    <!-- Legend -->
+    <mxCell id="300" value="图例"
+      style="swimlane;startSize=25;fontSize=12;fontStyle=1;fillColor=#f5f5f5;strokeColor=#999999;"
+      vertex="1" parent="1">
+      <mxGeometry x="40" y="660" width="200" height="130" as="geometry"/>
+    </mxCell>
+    <mxCell id="301" value="&#x25A0; 紫色 = 抽象基类&#xa;&#x25A0; 蓝色 = Tag相关&#xa;&#x25A0; 红色 = 数值/Modifier相关&#xa;&#x25A0; 绿色 = 表现/UI相关&#xa;&#x25A0; 黄色 = 条件控制&#xa;&#x25A0; 紫色 = 授予技能/效果"
+      style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;fontSize=10;"
+      vertex="1" parent="300">
+      <mxGeometry y="25" width="200" height="105" as="geometry"/>
+    </mxCell>
+
+  </root>
+</mxGraphModel>

@@ -1,0 +1,25 @@
+<mxGraphModel page="1" pageWidth="1200" pageHeight="800">
+  <root>
+    <mxCell id="0"/><mxCell id="1" parent="0"/>
+    <mxCell id="10" value="GAS 子系统架构全景" style="swimlane;startSize=25;fontSize=13;fontStyle=1;fillColor=#fafafa;strokeColor=#999;swimlaneFillColor=#fafafa;" vertex="1" parent="1"><mxGeometry x="30" y="30" width="1100" height="720" as="geometry"/></mxCell>
+    <mxCell id="20" value="UAbilitySystemComponent&#xa;核心调度器" style="rounded=1;whiteSpace=wrap;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=13;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="60" y="340" width="180" height="60" as="geometry"/></mxCell>
+    <mxCell id="30" value="UAttributeSet&#xa;属性数值" style="rounded=1;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="300" y="100" width="180" height="60" as="geometry"/></mxCell>
+    <mxCell id="40" value="UGameplayEffect&#xa;效果/增益" style="rounded=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;fontSize=13;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="300" y="220" width="180" height="60" as="geometry"/></mxCell>
+    <mxCell id="50" value="UGameplayAbility&#xa;技能逻辑" style="rounded=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=13;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="300" y="340" width="180" height="60" as="geometry"/></mxCell>
+    <mxCell id="60" value="UAbilityTask&#xa;异步任务" style="rounded=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=13;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="300" y="460" width="180" height="60" as="geometry"/></mxCell>
+    <mxCell id="70" value="UGameplayCue&#xa;表现反馈" style="rounded=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=13;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="300" y="580" width="180" height="60" as="geometry"/></mxCell>
+    <mxCell id="80" value="ExecutionCalculation&#xa;伤害公式" style="rounded=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=13;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="560" y="100" width="180" height="60" as="geometry"/></mxCell>
+    <mxCell id="90" value="GE Components&#xa;模块化(5.3+)" style="rounded=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;fontSize=13;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="560" y="220" width="180" height="60" as="geometry"/></mxCell>
+    <mxCell id="100" value="TargetData&#xa;索敌/传递" style="rounded=1;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="560" y="340" width="180" height="60" as="geometry"/></mxCell>
+    <mxCell id="110" value="网络同步&#xa;预测/回滚" style="rounded=1;whiteSpace=wrap;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=13;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="560" y="460" width="180" height="60" as="geometry"/></mxCell>
+    <mxCell id="120" value="GameplayTags&#xa;层次标签" style="text;fillColor=none;strokeColor=none;fontSize=11;fontStyle=2;fontColor=#999;" vertex="1" parent="1"><mxGeometry x="60" y="240" width="120" height="20" as="geometry"/></mxCell>
+    <mxCell id="130" value="跨系统基础设施" style="text;fillColor=none;strokeColor=none;fontSize=10;fontColor=#999;fontStyle=2;" vertex="1" parent="1"><mxGeometry x="60" y="260" width="120" height="20" as="geometry"/></mxCell>
+    <mxCell id="31" value="管理AttributeSet" style="endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="20" target="30"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="41" value="ApplyGE" style="endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="20" target="40"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="51" value="Activate" style="endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="20" target="50"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="61" value="GE → Attr 修改" style="endArrow=open;dashed=1;fontSize=9;" edge="1" parent="1" source="40" target="30"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="71" value="GA 提交 Cost/CD" style="endArrow=open;dashed=1;fontSize=9;" edge="1" parent="1" source="50" target="40"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="81" value="GE 引用" style="endArrow=open;fontSize=9;" edge="1" parent="1" source="40" target="80"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="91" value="Task → Cue" style="endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="60" target="70"><mxGeometry relative="1" as="geometry"/></mxCell>
+  </root>
+</mxGraphModel>
