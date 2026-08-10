@@ -1,0 +1,160 @@
+<mxfile host="app.diagrams.net" modified="2026-01-01T00:00:00.000Z" agent="draw.io" version="22.0.0">
+  <diagram name="ASC Six Layers" id="asc_layers">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1060" pageHeight="710" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Title -->
+        <mxCell id="title" value="UAbilitySystemComponent — 六层架构总览" style="text;html=1;strokeColor=none;fillColor=none;fontSize=18;fontColor=#1A237E;fontStyle=1;align=center;" vertex="1" parent="1">
+          <mxGeometry x="230" y="12" width="600" height="32" as="geometry" />
+        </mxCell>
+
+        <!-- Outer container -->
+        <mxCell id="outer" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ECEFF1;strokeColor=#455A64;strokeWidth=2;arcSize=4;" vertex="1" parent="1">
+          <mxGeometry x="60" y="54" width="940" height="628" as="geometry" />
+        </mxCell>
+
+        <!-- Header -->
+        <mxCell id="hdr" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#1A237E;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="62" y="56" width="936" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="hdr_t" value="UAbilitySystemComponent" style="text;html=1;strokeColor=none;fillColor=none;fontSize=14;fontColor=#FFFFFF;fontStyle=1;fontFamily=Consolas;align=center;" vertex="1" parent="1">
+          <mxGeometry x="300" y="62" width="400" height="28" as="geometry" />
+        </mxCell>
+
+        <!-- L1: 身份层 -->
+        <mxCell id="L1_bg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8EAF6;strokeColor=none;arcSize=6;" vertex="1" parent="1">
+          <mxGeometry x="74" y="108" width="914" height="82" as="geometry" />
+        </mxCell>
+        <mxCell id="L1_bar" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#5C6BC0;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="74" y="108" width="6" height="82" as="geometry" />
+        </mxCell>
+        <mxCell id="L1_tag" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#5C6BC0;strokeColor=#3949AB;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="88" y="108" width="100" height="82" as="geometry" />
+        </mxCell>
+        <mxCell id="L1_tag_t" value="身份层&lt;br&gt;&lt;font style=&quot;font-size:9;font-style:italic&quot;&gt;Identity&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;fontSize=13;fontColor=#FFFFFF;fontStyle=1;align=center;" vertex="1" parent="1">
+          <mxGeometry x="88" y="118" width="100" height="62" as="geometry" />
+        </mxCell>
+        <mxCell id="L1_var" value="FGameplayAbilityActorInfo  &lt;b&gt;AbilityActorInfo&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;fontSize=12;fontColor=#283593;fontFamily=Consolas;align=left;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="208" y="118" width="760" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="L1_desc" value="OwnerActor + AvatarActor 绑定 —— ASC 知道自己属于谁、作用于谁" style="text;html=1;strokeColor=none;fillColor=none;fontSize=11;fontColor=#5C6BC0;align=left;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="208" y="148" width="760" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- L2: 技能层 -->
+        <mxCell id="L2_bg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0F2F1;strokeColor=none;arcSize=6;" vertex="1" parent="1">
+          <mxGeometry x="74" y="198" width="914" height="82" as="geometry" />
+        </mxCell>
+        <mxCell id="L2_bar" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#26A69A;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="74" y="198" width="6" height="82" as="geometry" />
+        </mxCell>
+        <mxCell id="L2_tag" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#26A69A;strokeColor=#00897B;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="88" y="198" width="100" height="82" as="geometry" />
+        </mxCell>
+        <mxCell id="L2_tag_t" value="技能层&lt;br&gt;&lt;font style=&quot;font-size:9;font-style:italic&quot;&gt;Abilities&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;fontSize=13;fontColor=#FFFFFF;fontStyle=1;align=center;" vertex="1" parent="1">
+          <mxGeometry x="88" y="208" width="100" height="62" as="geometry" />
+        </mxCell>
+        <mxCell id="L2_var" value="FGameplayAbilitySpecContainer  &lt;b&gt;ActivatableAbilities&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;fontSize=12;fontColor=#00695C;fontFamily=Consolas;align=left;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="208" y="208" width="760" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="L2_desc" value="ReplicatedUsing = OnRep_ActivateAbilities —— 技能列表自动网络同步" style="text;html=1;strokeColor=none;fillColor=none;fontSize=11;fontColor=#26A69A;align=left;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="208" y="238" width="760" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- L3: 效果层 -->
+        <mxCell id="L3_bg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFEBEE;strokeColor=none;arcSize=6;" vertex="1" parent="1">
+          <mxGeometry x="74" y="288" width="914" height="82" as="geometry" />
+        </mxCell>
+        <mxCell id="L3_bar" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#EF5350;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="74" y="288" width="6" height="82" as="geometry" />
+        </mxCell>
+        <mxCell id="L3_tag" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EF5350;strokeColor=#C62828;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="88" y="288" width="100" height="82" as="geometry" />
+        </mxCell>
+        <mxCell id="L3_tag_t" value="效果层&lt;br&gt;&lt;font style=&quot;font-size:9;font-style:italic&quot;&gt;Effects&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;fontSize=13;fontColor=#FFFFFF;fontStyle=1;align=center;" vertex="1" parent="1">
+          <mxGeometry x="88" y="298" width="100" height="62" as="geometry" />
+        </mxCell>
+        <mxCell id="L3_var" value="FActiveGameplayEffectsContainer  &lt;b&gt;ActiveGameplayEffects&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;fontSize=12;fontColor=#B71C1C;fontFamily=Consolas;align=left;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="208" y="298" width="760" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="L3_desc" value="所有活跃 GE 的运行时容器 —— 管理效果叠加、持续时间、周期性执行" style="text;html=1;strokeColor=none;fillColor=none;fontSize=11;fontColor=#EF5350;align=left;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="208" y="328" width="760" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- L4: 属性层 -->
+        <mxCell id="L4_bg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=none;arcSize=6;" vertex="1" parent="1">
+          <mxGeometry x="74" y="378" width="914" height="82" as="geometry" />
+        </mxCell>
+        <mxCell id="L4_bar" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#AB47BC;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="74" y="378" width="6" height="82" as="geometry" />
+        </mxCell>
+        <mxCell id="L4_tag" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#AB47BC;strokeColor=#6A1B9A;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="88" y="378" width="100" height="82" as="geometry" />
+        </mxCell>
+        <mxCell id="L4_tag_t" value="属性层&lt;br&gt;&lt;font style=&quot;font-size:9;font-style:italic&quot;&gt;Attributes&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;fontSize=13;fontColor=#FFFFFF;fontStyle=1;align=center;" vertex="1" parent="1">
+          <mxGeometry x="88" y="388" width="100" height="62" as="geometry" />
+        </mxCell>
+        <mxCell id="L4_var" value="TArray&amp;lt;UAttributeSet*&amp;gt;  &lt;b&gt;SpawnedAttributes&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;fontSize=12;fontColor=#4A148C;fontFamily=Consolas;align=left;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="208" y="388" width="760" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="L4_desc" value="动态生成的属性集 —— 支持运行时增删，属性修改自动同步" style="text;html=1;strokeColor=none;fillColor=none;fontSize=11;fontColor=#AB47BC;align=left;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="208" y="418" width="760" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- L5: 标签层 -->
+        <mxCell id="L5_bg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=none;arcSize=6;" vertex="1" parent="1">
+          <mxGeometry x="74" y="468" width="914" height="82" as="geometry" />
+        </mxCell>
+        <mxCell id="L5_bar" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFA726;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="74" y="468" width="6" height="82" as="geometry" />
+        </mxCell>
+        <mxCell id="L5_tag" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFA726;strokeColor=#E65100;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="88" y="468" width="100" height="82" as="geometry" />
+        </mxCell>
+        <mxCell id="L5_tag_t" value="标签层&lt;br&gt;&lt;font style=&quot;font-size:9;font-style:italic&quot;&gt;Tags&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;fontSize=13;fontColor=#FFFFFF;fontStyle=1;align=center;" vertex="1" parent="1">
+          <mxGeometry x="88" y="478" width="100" height="62" as="geometry" />
+        </mxCell>
+        <mxCell id="L5_var1" value="FGameplayTagCountContainer  &lt;b&gt;GameplayTagCountContainer&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;fontSize=12;fontColor=#E65100;fontFamily=Consolas;align=left;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="208" y="478" width="760" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="L5_var2" value="FGameplayTagContainer  &lt;b&gt;BlockedAbilityTags&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;fontSize=12;fontColor=#E65100;fontFamily=Consolas;align=left;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="208" y="498" width="760" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="L5_desc" value="Tag 引用计数（支持多层嵌套）+ 阻塞技能执行的白名单 Tag" style="text;html=1;strokeColor=none;fillColor=none;fontSize=11;fontColor=#FFA726;align=left;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="208" y="522" width="760" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- L6: 表现层 -->
+        <mxCell id="L6_bg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=none;arcSize=6;" vertex="1" parent="1">
+          <mxGeometry x="74" y="558" width="914" height="82" as="geometry" />
+        </mxCell>
+        <mxCell id="L6_bar" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#66BB6A;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="74" y="558" width="6" height="82" as="geometry" />
+        </mxCell>
+        <mxCell id="L6_tag" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#66BB6A;strokeColor=#2E7D32;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="88" y="558" width="100" height="82" as="geometry" />
+        </mxCell>
+        <mxCell id="L6_tag_t" value="表现层&lt;br&gt;&lt;font style=&quot;font-size:9;font-style:italic&quot;&gt;Cues&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;fontSize=13;fontColor=#FFFFFF;fontStyle=1;align=center;" vertex="1" parent="1">
+          <mxGeometry x="88" y="568" width="100" height="62" as="geometry" />
+        </mxCell>
+        <mxCell id="L6_var1" value="FActiveGameplayCueContainer  &lt;b&gt;ActiveGameplayCues&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;fontSize=12;fontColor=#1B5E20;fontFamily=Consolas;align=left;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="208" y="568" width="760" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="L6_var2" value="FActiveGameplayCueContainer  &lt;b&gt;MinimalReplicationGameplayCues&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;fontSize=12;fontColor=#1B5E20;fontFamily=Consolas;align=left;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="208" y="588" width="760" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="L6_desc" value="GameplayCue 运行时管理 + 混合复制模式下供非 Owner 客户端使用的轻量 Cue" style="text;html=1;strokeColor=none;fillColor=none;fontSize=11;fontColor=#66BB6A;align=left;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="208" y="612" width="760" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- Footer note -->
+        <mxCell id="footer" value="六层架构自上而下贯穿 GAS 完整运行时 —— 从身份绑定到底层表现，每个成员变量承载一个独立子系统" style="text;html=1;strokeColor=none;fillColor=none;fontSize=10;fontColor=#78909C;fontStyle=2;align=center;" vertex="1" parent="1">
+          <mxGeometry x="180" y="654" width="700" height="18" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

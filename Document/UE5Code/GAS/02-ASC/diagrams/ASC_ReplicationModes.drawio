@@ -1,0 +1,213 @@
+<mxfile host="app.diagrams.net" modified="2026-01-01T00:00:00.000Z" agent="draw.io" version="22.0.0">
+  <diagram name="Replication Modes" id="asc_rep_modes">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="800" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="bg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FAFAFA;strokeColor=#E0E0E0;arcSize=5;" vertex="1" parent="1">
+          <mxGeometry x="20" y="20" width="1160" height="760" as="geometry" />
+        </mxCell>
+        <mxCell id="title" value="ASC 三种网络复制模式" style="text;html=1;strokeColor=none;fillColor=none;fontSize=18;fontColor=#1A237E;fontStyle=1;align=center;" vertex="1" parent="1">
+          <mxGeometry x="300" y="32" width="600" height="30" as="geometry" />
+        </mxCell>
+        <!-- Mode 1: Minimal -->
+        <mxCell id="m1bg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1E88E5;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="40" y="80" width="350" height="340" as="geometry" />
+        </mxCell>
+        <mxCell id="m1h" value="Minimal" style="text;html=1;strokeColor=none;fillColor=none;fontSize=15;fontColor=#0D47A1;fontStyle=1;align=center;" vertex="1" parent="1">
+          <mxGeometry x="130" y="88" width="170" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="m1sub" value="最小信息复制（AI/NPC 推荐）" style="text;html=1;strokeColor=none;fillColor=none;fontSize=9;fontColor=#1565C0;align=center;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="100" y="112" width="230" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="m1_sep" value="" style="line;strokeWidth=1;fillColor=none;strokeColor=#90CAF9;" vertex="1" parent="1">
+          <mxGeometry x="60" y="134" width="310" height="2" as="geometry" />
+        </mxCell>
+        <mxCell id="m1_c1" value="复制内容" style="text;html=1;strokeColor=none;fillColor=none;fontSize=11;fontColor=#1565C0;fontStyle=1;align=left;" vertex="1" parent="1">
+          <mxGeometry x="60" y="142" width="70" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="m1_i1" value="✓ MinimalReplicationTags" style="text;html=1;strokeColor=none;fillColor=none;fontSize=10;fontColor=#0D47A1;align=left;" vertex="1" parent="1">
+          <mxGeometry x="70" y="166" width="300" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="m1_i1d" value="  只复制标记为 MinimalRep 的 GameplayTag" style="text;html=1;strokeColor=none;fillColor=none;fontSize=8;fontColor=#78909C;align=left;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="70" y="182" width="300" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="m1_i2" value="✓ MinimalReplicationGameplayCues" style="text;html=1;strokeColor=none;fillColor=none;fontSize=10;fontColor=#0D47A1;align=left;" vertex="1" parent="1">
+          <mxGeometry x="70" y="202" width="300" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="m1_i2d" value="  只复制标记为 MinimalRep 的 GameplayCue" style="text;html=1;strokeColor=none;fillColor=none;fontSize=8;fontColor=#78909C;align=left;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="70" y="218" width="300" height="14" as="geometry" />
+        </mxCell>
+        <mxCell id="m1_c2" value="不复制内容" style="text;html=1;strokeColor=none;fillColor=none;fontSize=11;fontColor=#C62828;fontStyle=1;align=left;" vertex="1" parent="1">
+          <mxGeometry x="60" y="242" width="80" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="m1_x1" value="✗ 技能列表 (ActivatableAbilities)" style="text;html=1;strokeColor=none;fillColor=none;fontSize=10;fontColor=#B71C1C;align=left;" vertex="1" parent="1">
+          <mxGeometry x="70" y="266" width="300" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="m1_x2" value="✗ GE 列表 (ActiveGameplayEffects)" style="text;html=1;strokeColor=none;fillColor=none;fontSize=10;fontColor=#B71C1C;align=left;" vertex="1" parent="1">
+          <mxGeometry x="70" y="286" width="300" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="m1_x3" value="✗ 属性值 (SpawnedAttributes)" style="text;html=1;strokeColor=none;fillColor=none;fontSize=10;fontColor=#B71C1C;align=left;" vertex="1" parent="1">
+          <mxGeometry x="70" y="306" width="300" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="m1_x4" value="✗ GameplayCue 参数" style="text;html=1;strokeColor=none;fillColor=none;fontSize=10;fontColor=#B71C1C;align=left;" vertex="1" parent="1">
+          <mxGeometry x="70" y="326" width="300" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="m1_use" value="适用：AI 敌人、环境物件、只有 Server 需要完整数据" style="text;html=1;strokeColor=none;fillColor=#FFECB3;fontSize=9;fontColor=#E65100;align=center;rounded=1;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="60" y="368" width="310" height="24" as="geometry" />
+        </mxCell>
+        <!-- Mode 2: Mixed -->
+        <mxCell id="m2bg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#FB8C00;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="425" y="80" width="350" height="340" as="geometry" />
+        </mxCell>
+        <mxCell id="m2h" value="Mixed" style="text;html=1;strokeColor=none;fillColor=none;fontSize=15;fontColor=#E65100;fontStyle=1;align=center;" vertex="1" parent="1">
+          <mxGeometry x="515" y="88" width="170" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="m2sub" value="混合模式（玩家角色推荐）" style="text;html=1;strokeColor=none;fillColor=none;fontSize=9;fontColor=#BF360C;align=center;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="485" y="112" width="230" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="m2_sep" value="" style="line;strokeWidth=1;fillColor=none;strokeColor=#FFCC80;" vertex="1" parent="1">
+          <mxGeometry x="445" y="134" width="310" height="2" as="geometry" />
+        </mxCell>
+        <mxCell id="m2_owner" value="对 Owner/Autonomous: Full" style="text;html=1;strokeColor=none;fillColor=#C8E6C9;fontSize=10;fontColor=#2E7D32;fontStyle=1;align=center;rounded=1;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="465" y="146" width="290" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="m2_o1" value="→ 技能、GE、属性、Tag 全部复制" style="text;html=1;strokeColor=none;fillColor=none;fontSize=9;fontColor=#2E7D32;align=left;" vertex="1" parent="1">
+          <mxGeometry x="475" y="174" width="280" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="m2_o2" value="→ 客户端可以看到并修改自己的属性" style="text;html=1;strokeColor=none;fillColor=none;fontSize=9;fontColor=#2E7D32;align=left;" vertex="1" parent="1">
+          <mxGeometry x="475" y="192" width="280" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="m2_sim" value="对 Simulated Proxy: Minimal" style="text;html=1;strokeColor=none;fillColor=#FFCDD2;fontSize=10;fontColor=#C62828;fontStyle=1;align=center;rounded=1;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="465" y="222" width="290" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="m2_s1" value="→ 只复制 MinimalReplicationTags/Cues" style="text;html=1;strokeColor=none;fillColor=none;fontSize=9;fontColor=#C62828;align=left;" vertex="1" parent="1">
+          <mxGeometry x="475" y="250" width="280" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="m2_s2" value="→ 别的玩家看不到你的技能/GE/属性" style="text;html=1;strokeColor=none;fillColor=none;fontSize=9;fontColor=#C62828;align=left;" vertex="1" parent="1">
+          <mxGeometry x="475" y="268" width="280" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="m2_mech" value="实现原理" style="text;html=1;strokeColor=none;fillColor=none;fontSize=11;fontColor=#E65100;fontStyle=1;align=left;" vertex="1" parent="1">
+          <mxGeometry x="445" y="298" width="80" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="m2_m1" value="GetLifetimeReplicatedProps() 中根据" style="text;html=1;strokeColor=none;fillColor=none;fontSize=9;fontColor=#BF360C;align=left;" vertex="1" parent="1">
+          <mxGeometry x="455" y="318" width="300" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="m2_m2" value="COND_OwnerOnly 条件动态决定推送给谁" style="text;html=1;strokeColor=none;fillColor=none;fontSize=9;fontColor=#BF360C;align=left;" vertex="1" parent="1">
+          <mxGeometry x="455" y="336" width="300" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="m2_use" value="适用：玩家角色 → 自己能看到全量，别人只看到最小信息" style="text;html=1;strokeColor=none;fillColor=#FFECB3;fontSize=9;fontColor=#E65100;align=center;rounded=1;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="445" y="368" width="310" height="24" as="geometry" />
+        </mxCell>
+        <!-- Mode 3: Full -->
+        <mxCell id="m3bg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#43A047;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="810" y="80" width="350" height="340" as="geometry" />
+        </mxCell>
+        <mxCell id="m3h" value="Full" style="text;html=1;strokeColor=none;fillColor=none;fontSize=15;fontColor=#1B5E20;fontStyle=1;align=center;" vertex="1" parent="1">
+          <mxGeometry x="900" y="88" width="170" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="m3sub" value="全量复制（默认模式 / 开发调试）" style="text;html=1;strokeColor=none;fillColor=none;fontSize=9;fontColor=#2E7D32;align=center;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="870" y="112" width="230" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="m3_sep" value="" style="line;strokeWidth=1;fillColor=none;strokeColor=#A5D6A7;" vertex="1" parent="1">
+          <mxGeometry x="830" y="134" width="310" height="2" as="geometry" />
+        </mxCell>
+        <mxCell id="m3_c1" value="所有内容全部复制" style="text;html=1;strokeColor=none;fillColor=none;fontSize=11;fontColor=#1B5E20;fontStyle=1;align=left;" vertex="1" parent="1">
+          <mxGeometry x="830" y="142" width="130" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="m3_i1" value="✓ 技能列表 (ActivatableAbilities)" style="text;html=1;strokeColor=none;fillColor=none;fontSize=10;fontColor=#1B5E20;align=left;" vertex="1" parent="1">
+          <mxGeometry x="840" y="166" width="300" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="m3_i2" value="✓ GE 列表 (ActiveGameplayEffects)" style="text;html=1;strokeColor=none;fillColor=none;fontSize=10;fontColor=#1B5E20;align=left;" vertex="1" parent="1">
+          <mxGeometry x="840" y="186" width="300" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="m3_i3" value="✓ 属性值 (SpawnedAttributes)" style="text;html=1;strokeColor=none;fillColor=none;fontSize=10;fontColor=#1B5E20;align=left;" vertex="1" parent="1">
+          <mxGeometry x="840" y="206" width="300" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="m3_i4" value="✓ BlockedAbilityTags" style="text;html=1;strokeColor=none;fillColor=none;fontSize=10;fontColor=#1B5E20;align=left;" vertex="1" parent="1">
+          <mxGeometry x="840" y="226" width="300" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="m3_i5" value="✓ GameplayTags" style="text;html=1;strokeColor=none;fillColor=none;fontSize=10;fontColor=#1B5E20;align=left;" vertex="1" parent="1">
+          <mxGeometry x="840" y="246" width="300" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="m3_i6" value="✓ GameplayCues" style="text;html=1;strokeColor=none;fillColor=none;fontSize=10;fontColor=#1B5E20;align=left;" vertex="1" parent="1">
+          <mxGeometry x="840" y="266" width="300" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="m3_warn" value="⚠ 缺点" style="text;html=1;strokeColor=none;fillColor=none;fontSize=11;fontColor=#D84315;fontStyle=1;align=left;" vertex="1" parent="1">
+          <mxGeometry x="830" y="298" width="50" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="m3_w1" value="任何人都能看到完整的技能/GE/属性数据" style="text;html=1;strokeColor=none;fillColor=none;fontSize=9;fontColor=#BF360C;align=left;" vertex="1" parent="1">
+          <mxGeometry x="840" y="318" width="300" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="m3_w2" value="带宽消耗大，生产环境不推荐" style="text;html=1;strokeColor=none;fillColor=none;fontSize=9;fontColor=#BF360C;align=left;" vertex="1" parent="1">
+          <mxGeometry x="840" y="336" width="300" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="m3_use" value="适用：单人/合作游戏、开发阶段、调试" style="text;html=1;strokeColor=none;fillColor=#FFECB3;fontSize=9;fontColor=#E65100;align=center;rounded=1;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="830" y="368" width="310" height="24" as="geometry" />
+        </mxCell>
+        <!-- Bottom: Comparison -->
+        <mxCell id="comp" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#AB47BC;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="40" y="450" width="1120" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="comp_t" value="关键对比 &amp; 决策指南" style="text;html=1;strokeColor=none;fillColor=none;fontSize=13;fontColor=#6A1B9A;fontStyle=1;align=left;" vertex="1" parent="1">
+          <mxGeometry x="60" y="456" width="180" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="comp1" value="问题" style="text;html=1;strokeColor=none;fillColor=none;fontSize=10;fontColor=#7B1FA2;fontStyle=1;align=center;" vertex="1" parent="1">
+          <mxGeometry x="60" y="484" width="140" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="comp1m1" value="Minimal：只复制必要 Tag/Cue，几乎零带宽" style="text;html=1;strokeColor=none;fillColor=none;fontSize=9;fontColor=#4A148C;align=left;" vertex="1" parent="1">
+          <mxGeometry x="60" y="506" width="520" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="comp1m2" value="Mixed (推荐)：Owner 拿全量做 UI/预测，别人只看最小信息" style="text;html=1;strokeColor=none;fillColor=none;fontSize=9;fontColor=#4A148C;align=left;" vertex="1" parent="1">
+          <mxGeometry x="60" y="526" width="520" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="comp1m3" value="Full：所有人都看得到所有人，数据完全透明但带宽昂贵" style="text;html=1;strokeColor=none;fillColor=none;fontSize=9;fontColor=#4A148C;align=left;" vertex="1" parent="1">
+          <mxGeometry x="60" y="546" width="520" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="comp2" value="选择建议" style="text;html=1;strokeColor=none;fillColor=none;fontSize=10;fontColor=#7B1FA2;fontStyle=1;align=center;" vertex="1" parent="1">
+          <mxGeometry x="60" y="572" width="140" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="comp2t" value="AI/NPC → Minimal　　玩家角色 → Mixed　　开发/单人 → Full" style="text;html=1;strokeColor=none;fillColor=none;fontSize=10;fontColor=#6A1B9A;fontStyle=1;align=left;" vertex="1" parent="1">
+          <mxGeometry x="60" y="594" width="800" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="comp3" value="设置时机" style="text;html=1;strokeColor=none;fillColor=none;fontSize=10;fontColor=#7B1FA2;fontStyle=1;align=center;" vertex="1" parent="1">
+          <mxGeometry x="60" y="622" width="140" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="comp3t" value="必须在 InitAbilityActorInfo() 调用之前通过 SetReplicationMode() 设置，初始化后不可更改" style="text;html=1;strokeColor=none;fillColor=none;fontSize=10;fontColor=#6A1B9A;fontStyle=1;align=left;" vertex="1" parent="1">
+          <mxGeometry x="60" y="644" width="700" height="18" as="geometry" />
+        </mxCell>
+        <!-- Timeline -->
+        <mxCell id="timeline" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#FFB300;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="40" y="680" width="1120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="tlt" value="初始化正确顺序" style="text;html=1;strokeColor=none;fillColor=none;fontSize=12;fontColor=#E65100;fontStyle=1;align=left;" vertex="1" parent="1">
+          <mxGeometry x="60" y="685" width="120" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="tl1" value="① SetReplicationMode()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFCC80;strokeColor=#FB8C00;fontSize=10;fontColor=#E65100;fontStyle=1;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="60" y="712" width="130" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="tl_arr1" value="" style="endArrow=classic;html=1;strokeWidth=1.5;strokeColor=#FB8C00;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="195" y="726" as="sourcePoint" />
+            <mxPoint x="255" y="726" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="tl2" value="② InitAbilityActorInfo()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFCC80;strokeColor=#FB8C00;fontSize=10;fontColor=#E65100;fontStyle=1;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="260" y="712" width="160" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="tl_arr2" value="" style="endArrow=classic;html=1;strokeWidth=1.5;strokeColor=#FB8C00;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="425" y="726" as="sourcePoint" />
+            <mxPoint x="485" y="726" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="tl3" value="③ 技能 + 属性 + GE 初始化" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFCC80;strokeColor=#FB8C00;fontSize=10;fontColor=#E65100;fontStyle=1;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="490" y="712" width="180" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="tl_warn" value="⚠ 顺序错了？客户端可能收不到已分配的技能和属性" style="text;html=1;strokeColor=none;fillColor=none;fontSize=9;fontColor=#D84315;fontStyle=1;align=left;" vertex="1" parent="1">
+          <mxGeometry x="700" y="720" width="380" height="16" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

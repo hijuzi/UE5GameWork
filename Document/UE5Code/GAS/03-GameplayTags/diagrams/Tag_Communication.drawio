@@ -1,0 +1,183 @@
+<mxfile host="65bd71144e">
+    <diagram name="Tag_Communication" id="0">
+        <mxGraphModel dx="1334" dy="1631" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1620" pageHeight="940" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="2" value="GameplayTags：GAS 的神经系统 — 子系统间通过 Tag 间接通信" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontSize=22;fontStyle=1;fontColor=#1a237e;" parent="1" vertex="1">
+                    <mxGeometry x="200" y="20" width="1200" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="10" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e3f2fd;strokeColor=#1976d2;strokeWidth=2;" parent="1" vertex="1">
+                    <mxGeometry x="30" y="80" width="450" height="830" as="geometry"/>
+                </mxCell>
+                <mxCell id="11" value="ASC（大脑）— 统一调度中心" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=16;fontStyle=1;fontColor=#0d47a1;" parent="1" vertex="1">
+                    <mxGeometry x="30" y="85" width="450" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="12" value="GameplayTagCountContainer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#bbdefb;strokeColor=#42a5f5;fontSize=13;fontStyle=1;fontColor=#1a237e;" parent="1" vertex="1">
+                    <mxGeometry x="50" y="140" width="410" height="34" as="geometry"/>
+                </mxCell>
+                <mxCell id="13" value="TMap&lt;FGameplayTag, int32&gt;  例: Status.Debuff.Stun→2, Status.Alive→1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=11;fontColor=#37474f;fontFamily=Courier New;spacingLeft=10;spacingTop=2;" parent="1" vertex="1">
+                    <mxGeometry x="50" y="176" width="410" height="24" as="geometry"/>
+                </mxCell>
+                <mxCell id="14" value="BlockedAbilityTags" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#bbdefb;strokeColor=#42a5f5;fontSize=13;fontStyle=1;fontColor=#1a237e;" parent="1" vertex="1">
+                    <mxGeometry x="50" y="265" width="410" height="34" as="geometry"/>
+                </mxCell>
+                <mxCell id="15" value="全局阻塞特定 Tag 的技能激活，支持网络复制" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=11;fontColor=#546e7a;spacingLeft=10;spacingTop=2;" parent="1" vertex="1">
+                    <mxGeometry x="50" y="301" width="410" height="24" as="geometry"/>
+                </mxCell>
+                <mxCell id="16" value="MinimalReplicationTags（Mixed 模式）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#bbdefb;strokeColor=#42a5f5;fontSize=13;fontStyle=1;fontColor=#1a237e;" parent="1" vertex="1">
+                    <mxGeometry x="50" y="390" width="410" height="34" as="geometry"/>
+                </mxCell>
+                <mxCell id="17" value="非 Owner 客户端只收 GameplayCue 相关 Tag，节省带宽" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=11;fontColor=#546e7a;spacingLeft=10;spacingTop=2;" parent="1" vertex="1">
+                    <mxGeometry x="50" y="426" width="410" height="24" as="geometry"/>
+                </mxCell>
+                <mxCell id="18" value="OnAnyTagChangeDelegate（事件回调）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8eaf6;strokeColor=#7e57c2;strokeWidth=1;dashed=1;fontSize=13;fontStyle=1;fontColor=#4527a0;" parent="1" vertex="1">
+                    <mxGeometry x="50" y="515" width="410" height="34" as="geometry"/>
+                </mxCell>
+                <mxCell id="19" value="Tag 计数 0→1 或 1→0 时触发&#10;→ Skill 订阅：检测互斥 Tag，自动取消/阻塞&#10;→ GE  订阅：检测持续条件，不符合则自动移除" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=11;fontColor=#546e7a;spacingLeft=10;spacingTop=2;" parent="1" vertex="1">
+                    <mxGeometry x="50" y="551" width="410" height="46" as="geometry"/>
+                </mxCell>
+                <mxCell id="20" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff8e1;strokeColor=#ffc107;strokeWidth=1.5;" parent="1" vertex="1">
+                    <mxGeometry x="50" y="680" width="410" height="200" as="geometry"/>
+                </mxCell>
+                <mxCell id="21" value="核心原则" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=14;fontStyle=1;fontColor=#e65100;" parent="1" vertex="1">
+                    <mxGeometry x="50" y="685" width="410" height="24" as="geometry"/>
+                </mxCell>
+                <mxCell id="22" value="子系统之间不直接互相调用&#10;Skill 通过 Tag 感知 GE 状态&#10;GE 通过 Tag 驱动 Skill 行为&#10;ASC 统一负责：存储 / 引用计数 / 网络复制 / 事件回调" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=12;fontColor=#424242;spacingLeft=10;spacingTop=4;" parent="1" vertex="1">
+                    <mxGeometry x="50" y="713" width="410" height="155" as="geometry"/>
+                </mxCell>
+                <mxCell id="30" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f5e9;strokeColor=#388e3c;strokeWidth=2;" parent="1" vertex="1">
+                    <mxGeometry x="550" y="80" width="490" height="830" as="geometry"/>
+                </mxCell>
+                <mxCell id="31" value="GameplayAbility（手脚）— 5 类 Tag 配置" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=16;fontStyle=1;fontColor=#1b5e20;" parent="1" vertex="1">
+                    <mxGeometry x="550" y="85" width="490" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="32" value="1. AbilityTags — 身份标签" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c8e6c9;strokeColor=#66bb6a;fontSize=13;fontStyle=1;fontColor=#1b5e20;align=left;spacingLeft=10;" parent="1" vertex="1">
+                    <mxGeometry x="575" y="140" width="440" height="34" as="geometry"/>
+                </mxCell>
+                <mxCell id="33" value="Ability.Attack.Melee.AoE  告诉系统「我是 AoE 近战攻击」" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=11;fontColor=#546e7a;spacingLeft=12;spacingTop=2;fontFamily=Courier New;" parent="1" vertex="1">
+                    <mxGeometry x="575" y="176" width="440" height="24" as="geometry"/>
+                </mxCell>
+                <mxCell id="34" value="2. ActivationRequiredTags / ActivationBlockedTags — 激活条件" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c8e6c9;strokeColor=#66bb6a;fontSize=13;fontStyle=1;fontColor=#1b5e20;align=left;spacingLeft=10;" parent="1" vertex="1">
+                    <mxGeometry x="575" y="265" width="440" height="34" as="geometry"/>
+                </mxCell>
+                <mxCell id="35" value="Required: 拥有 Status.Alive 才能激活  |  Blocked: 拥有 Status.Debuff.Stun 则阻塞" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=11;fontColor=#546e7a;spacingLeft=12;spacingTop=2;" parent="1" vertex="1">
+                    <mxGeometry x="575" y="301" width="440" height="24" as="geometry"/>
+                </mxCell>
+                <mxCell id="36" value="3. ActivationOwnedTags — 激活副作用" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c8e6c9;strokeColor=#66bb6a;fontSize=13;fontStyle=1;fontColor=#1b5e20;align=left;spacingLeft=10;" parent="1" vertex="1">
+                    <mxGeometry x="575" y="390" width="440" height="34" as="geometry"/>
+                </mxCell>
+                <mxCell id="37" value="激活时自动给 Owner 打上 Status.Attacking" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=11;fontColor=#546e7a;spacingLeft=12;spacingTop=2;" parent="1" vertex="1">
+                    <mxGeometry x="575" y="426" width="440" height="24" as="geometry"/>
+                </mxCell>
+                <mxCell id="38" value="4. CancelAbilitiesWithTag / BlockAbilitiesWithTag — 互斥" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c8e6c9;strokeColor=#66bb6a;fontSize=13;fontStyle=1;fontColor=#1b5e20;align=left;spacingLeft=10;" parent="1" vertex="1">
+                    <mxGeometry x="575" y="515" width="440" height="34" as="geometry"/>
+                </mxCell>
+                <mxCell id="39" value="Cancel: 打断所有带 Ability.Channel 的引导技能  |  Block: 阻塞其他 Ability.Attack" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=11;fontColor=#546e7a;spacingLeft=12;spacingTop=2;" parent="1" vertex="1">
+                    <mxGeometry x="575" y="551" width="440" height="24" as="geometry"/>
+                </mxCell>
+                <mxCell id="40" value="5. SourceRequiredTags / TargetRequiredTags — 来源/目标条件" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c8e6c9;strokeColor=#66bb6a;fontSize=13;fontStyle=1;fontColor=#1b5e20;align=left;spacingLeft=10;" parent="1" vertex="1">
+                    <mxGeometry x="575" y="640" width="440" height="34" as="geometry"/>
+                </mxCell>
+                <mxCell id="41" value="Source: 施法者需有 Status.Alive  |  Target: 目标不能有 Status.Immune" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=11;fontColor=#546e7a;spacingLeft=12;spacingTop=2;" parent="1" vertex="1">
+                    <mxGeometry x="575" y="676" width="440" height="24" as="geometry"/>
+                </mxCell>
+                <mxCell id="42" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f1f8e9;strokeColor=#8bc34a;strokeWidth=1;dashed=1;" parent="1" vertex="1">
+                    <mxGeometry x="575" y="740" width="440" height="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="43" value="激活流程：检查 Tags → 通过后打 OwnedTags → 遍历 Cancel/Block → 执行技能 → 结束移除" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=11;fontColor=#33691e;spacingLeft=10;spacingTop=4;" parent="1" vertex="1">
+                    <mxGeometry x="575" y="745" width="440" height="90" as="geometry"/>
+                </mxCell>
+                <mxCell id="50" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#7b1fa2;strokeWidth=2;" parent="1" vertex="1">
+                    <mxGeometry x="1110" y="80" width="450" height="830" as="geometry"/>
+                </mxCell>
+                <mxCell id="51" value="GameplayEffect（血液）— 4 个 Tag 通道" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=16;fontStyle=1;fontColor=#4a148c;" parent="1" vertex="1">
+                    <mxGeometry x="1110" y="85" width="450" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="52" value="1. AssetTags（InheritableGrantedTags）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1bee7;strokeColor=#ab47bc;fontSize=13;fontStyle=1;fontColor=#4a148c;align=left;spacingLeft=10;" parent="1" vertex="1">
+                    <mxGeometry x="1135" y="140" width="400" height="34" as="geometry"/>
+                </mxCell>
+                <mxCell id="53" value="GE 存在期间 Owner 持有该 Tag，支持 Inheritable 父级继承" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=11;fontColor=#546e7a;spacingLeft=12;spacingTop=2;" parent="1" vertex="1">
+                    <mxGeometry x="1135" y="176" width="400" height="24" as="geometry"/>
+                </mxCell>
+                <mxCell id="54" value="2. ApplicationTagRequirements — 施加条件" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1bee7;strokeColor=#ab47bc;fontSize=13;fontStyle=1;fontColor=#4a148c;align=left;spacingLeft=10;" parent="1" vertex="1">
+                    <mxGeometry x="1135" y="265" width="400" height="34" as="geometry"/>
+                </mxCell>
+                <mxCell id="55" value="GE 施加前需满足的 Tag 条件，例：目标不能有 Status.Immune.Fire" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=11;fontColor=#546e7a;spacingLeft=12;spacingTop=2;" parent="1" vertex="1">
+                    <mxGeometry x="1135" y="301" width="400" height="24" as="geometry"/>
+                </mxCell>
+                <mxCell id="56" value="3. OngoingTagRequirements — 持续条件" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1bee7;strokeColor=#ab47bc;fontSize=13;fontStyle=1;fontColor=#4a148c;align=left;spacingLeft=10;" parent="1" vertex="1">
+                    <mxGeometry x="1135" y="390" width="400" height="34" as="geometry"/>
+                </mxCell>
+                <mxCell id="57" value="GE 生效期间 Owner 必须一直满足的条件，例：必须有 Status.Alive" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=11;fontColor=#546e7a;spacingLeft=12;spacingTop=2;" parent="1" vertex="1">
+                    <mxGeometry x="1135" y="426" width="400" height="24" as="geometry"/>
+                </mxCell>
+                <mxCell id="58" value="4. RemoveGameplayEffectsWithTags — 连锁移除" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1bee7;strokeColor=#ab47bc;fontSize=13;fontStyle=1;fontColor=#4a148c;align=left;spacingLeft=10;" parent="1" vertex="1">
+                    <mxGeometry x="1135" y="515" width="400" height="34" as="geometry"/>
+                </mxCell>
+                <mxCell id="59" value="该 GE 移除时，同时移除带特定 Tag 的其他 GE，例：净化时移除所有 Status.Debuff.*" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=11;fontColor=#546e7a;spacingLeft=12;spacingTop=2;" parent="1" vertex="1">
+                    <mxGeometry x="1135" y="551" width="400" height="24" as="geometry"/>
+                </mxCell>
+                <mxCell id="60" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fce4ec;strokeColor=#e91e63;strokeWidth=1;dashed=1;" parent="1" vertex="1">
+                    <mxGeometry x="1135" y="680" width="400" height="200" as="geometry"/>
+                </mxCell>
+                <mxCell id="61" value="完整生命周期&#10;施加前：检查 ApplicationTagRequirements&#10;施加时：AssetTags 注入 GameplayTagCountContainer&#10;持续中：每帧检查 OngoingTagRequirements&#10;移除时：AssetTags 撤出 + RemoveGameplayEffectsWithTags" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=11;fontColor=#880e4f;spacingLeft=12;spacingTop=4;" parent="1" vertex="1">
+                    <mxGeometry x="1135" y="685" width="400" height="190" as="geometry"/>
+                </mxCell>
+                <mxCell id="70" value="读取 Tag 状态" style="edgeStyle=orthogonalEdgeStyle;endArrow=block;endFill=1;fontSize=10;fontColor=#1565c0;strokeColor=#1976d2;strokeWidth=1.5;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="12" target="34" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="460" y="170"/>
+                            <mxPoint x="500" y="170"/>
+                            <mxPoint x="500" y="240"/>
+                            <mxPoint x="575" y="240"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="71" value="检查 Tag 条件" style="edgeStyle=orthogonalEdgeStyle;endArrow=block;endFill=1;fontSize=10;fontColor=#6a1b9a;strokeColor=#7b1fa2;strokeWidth=1.5;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="12" target="54" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="515" y="157"/>
+                            <mxPoint x="515" y="220"/>
+                            <mxPoint x="1075" y="220"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="72" value="写入 OwnedTags" style="edgeStyle=orthogonalEdgeStyle;endArrow=block;endFill=1;fontSize=10;fontColor=#2e7d32;strokeColor=#43a047;strokeWidth=1.5;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="36" target="12" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="515" y="407"/>
+                            <mxPoint x="515" y="157"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="73" value="写入 / 移除 GrantedTags" style="edgeStyle=orthogonalEdgeStyle;endArrow=block;endFill=1;fontSize=10;fontColor=#6a1b9a;strokeColor=#7b1fa2;strokeWidth=1.5;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;labelBackgroundColor=#B266FF;" parent="1" source="52" target="12" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="1075" y="157"/>
+                            <mxPoint x="1075" y="220"/>
+                            <mxPoint x="530" y="220"/>
+                            <mxPoint x="530" y="157"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="74" value="回调通知" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;endFill=0;fontSize=10;fontColor=#5e35b1;strokeColor=#7e57c2;strokeWidth=1;dashed=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="18" target="38" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="75" value="回调通知" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;endFill=0;fontSize=10;fontColor=#5e35b1;strokeColor=#7e57c2;strokeWidth=1;dashed=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;labelBackgroundColor=#B266FF;" parent="1" source="18" target="56" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="515" y="532"/>
+                            <mxPoint x="515" y="470"/>
+                            <mxPoint x="1075" y="470"/>
+                        </Array>
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="76" value="通过 ASC Tag 系统间接实现互斥" style="text;html=1;strokeColor=#e53935;fillColor=#ffebee;align=center;verticalAlign=middle;fontSize=10;fontColor=#b71c1c;strokeWidth=1;rounded=1;" parent="1" vertex="1">
+                    <mxGeometry x="575" y="580" width="440" height="24" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

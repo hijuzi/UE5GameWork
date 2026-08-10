@@ -1,0 +1,118 @@
+<mxfile host="app.diagrams.net" modified="2026-01-01T00:00:00.000Z" agent="draw.io" version="22.0.0">
+  <diagram name="Owner vs Avatar" id="asc_owner_avatar">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1060" pageHeight="620" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- ===== Title ===== -->
+        <mxCell id="title" value="Owner vs Avatar —— ASC 的双重身份" style="text;html=1;strokeColor=none;fillColor=none;fontSize=18;fontColor=#1A237E;fontStyle=1;align=center;" vertex="1" parent="1">
+          <mxGeometry x="230" y="16" width="600" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- ===== Owner Panel (Left) ===== -->
+        <mxCell id="ownerbg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8EAF6;strokeColor=#7986CB;arcSize=10;opacity=60;" vertex="1" parent="1">
+          <mxGeometry x="30" y="62" width="440" height="250" as="geometry" />
+        </mxCell>
+        <mxCell id="ownertitle" value="Owner (逻辑拥有者)" style="text;html=1;strokeColor=none;fillColor=none;fontSize=14;fontColor=#283593;fontStyle=1;align=center;" vertex="1" parent="1">
+          <mxGeometry x="150" y="68" width="200" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="pc" value="PlayerController" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#5C6BC0;strokeColor=#3949AB;fontSize=13;fontColor=#FFFFFF;fontStyle=1;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="130" y="100" width="240" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="pcown" value="拥有 GetAbilitySystemComponent()" style="text;html=1;strokeColor=none;fillColor=none;fontSize=10;fontColor=#5C6BC0;align=center;fontStyle=2;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="130" y="142" width="240" height="16" as="geometry" />
+        </mxCell>
+
+        <mxCell id="a1" value="" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#5C6BC0;edgeStyle=none;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="250" y="160" as="sourcePoint" />
+            <mxPoint x="250" y="182" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="ps" value="PlayerState" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#7986CB;strokeColor=#5C6BC0;fontSize=13;fontColor=#FFFFFF;fontStyle=1;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="130" y="184" width="240" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="psown" value="实现 UAbilitySystemInterface" style="text;html=1;strokeColor=none;fillColor=none;fontSize=10;fontColor=#7986CB;align=center;fontStyle=2;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="130" y="226" width="240" height="16" as="geometry" />
+        </mxCell>
+
+        <mxCell id="a2" value="" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#7986CB;edgeStyle=none;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="250" y="244" as="sourcePoint" />
+            <mxPoint x="250" y="262" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="asc" value="AbilitySystemComponent" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#3949AB;strokeColor=#1A237E;fontSize=13;fontColor=#FFFFFF;fontStyle=1;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="120" y="264" width="260" height="38" as="geometry" />
+        </mxCell>
+
+        <!-- ===== Avatar Panel (Right) ===== -->
+        <mxCell id="avatarbg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#81C784;arcSize=10;opacity=60;" vertex="1" parent="1">
+          <mxGeometry x="530" y="62" width="500" height="250" as="geometry" />
+        </mxCell>
+        <mxCell id="avatartitle" value="Avatar (物理化身)" style="text;html=1;strokeColor=none;fillColor=none;fontSize=14;fontColor=#2E7D32;fontStyle=1;align=center;" vertex="1" parent="1">
+          <mxGeometry x="680" y="68" width="200" height="22" as="geometry" />
+        </mxCell>
+
+        <mxCell id="pawn" value="Character / Pawn" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#66BB6A;strokeColor=#43A047;fontSize=14;fontColor=#FFFFFF;fontStyle=1;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="620" y="264" width="260" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="pawnsub" value="物理载体：Mesh 丶 Movement 丶 AnimInstance" style="text;html=1;strokeColor=none;fillColor=none;fontSize=10;fontColor=#43A047;align=center;fontStyle=2;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="620" y="306" width="260" height="16" as="geometry" />
+        </mxCell>
+
+        <!-- ===== Connection: ASC → Avatar ===== -->
+        <mxCell id="ar_asc_avatar" value="" style="endArrow=classic;html=1;strokeWidth=3;strokeColor=#FF6D00;dashed=1;edgeStyle=none;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="380" y="283" as="sourcePoint" />
+            <mxPoint x="620" y="283" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ar_asc_avatar_l" value="InitAbilityActorInfo 绑定" style="text;html=1;strokeColor=#FFE0B2;fillColor=#FFFFFF;fontSize=10;fontColor=#E65100;fontStyle=1;align=center;rounded=1;arcSize=14;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="440" y="274" width="170" height="18" as="geometry" />
+        </mxCell>
+
+        <!-- ===== Insight Box ===== -->
+        <mxCell id="insight" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#FFB300;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="30" y="340" width="1000" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="insight_t" value="为什么需要 Owner 和 Avatar 分离？" style="text;html=1;strokeColor=none;fillColor=none;fontSize=14;fontColor=#E65100;fontStyle=1;align=left;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="50" y="346" width="300" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="insight1" value="1. 玩家死亡时，Pawn 被销毁但 PlayerState 存活 → ASC 保持不动，换新 Pawn 只需 SetAvatarActor()" style="text;html=1;strokeColor=none;fillColor=none;fontSize=11;fontColor=#BF360C;align=left;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="55" y="374" width="950" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="insight2" value="2. Owner 负责网络复制（PlayerState 天然可复制），Avatar 负责物理行为（移动、动画、碰撞）" style="text;html=1;strokeColor=none;fillColor=none;fontSize=11;fontColor=#BF360C;align=left;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="55" y="398" width="950" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="insight3" value="3. 特殊场景 Owner == Avatar —— 源码默认 InitAbilityActorInfo(Owner, Owner)，同一 Actor 承担两类角色" style="text;html=1;strokeColor=none;fillColor=none;fontSize=11;fontColor=#BF360C;align=left;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="55" y="422" width="950" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="insight4" value="4. 客户端查找 ASC 路径：Pawn → PlayerState → ASC（UAbilitySystemInterface），查不到再 Pawn → ASC 兜底" style="text;html=1;strokeColor=none;fillColor=none;fontSize=11;fontColor=#BF360C;align=left;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="55" y="446" width="950" height="22" as="geometry" />
+        </mxCell>
+
+        <!-- ===== Scenario Box ===== -->
+        <mxCell id="scenario" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#AB47BC;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="30" y="490" width="1000" height="108" as="geometry" />
+        </mxCell>
+        <mxCell id="sct" value="典型场景：玩家重生流程" style="text;html=1;strokeColor=none;fillColor=none;fontSize=14;fontColor=#6A1B9A;fontStyle=1;align=left;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="50" y="496" width="220" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="sc1" value="Step 1 — 死亡: 旧 Pawn 销毁，ASC 存活在 PlayerState，技能和属性数据完好" style="text;html=1;strokeColor=none;fillColor=none;fontSize=11;fontColor=#4A148C;align=left;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="55" y="522" width="950" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="sc2" value="Step 2 — 重生: 新 Pawn 生成 → ASC::SetAvatarActor(NewPawn) → ASC 重新指向新 Pawn" style="text;html=1;strokeColor=none;fillColor=none;fontSize=11;fontColor=#4A148C;align=left;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="55" y="546" width="950" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="sc3" value="Step 3 — 恢复: 技能列表、属性值、GE 列表全部保留，Avatar 切换对上层透明" style="text;html=1;strokeColor=none;fillColor=none;fontSize=11;fontColor=#4A148C;align=left;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="55" y="570" width="950" height="22" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

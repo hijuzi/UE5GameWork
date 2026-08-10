@@ -1,0 +1,41 @@
+{
+  "skill_name": "tech-article-writer",
+  "version": "1.1.0",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "帮我写一篇关于 UE5 Enhanced Input 系统的技术文章，面向中级开发者，大约 2000 字",
+      "expectations": [
+        "文章包含引言、核心概念、源码分析、设计思考、总结五段式结构",
+        "引言建立了认知锚点（背景→痛点→价值）",
+        "代码块不超过 20 行",
+        "至少包含一个「### 思考：为什么...？」段落",
+        "文章末尾附带 AI 自审查报告（四维度评分表格 + 具体问题列表）",
+        "核心概念用一句话定义清楚"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "审查这篇技术文章的结构和深度，文件路径：evals/files/sample_article.md",
+      "files": ["evals/files/sample_article.md"],
+      "expectations": [
+        "输出包含四维度评分（结构/深度/可读性/准确性）",
+        "总分格式为 XX/40",
+        "至少给出 3 条定位到具体段落的修改建议",
+        "每条建议包含：位置、维度、问题、修改建议四个字段",
+        "审查以技术编辑身份（挑剔但不刻薄）的口吻表达"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "参考大钊《InsideUE4》的风格，帮我优化 sample_article.md 的引言部分，文件路径：evals/files/sample_article.md",
+      "files": ["evals/files/sample_article.md"],
+      "expectations": [
+        "只修改了引言部分，正文其他部分保持不变",
+        "修改后使用了拟人化或故事化手法",
+        "修改后重新执行了自审查并报告分数变化",
+        "输出中说明了改了什么、为什么这样改"
+      ]
+    }
+  ]
+}

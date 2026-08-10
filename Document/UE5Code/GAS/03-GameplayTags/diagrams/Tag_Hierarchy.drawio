@@ -1,0 +1,102 @@
+<mxfile host="65bd71144e">
+    <diagram name="Tag_Hierarchy" id="0">
+        <mxGraphModel dx="934" dy="1142" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1380" pageHeight="680" background="#FFFFFF" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="title" value="FGameplayTag 层次结构与自动匹配规则" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=20;fontStyle=1;fontColor=#212121;" parent="1" vertex="1">
+                    <mxGeometry x="300" y="12" width="700" height="36" as="geometry"/>
+                </mxCell>
+                <mxCell id="root" value="Status（根 Tag）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1565C0;strokeColor=#0D47A1;strokeWidth=2;fontSize=15;fontStyle=1;fontColor=#FFFFFF;arcSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="550" y="65" width="200" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="debuff" value="Status.Debuff" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C62828;strokeColor=#B71C1C;strokeWidth=2;fontSize=14;fontStyle=1;fontColor=#FFFFFF;arcSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="120" y="160" width="220" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="buff" value="Status.Buff" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2E7D32;strokeColor=#1B5E20;strokeWidth=2;fontSize=14;fontStyle=1;fontColor=#FFFFFF;arcSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="960" y="160" width="220" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="stun" value="Status.Debuff.Stun" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EF5350;strokeColor=#E53935;strokeWidth=1.5;fontSize=13;fontStyle=1;fontColor=#FFFFFF;arcSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="280" width="210" height="36" as="geometry"/>
+                </mxCell>
+                <mxCell id="slow" value="Status.Debuff.Slow" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EF5350;strokeColor=#E53935;strokeWidth=1.5;fontSize=13;fontStyle=1;fontColor=#FFFFFF;arcSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="280" y="280" width="210" height="36" as="geometry"/>
+                </mxCell>
+                <mxCell id="burn" value="Status.Debuff.Burning" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EF5350;strokeColor=#E53935;strokeWidth=1.5;fontSize=13;fontStyle=1;fontColor=#FFFFFF;arcSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="520" y="280" width="210" height="36" as="geometry"/>
+                </mxCell>
+                <mxCell id="invinc" value="Status.Buff.Invincible" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#66BB6A;strokeColor=#43A047;strokeWidth=1.5;fontSize=13;fontStyle=1;fontColor=#FFFFFF;arcSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="900" y="280" width="210" height="36" as="geometry"/>
+                </mxCell>
+                <mxCell id="shield" value="Status.Buff.Shield" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#66BB6A;strokeColor=#43A047;strokeWidth=1.5;fontSize=13;fontStyle=1;fontColor=#FFFFFF;arcSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="1140" y="280" width="200" height="36" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#1565C0;strokeWidth=2;exitX=0.25;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="root" target="debuff" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#1565C0;strokeWidth=2;exitX=0.75;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="root" target="buff" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e3" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#C62828;strokeWidth=1.5;exitX=0.2;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="debuff" target="stun" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e4" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#C62828;strokeWidth=1.5;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="debuff" target="slow" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e5" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#C62828;strokeWidth=1.5;exitX=0.8;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="debuff" target="burn" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="296" y="220"/>
+                            <mxPoint x="625" y="220"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e6" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2E7D32;strokeWidth=1.5;exitX=0.3;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="buff" target="invinc" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e7" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2E7D32;strokeWidth=1.5;exitX=0.7;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="buff" target="shield" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="ann-bg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;strokeWidth=1.5;arcSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="30" y="370" width="1320" height="145" as="geometry"/>
+                </mxCell>
+                <mxCell id="ann-title" value="自动父级匹配规则" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=15;fontStyle=1;fontColor=#0D47A1;spacingLeft=16;" parent="1" vertex="1">
+                    <mxGeometry x="30" y="375" width="1320" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="ann-rule1" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#BBDEFB;strokeColor=none;arcSize=6;" parent="1" vertex="1">
+                    <mxGeometry x="46" y="410" width="630" height="36" as="geometry"/>
+                </mxCell>
+                <mxCell id="ann-rule1-text" value="HasTag(&quot;Status.Debuff.Stun&quot;)  →  自动匹配 Status.Debuff 和 Status  —  子 Tag 向上继承所有权" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;fontColor=#37474F;fontFamily=Courier New;spacingLeft=8;" parent="1" vertex="1">
+                    <mxGeometry x="46" y="410" width="630" height="36" as="geometry"/>
+                </mxCell>
+                <mxCell id="ann-rule2" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#BBDEFB;strokeColor=none;arcSize=6;" parent="1" vertex="1">
+                    <mxGeometry x="686" y="410" width="630" height="36" as="geometry"/>
+                </mxCell>
+                <mxCell id="ann-rule2-text" value="HasTag(&quot;Status.Debuff&quot;)  →  匹配 Stun/Slow/Burning 等全部子 Tag  —  父 Tag 向下匹配所有后代" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;fontColor=#37474F;fontFamily=Courier New;spacingLeft=8;" parent="1" vertex="1">
+                    <mxGeometry x="686" y="410" width="630" height="36" as="geometry"/>
+                </mxCell>
+                <mxCell id="ann-note" value="两者互为逆向：子匹配自动包含父  ⇄  父匹配自动包含所有子" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=12;fontStyle=2;fontColor=#546E7A;" parent="1" vertex="1">
+                    <mxGeometry x="30" y="460" width="1320" height="36" as="geometry"/>
+                </mxCell>
+                <mxCell id="ex-bg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#7B1FA2;strokeWidth=1.5;dashed=1;arcSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="30" y="530" width="1320" height="120" as="geometry"/>
+                </mxCell>
+                <mxCell id="ex-title" value="实战应用" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=15;fontStyle=1;fontColor=#6A1B9A;spacingLeft=16;" parent="1" vertex="1">
+                    <mxGeometry x="30" y="535" width="1320" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="ex-line1-bg" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E1BEE7;strokeColor=none;arcSize=4;" parent="1" vertex="1">
+                    <mxGeometry x="46" y="570" width="1288" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="ex-line1" value="技能 ActivationBlockedTags = Status.Debuff  →  眩晕、减速、燃烧 全部自动阻塞，无需逐个配置" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=12;fontColor=#4A148C;fontFamily=Courier New;spacingLeft=8;" parent="1" vertex="1">
+                    <mxGeometry x="46" y="570" width="1288" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="ex-line2-bg" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E1BEE7;strokeColor=none;arcSize=4;" parent="1" vertex="1">
+                    <mxGeometry x="46" y="608" width="1288" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="ex-line2" value="新增 Status.Debuff.Frozen  →  无需修改任何代码，自动被 Status.Debuff 匹配拦截" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=12;fontColor=#4A148C;fontFamily=Courier New;spacingLeft=8;" parent="1" vertex="1">
+                    <mxGeometry x="46" y="608" width="1288" height="30" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

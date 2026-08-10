@@ -1,0 +1,77 @@
+<mxGraphModel page="1" pageWidth="1800" pageHeight="440" gridSize="10">
+<root>
+<mxCell id="0"/><mxCell id="1" parent="0"/>
+
+<mxCell id="t" value="GAS 核心数据流 — 从输入到表现的五阶段流水线" style="text;html=1;fontSize=22;fontStyle=1;fontColor=#1a1a2e;align=center;" vertex="1" parent="1">
+  <mxGeometry x="300" y="10" width="1200" height="36" as="geometry"/>
+</mxCell>
+
+<!-- Stage 1: Input -->
+<mxCell id="s1" value="&lt;b style=&quot;font-size:16px;&quot;&gt;① 输入触发&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px;color:#555;&quot;&gt;Input mapping → Ability&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#999;&quot;&gt;─────────────────&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px;&quot;&gt;▸ 按键 → AbilityTag 映射&lt;br&gt;▸ Pressed / Released 事件&lt;br&gt;▸ EnhancedInput 集成&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#999;strokeWidth=2;fontSize=12;arcSize=14;verticalAlign=top;spacingTop=10;" vertex="1" parent="1">
+  <mxGeometry x="40" y="70" width="245" height="135" as="geometry"/>
+</mxCell>
+
+<mxCell id="e12" value="TryActivateAbility()" style="endArrow=blockThin;endFill=1;strokeWidth=3;strokeColor=#6c8ebf;fontSize=10;fontColor=#6c8ebf;fontStyle=1;labelBackgroundColor=#FFF;edgeStyle=none;" edge="1" parent="1" source="s1" target="s2"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+<!-- Stage 2: GA -->
+<mxCell id="s2" value="&lt;b style=&quot;font-size:16px;&quot;&gt;② GameplayAbility&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px;color:#555;&quot;&gt;技能逻辑执行单元&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#999;&quot;&gt;─────────────────&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px;&quot;&gt;▸ InstancingPolicy 实例化策略&lt;br&gt;▸ NetExecutionPolicy 控制预测&lt;br&gt;▸ AbilityTags 匹配与阻塞&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;fontSize=12;arcSize=14;verticalAlign=top;spacingTop=10;" vertex="1" parent="1">
+  <mxGeometry x="360" y="70" width="245" height="135" as="geometry"/>
+</mxCell>
+
+<mxCell id="e23" value="MakeOutgoingSpec()" style="endArrow=blockThin;endFill=1;strokeWidth=3;strokeColor=#b85450;fontSize=10;fontColor=#b85450;fontStyle=1;labelBackgroundColor=#FFF;edgeStyle=none;" edge="1" parent="1" source="s2" target="s3"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+<!-- Stage 3: GE -->
+<mxCell id="s3" value="&lt;b style=&quot;font-size:16px;&quot;&gt;③ GameplayEffect&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px;color:#555;&quot;&gt;运行时效果实例 (GE Spec)&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#999;&quot;&gt;─────────────────&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px;&quot;&gt;▸ Modifier 四种 Magnitude 来源&lt;br&gt;▸ Duration / Infinite / Instant&lt;br&gt;▸ SetByCaller 运行时动态数值&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;strokeWidth=2;fontSize=12;arcSize=14;verticalAlign=top;spacingTop=10;" vertex="1" parent="1">
+  <mxGeometry x="680" y="70" width="245" height="135" as="geometry"/>
+</mxCell>
+
+<mxCell id="e34" value="ApplyGameplayEffectToSelf()" style="endArrow=blockThin;endFill=1;strokeWidth=3;strokeColor=#d6b656;fontSize=9;fontColor=#b8860b;fontStyle=1;labelBackgroundColor=#FFF;edgeStyle=none;" edge="1" parent="1" source="s3" target="s4"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+<!-- Stage 4: ASC + AttributeSet -->
+<mxCell id="s4" value="&lt;b style=&quot;font-size:16px;&quot;&gt;④ ASC + AttributeSet&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px;color:#555;&quot;&gt;核心调度器 + 属性数据&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#999;&quot;&gt;─────────────────&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px;&quot;&gt;▸ Aggregator 多 GE 效果叠算&lt;br&gt;▸ PreAttributeChange 回调链&lt;br&gt;▸ PostGameplayEffectExecute&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=2;fontSize=12;arcSize=14;verticalAlign=top;spacingTop=10;" vertex="1" parent="1">
+  <mxGeometry x="1000" y="70" width="245" height="135" as="geometry"/>
+</mxCell>
+
+<mxCell id="e45" value="Tag Change → Trigger Cue" style="endArrow=blockThin;endFill=1;strokeWidth=3;strokeColor=#0e8088;fontSize=9;fontColor=#0e8088;fontStyle=1;labelBackgroundColor=#FFF;edgeStyle=none;" edge="1" parent="1" source="s4" target="s5"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+<!-- Stage 5: GameplayCue -->
+<mxCell id="s5" value="&lt;b style=&quot;font-size:16px;&quot;&gt;⑤ GameplayCue&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px;color:#555;&quot;&gt;视觉 / 音效表现层&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#999;&quot;&gt;─────────────────&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px;&quot;&gt;▸ Tag 驱动，逻辑与表现解耦&lt;br&gt;▸ Burst 一次性 / Looping 持续&lt;br&gt;▸ 支持 Niagara / Sound / Camera&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b0e3e6;strokeColor=#0e8088;strokeWidth=2;fontSize=12;arcSize=14;verticalAlign=top;spacingTop=10;" vertex="1" parent="1">
+  <mxGeometry x="1320" y="70" width="245" height="135" as="geometry"/>
+</mxCell>
+
+<!-- ========== 底层系统 ========== -->
+
+<!-- Tags 横条 -->
+<mxCell id="tags" value="&lt;b&gt;GameplayTags&lt;/b&gt; — 跨系统通用语言，贯穿全流程 ｜ Ability.Attack.Fire　Status.Debuff.Stun　GameplayCue.Damage.Hit　Effect.Immunity.Poison" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;strokeWidth=2;fontSize=12;arcSize=10;" vertex="1" parent="1">
+  <mxGeometry x="40" y="255" width="1720" height="38" as="geometry"/>
+</mxCell>
+
+<!-- 基础设施 -->
+<mxCell id="pred" value="&lt;b&gt;GameplayPrediction&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;客户端预测 | PredictionKey&lt;br&gt;服务器校验 | 预测回滚&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;strokeWidth=1.5;fontSize=11;arcSize=10;verticalAlign=top;spacingTop=6;" vertex="1" parent="1">
+  <mxGeometry x="180" y="325" width="260" height="70" as="geometry"/>
+</mxCell>
+
+<mxCell id="net" value="&lt;b&gt;Network Replication&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;三种复制模式&lt;br&gt;Mixed / Minimal / Full&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;strokeWidth=1.5;fontSize=11;arcSize=10;verticalAlign=top;spacingTop=6;" vertex="1" parent="1">
+  <mxGeometry x="570" y="325" width="240" height="70" as="geometry"/>
+</mxCell>
+
+<mxCell id="ser" value="&lt;b&gt;Serialization&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;FGameplayEffectContext&lt;br&gt;FGameplayAbilityTargetData&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;strokeWidth=1.5;fontSize=11;arcSize=10;verticalAlign=top;spacingTop=6;" vertex="1" parent="1">
+  <mxGeometry x="940" y="325" width="260" height="70" as="geometry"/>
+</mxCell>
+
+<mxCell id="hint" value="&lt;b&gt;Debug&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;showdebug abilitysystem&lt;br&gt;GameplayDebugger&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;strokeWidth=1.5;fontSize=11;arcSize=10;verticalAlign=top;spacingTop=6;" vertex="1" parent="1">
+  <mxGeometry x="1320" y="325" width="230" height="70" as="geometry"/>
+</mxCell>
+
+<!-- 基础设施内部连线 -->
+<mxCell id="ep1" value="" style="endArrow=blockThin;endFill=1;strokeWidth=1.5;strokeColor=#9673a6;edgeStyle=none;" edge="1" parent="1" source="pred" target="net"><mxGeometry relative="1" as="geometry"/></mxCell>
+<mxCell id="ep2" value="" style="endArrow=blockThin;endFill=1;strokeWidth=1.5;strokeColor=#9673a6;edgeStyle=none;" edge="1" parent="1" source="net" target="ser"><mxGeometry relative="1" as="geometry"/></mxCell>
+<mxCell id="ep3" value="" style="endArrow=blockThin;endFill=1;strokeWidth=1.5;strokeColor=#9673a6;edgeStyle=none;" edge="1" parent="1" source="ser" target="hint"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+<!-- Tags 垂直连接 -->
+<mxCell id="vt1" value="" style="endArrow=open;endFill=0;strokeWidth=1.5;strokeColor=#d79b00;dashed=1;edgeStyle=none;" edge="1" parent="1" source="s2" target="tags"><mxGeometry relative="1" as="geometry"/></mxCell>
+<mxCell id="vt2" value="" style="endArrow=open;endFill=0;strokeWidth=1.5;strokeColor=#d79b00;dashed=1;edgeStyle=none;" edge="1" parent="1" source="s3" target="tags"><mxGeometry relative="1" as="geometry"/></mxCell>
+<mxCell id="vt3" value="" style="endArrow=open;endFill=0;strokeWidth=1.5;strokeColor=#d79b00;dashed=1;edgeStyle=none;" edge="1" parent="1" source="s4" target="tags"><mxGeometry relative="1" as="geometry"/></mxCell>
+<mxCell id="vt4" value="" style="endArrow=open;endFill=0;strokeWidth=1.5;strokeColor=#d79b00;dashed=1;edgeStyle=none;" edge="1" parent="1" source="s5" target="tags"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+</root></mxGraphModel>
