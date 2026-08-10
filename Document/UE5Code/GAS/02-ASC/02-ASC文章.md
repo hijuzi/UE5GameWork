@@ -146,18 +146,21 @@ void UAbilitySystemComponent::InitializeComponent()
 ④ 应用初始 GE（如果有默认属性加成）
 ```
 
-源码中的 `SetReplicationMode()` 实现确认了这一点（`AbilitySystemComponent.cpp` 第 664-670 行附近）：
+源码实现（`AbilitySystemComponent.cpp` 第 1982-1990 行）：
 
 ```cpp
 void UAbilitySystemComponent::SetReplicationMode(EGameplayEffectReplicationMode NewReplicationMode)
 {
-    ensureMsgf(!bIsNetDirty || ReplicationMode == NewReplicationMode,
-        TEXT("SetReplicationMode called after InitAbilityActorInfo, no effect."));
     ReplicationMode = NewReplicationMode;
+
+    // 复制模式变更会影响 ActiveGameplayEffects 和 MinimalReplicationGameplayCues 的复制条件
+    // 在组件首次复制之前调用也没问题——GetReplicatedCustomConditionState 会确保条件正确
+    UpdateActiveGameplayEffectsReplicationCondition();
+    UpdateMinimalReplicationGameplayCuesCondition();
 }
 ```
 
-> **关键**：`bIsNetDirty` 在 `InitAbilityActorInfo()` 中被置为 `true`，之后 `ensureMsgf` 会在重复调用时触发断言警告。**初始化后修改无效。**
+> **关键**：`SetReplicationMode` 除了直接赋值外，还会立即调用两个 `Update*ReplicationCondition` 方法——这意味着 GE 和 Cue 的网络复制条件会**实时跟随模式切换**。虽然技术上你可以在运行时动态切换模式，但顺序上仍需在 `InitAbilityActorInfo` 之前调用，以确保首帧同步时复制条件已经正确。
 
 ### 3.3 推荐实践
 
@@ -188,34 +191,98 @@ AMyPlayerState::AMyPlayerState()
     // 此时 SetOwner() 已经由引擎调用
 }
 
-// AMyCharacter.cpp — BeginPlay()
-void AMyCharacter::BeginPlay()
+// AMyCharacter.h
+UCLASS()
+class AMyCharacter : public ACharacter
 {
-    Super::BeginPlay();
-    
-    if (APlayerState* PS = GetPlayerState<AMyPlayerState>())
+    GENERATED_BODY()
+public:
+    virtual void PossessedBy(AController* NewController) override;  // 仅服务器调用
+    virtual void OnRep_PlayerState() override;                       // 仅客户端调用
+};
+
+// AMyCharacter.cpp
+void AMyCharacter::PossessedBy(AController* NewController)
+{
+    Super::PossessedBy(NewController);
+
+    // 【服务器】此时 PlayerState 一定已就绪（Pawn::PossessedBy 源码中已执行 SetPlayerState）
+    if (AMyPlayerState* PS = GetPlayerState<AMyPlayerState>())
     {
         UAbilitySystemComponent* ASC = PS->GetAbilitySystemComponent();
-        
+
         // Step 1: 设置复制模式（必须在 Step 2 之前）
         ASC->SetReplicationMode(EGameplayEffectReplicationMode::Mixed);
-        
+
         // Step 2: 初始化——PS 是 Owner，Character 是 Avatar
         ASC->InitAbilityActorInfo(PS, this);
-        
-        // Step 3: 授予技能
+
+        // Step 3: 授予技能（仅服务器，Spec 通过 ASC 复制自动同步给客户端）
         for (auto& AbilityClass : DefaultAbilities)
         {
             ASC->GiveAbility(FGameplayAbilitySpec(AbilityClass, 1));
         }
     }
 }
+
+void AMyCharacter::OnRep_PlayerState()
+{
+    Super::OnRep_PlayerState();
+
+    // 【客户端】PlayerState 复制到达后才可靠，只做初始化
+    if (AMyPlayerState* PS = GetPlayerState<AMyPlayerState>())
+    {
+        UAbilitySystemComponent* ASC = PS->GetAbilitySystemComponent();
+        ASC->InitAbilityActorInfo(PS, this);
+    }
+}
 ```
 
 关键点：
 - **ASC 创建在 PlayerState 构造中**——因为 PlayerState 生命周期长，跨死亡不销毁
-- **InitAbilityActorInfo 在 Character::BeginPlay() 中调用**。此时网络角色已确定，Character 已生成
+- **服务器在 `PossessedBy` 中初始化**——引擎时序是 Spawn → BeginPlay → Possess → PossessedBy，此时 PlayerState 一定可用
+- **客户端在 `OnRep_PlayerState` 中初始化**——PlayerState 是复制属性，到达客户端的时间不确定，只有它的 OnRep 回调才是可靠时机
 - **SetReplicationMode 在最前面**——任何其他操作之前
+- **GiveAbility 只在服务器执行**——技能 Spec 通过 ASC 的复制系统自动同步到客户端
+
+### 3.4 为什么不能用 BeginPlay？
+
+早期 GAS 社区文档（包括本文上一版本）常用 `Character::BeginPlay()` 做初始化，但在联网游戏中这段代码几乎**永远执行不到**：
+
+```cpp
+void AMyCharacter::BeginPlay()
+{
+    Super::BeginPlay();
+
+    if (APlayerState* PS = GetPlayerState<AMyPlayerState>())  // ← 双端基本都是 null，进不去
+    {
+        ...
+    }
+}
+```
+
+引擎真实时序（`GameModeBase.cpp`）：
+
+```
+SpawnDefaultPawnFor()            // BeginPlay 在 Spawn 内部触发
+    ↓
+BeginPlay()                      // ← 此时还没 Possess，GetPlayerState() 返回 null
+    ↓
+FinishRestartPlayer()
+    ↓
+Controller->Possess()            // ← Pawn::PossessedBy 中才 SetPlayerState
+```
+
+| 端 | BeginPlay 时 GetPlayerState() | PossessedBy 时 GetPlayerState() |
+|---|---|---|
+| 服务器 | null（Possess 还没发生） | ✅ 一定可用 |
+| 客户端 | 大概率 null（复制到达时机不保证） | 不调用（客户端对应 OnRep_PlayerState） |
+
+因此 ASC 放在 PlayerState 上时，`BeginPlay` 写法会**静默跳过**，ASC 永远没有真正初始化——初始化请求被吞掉，没有报错、没有日志，极难排查。
+
+**例外**：ASC 放在 Pawn 自己身上（Owner == Avatar）时，`BeginPlay` 里 `InitAbilityActorInfo(this, this)` 是安全的，不需要 PlayerState。
+
+**AI 边界**：AIController Possess 也会触发 `PossessedBy`，但 AI 没有 PlayerState（`GetController()->PlayerState == nullptr`），上面的 if 进不去——这正是"AI 把 ASC 放 Pawn 自己身上"的架构理由。
 
 ---
 
@@ -360,11 +427,19 @@ class FActiveGameplayEffectsContainer
     // 所有活跃的 GE 实例
     TArray<FActiveGameplayEffect> GameplayEffects_Internal;
     
-    // 按 Tag 索引，快速查找"被眩晕影响的所有 GE"
-    TMap<FGameplayTag, TArray<int32>> ActiveEffectTagMap;
-    
     // 属性聚合器——把多个 GE 贡献合并成一个最终属性值
-    TMap<FGameplayAttribute, FAggregator> AttributeAggregatorMap;
+    // 注意：是 FAggregatorRef（引用包装），聚合器本体存在池中，便于复用与惰性重建
+    TMap<FGameplayAttribute, FAggregatorRef> AttributeAggregatorMap;
+    
+    // 按"来源 GE"跟踪的堆叠映射（Aggregate by Source 需要知道每个来源堆到哪）
+    TMap<TWeakObjectPtr<UGameplayEffect>, TArray<FActiveGameplayEffectHandle>> SourceStackingMap;
+    
+    // 属性变更事件——外部（UI 等）订阅属性变化用
+    TMap<FGameplayAttribute, FOnGameplayAttributeValueChange> AttributeValueChangeDelegates;
+    
+    // UE 5.8 新增：待移除的 GE 用单向链表暂存，
+    // 在 ScopedLock（如 Aggregator 求值中）结束后才真正删除，避免遍历中改数组
+    FActiveGameplayEffect* PendingGameplayEffectHead;
     
     // 持续时间策略（Instant / Duration / Infinite）
     // 堆叠策略（Aggregate by Source / Aggregate by Target）
@@ -376,7 +451,19 @@ class FActiveGameplayEffectsContainer
 - GE 的添加、移除、持续时间到期
 - 属性聚合（多个 GE 对同一个属性的贡献如何合并）
 - Modifier 求值（加法、乘法、覆盖等操作符）
-- Tag 修改（GE 添加/移除 Tag）
+- Tag 修改（GE 添加/移除 Tag，转发给 ASC 的 Tag 计数容器）
+
+> **注意：这里没有"Tag → GE 列表"的反向索引。** 早期文档版本（含网络资料）常画的
+> `TMap<FGameplayTag, TArray<FActiveGameplayEffectHandle>>` 在 UE 5.x 源码中**并不存在**。
+> 真实机制分两条路：
+> 1. **"现在有没有这个 Tag"**——看 ASC 层的 `GameplayTagCountContainer`（见 5.4），
+>    由所有活跃 GE 的 GrantedTags 加加减减维护计数。
+> 2. **"哪些活跃 GE 带某个 Tag"**——用 `FGameplayEffectQuery` 调用
+>    `GetActiveEffects(Query)`，内部遍历 `GameplayEffects_Internal` 做 TagQuery 过滤，
+>    是**线性查询**而非索引。
+>
+> 引擎不做反向索引的原因：Tag 是 GE 的**派生数据**，GE 增删都会触发 Tag 变化，维护
+> 反向索引的增量成本比低频查询的线性成本更高。
 
 后续文章会在 GE 篇中深入 `FActiveGameplayEffectsContainer` 的内部实现。
 
@@ -482,25 +569,3 @@ public:
 ---
 
 *本文基于 UE 5.8 源码分析。系列文章将逐模块深入，从基础到高级，从 API 到设计哲学。*
-
----
-
-> **系列导航**
-> 
-> | 阶段 | 篇章 | 内容 | 状态 |
-> |------|------|------|------|
-> | 🟢 基础 | 01 | GAS 总览与核心架构 | ✅ |
-> | | **02** | **ASC — 核心调度器** | ✅ |
-> | | 03 | GameplayTags — 通用语言 | 📝 |
-> | | 04 | AttributeSet — 属性定义与复制 | 📝 |
-> | 🔵 核心 | 05 | GameplayEffect — 效果与计算 (上) | 📝 |
-> | | 06 | GameplayEffect — 效果与计算 (下) | 📝 |
-> | | 07 | GameplayAbility — 技能激活与核心框架 (上) | 📝 |
-> | | 08 | GameplayAbility — Task/输入/预测 (下) | 📝 |
-> | | 09 | GameplayCue — 表现层触发机制 | 📝 |
-> | 🔴 高级 | 10 | Prediction — 预测与回滚 | 📝 |
-> | | 11 | GE Components — 组件化架构演进 | 📝 |
-> | | 12 | Network & Serial — 网络序列化 | 📝 |
-> | | 13 | Targeting — 瞄准系统 | 📝 |
-> | | 14 | Debug & Optimization — 调试与优化 | 📝 |
-> | | 15 | 终篇回顾 — 全景复习 | 📝 |
