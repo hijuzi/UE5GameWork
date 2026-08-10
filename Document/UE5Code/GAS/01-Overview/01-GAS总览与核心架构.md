@@ -44,14 +44,9 @@ Epic 在《堡垒之夜》中遇到了同样的问题。他们的解决方案就
 
 ### 2.3 一句话说清关系
 
-```
-玩家按下一个按钮
-  → GameplayAbility 被激活（技能系统）
-  → GameplayAbility 创建一个 GameplayEffect Spec
-  → GameplayEffect 修改 AttributeSet 中的属性值（效果系统 → 属性系统）
-  → GameplayCue 响应 Tag 变化播放粒子/音效（表现系统）
-  → ASC 负责全程的网络同步（核心调度器）
-```
+![GAS DataFlow](diagrams/GAS_DataFlow_Overview.png)
+
+> **数据流全景图见上方**。从玩家按键到最终表现，GAS 的五步流程：GA 激活 → 创建 GE Spec → GE 修改属性 → Cue 播放表现，全程由 ASC 调度和同步。
 
 ---
 

@@ -1,0 +1,102 @@
+<mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="800" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+
+    <!-- Start Node -->
+    <mxCell id="10" value="玩家按下按钮"
+      style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=14;fontStyle=1;"
+      vertex="1" parent="1">
+      <mxGeometry x="300" y="30" width="200" height="55" as="geometry"/>
+    </mxCell>
+
+    <!-- Step 1: GA 激活 -->
+    <mxCell id="11" value="GameplayAbility 被激活"
+      style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;fontStyle=1;"
+      vertex="1" parent="1">
+      <mxGeometry x="250" y="145" width="300" height="55" as="geometry"/>
+    </mxCell>
+
+    <!-- Step 2: 创建 GE Spec -->
+    <mxCell id="12" value="创建 GameplayEffect Spec"
+      style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;"
+      vertex="1" parent="1">
+      <mxGeometry x="250" y="260" width="300" height="55" as="geometry"/>
+    </mxCell>
+
+    <!-- Step 3: GE 修改属性 -->
+    <mxCell id="13" value="GameplayEffect 修改属性值"
+      style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=13;fontStyle=1;"
+      vertex="1" parent="1">
+      <mxGeometry x="250" y="375" width="300" height="55" as="geometry"/>
+    </mxCell>
+
+    <!-- Step 4: Cue 播放表现 -->
+    <mxCell id="14" value="GameplayCue 播放粒子 / 音效"
+      style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=13;fontStyle=1;"
+      vertex="1" parent="1">
+      <mxGeometry x="250" y="490" width="300" height="55" as="geometry"/>
+    </mxCell>
+
+    <!-- ASC 调度器 -->
+    <mxCell id="15" value="ASC 全程网络同步 (核心调度器)"
+      style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=13;fontStyle=1;dashed=1;dashPattern=8 4;"
+      vertex="1" parent="1">
+      <mxGeometry x="250" y="610" width="300" height="50" as="geometry"/>
+    </mxCell>
+
+    <!-- Subsystem Labels (right side) -->
+    <mxCell id="30" value="技能系统"
+      style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;fontColor=#6c8ebf;fontStyle=2;"
+      vertex="1" parent="1">
+      <mxGeometry x="575" y="150" width="120" height="45" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="31" value="效果系统 → 属性系统"
+      style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;fontColor=#82b366;fontStyle=2;"
+      vertex="1" parent="1">
+      <mxGeometry x="575" y="380" width="160" height="45" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="32" value="表现系统"
+      style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;fontColor=#d6b656;fontStyle=2;"
+      vertex="1" parent="1">
+      <mxGeometry x="575" y="495" width="120" height="45" as="geometry"/>
+    </mxCell>
+
+    <!-- Connections -->
+    <mxCell id="20" value="" style="endArrow=block;endFill=1;strokeWidth=2;strokeColor=#6c8ebf;" edge="1" parent="1" source="10" target="11">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="21" value="" style="endArrow=block;endFill=1;strokeWidth=2;" edge="1" parent="1" source="11" target="12">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="22" value="" style="endArrow=block;endFill=1;strokeWidth=2;strokeColor=#82b366;" edge="1" parent="1" source="12" target="13">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="23" value="" style="endArrow=block;endFill=1;strokeWidth=2;strokeColor=#d6b656;" edge="1" parent="1" source="13" target="14">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="24" value="" style="endArrow=block;endFill=1;strokeWidth=2;strokeColor=#9673a6;dashed=1;dashPattern=8 4;" edge="1" parent="1" source="14" target="15">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- Side labels connections (dotted, light) -->
+    <mxCell id="25" value="" style="endArrow=none;dashed=1;dashPattern=2 4;strokeWidth=1;strokeColor=#6c8ebf;opacity=40;" edge="1" parent="1" source="11" target="30">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="26" value="" style="endArrow=none;dashed=1;dashPattern=2 4;strokeWidth=1;strokeColor=#82b366;opacity=40;" edge="1" parent="1" source="13" target="31">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="27" value="" style="endArrow=none;dashed=1;dashPattern=2 4;strokeWidth=1;strokeColor=#d6b656;opacity=40;" edge="1" parent="1" source="14" target="32">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+  </root>
+</mxGraphModel>
