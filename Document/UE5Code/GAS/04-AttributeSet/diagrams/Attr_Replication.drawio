@@ -1,0 +1,127 @@
+<mxfile host="65bd71144e">
+    <diagram name="Attr_Replication" id="replication">
+        <mxGraphModel dx="1146" dy="1631" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="1000" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="2" value="属性网络复制：服务器 → 客户端同步流程" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=18;fontStyle=1;fontColor=#1a1a2e;" parent="1" vertex="1">
+                    <mxGeometry x="350" y="20" width="600" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="p_server_asc" value="&lt;b&gt;Server ASC&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="80" y="100" width="140" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="p_server_as" value="&lt;b&gt;Server&#10;AttributeSet&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="280" y="100" width="140" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="p_network" value="&lt;b&gt;Network&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=12;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="480" y="100" width="140" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="p_client_as" value="&lt;b&gt;Client&#10;AttributeSet&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="680" y="100" width="140" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="p_client_asc" value="&lt;b&gt;Client ASC&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="880" y="100" width="140" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="l1" value="" style="endArrow=none;html=1;strokeWidth=1;strokeColor=#999999;dashed=1;dashPattern=4 4;" parent="1" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="150" y="140" as="sourcePoint"/>
+                        <mxPoint x="150" y="900" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="l2" value="" style="endArrow=none;html=1;strokeWidth=1;strokeColor=#999999;dashed=1;dashPattern=4 4;" parent="1" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="350" y="140" as="sourcePoint"/>
+                        <mxPoint x="350" y="900" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="l3" value="" style="endArrow=none;html=1;strokeWidth=1;strokeColor=#999999;dashed=1;dashPattern=4 4;" parent="1" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="550" y="140" as="sourcePoint"/>
+                        <mxPoint x="550" y="900" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="l4" value="" style="endArrow=none;html=1;strokeWidth=1;strokeColor=#999999;dashed=1;dashPattern=4 4;" parent="1" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="750" y="140" as="sourcePoint"/>
+                        <mxPoint x="750" y="900" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="l5" value="" style="endArrow=none;html=1;strokeWidth=1;strokeColor=#999999;dashed=1;dashPattern=4 4;" parent="1" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="950" y="140" as="sourcePoint"/>
+                        <mxPoint x="950" y="900" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="s1_label" value="① GE 修改属性" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;fontColor=#333333;" parent="1" vertex="1">
+                    <mxGeometry x="30" y="170" width="120" height="25" as="geometry"/>
+                </mxCell>
+                <mxCell id="s1_box" value="SetNumericAttributeBase" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="85" y="200" width="130" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="s2_label" value="② 更新聚合器" style="text;html=1;strokeColor=none;fillColor=none;align=right;verticalAlign=middle;fontSize=11;fontColor=#333333;" parent="1" vertex="1">
+                    <mxGeometry x="140" y="250" width="120" height="25" as="geometry"/>
+                </mxCell>
+                <mxCell id="s2_arrow" value="" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#d6b656;" parent="1" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="150" y="230" as="sourcePoint"/>
+                        <mxPoint x="350" y="280" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="s2_box" value="Aggregator.SetBaseValue&#10;PreAttributeBaseChange" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="280" y="280" width="140" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="s3_arrow" value="" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#d6b656;dashed=1;" parent="1" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="350" y="320" as="sourcePoint"/>
+                        <mxPoint x="150" y="360" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="s3_box" value="Evaluate → CurrentValue&#10;PreAttributeChange → PostAttributeChange" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="80" y="360" width="160" height="45" as="geometry"/>
+                </mxCell>
+                <mxCell id="s4_label" value="③ 标记脏" style="text;html=1;strokeColor=none;fillColor=none;align=right;verticalAlign=middle;fontSize=11;fontColor=#333333;" parent="1" vertex="1">
+                    <mxGeometry x="140" y="420" width="120" height="25" as="geometry"/>
+                </mxCell>
+                <mxCell id="s4_box" value="MARK_PROPERTY_DIRTY" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="280" y="420" width="140" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="s5_label" value="④ 网络复制" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=11;fontColor=#333333;" parent="1" vertex="1">
+                    <mxGeometry x="390" y="450" width="200" height="25" as="geometry"/>
+                </mxCell>
+                <mxCell id="s5_arrow" value="" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#4a90d9;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" edge="1" target="s5_box">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="350" y="450" as="sourcePoint"/>
+                        <mxPoint x="750" y="500" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="s5_box" value="DOREPLIFETIME_CONDITION_NOTIFY&#10;COND_None, REPNOTIFY_Always" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f4f8;strokeColor=#4a90d9;fontSize=11;fontFamily=Courier New;" parent="1" vertex="1">
+                    <mxGeometry x="490" y="500" width="250" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="s6_box" value="OnRep_Health(OldValue)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="680" y="580" width="140" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="s7_arrow" value="" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#9673a6;" parent="1" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="750" y="610" as="sourcePoint"/>
+                        <mxPoint x="950" y="650" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="s7_box" value="GAMEPLAYATTRIBUTE_REPNOTIFY&#10;→ SetBaseAttributeValueFromReplication" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="850" y="650" width="200" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="s8_arrow" value="" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#d6b656;dashed=1;" parent="1" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="950" y="690" as="sourcePoint"/>
+                        <mxPoint x="750" y="730" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="s8_box" value="⑤ 客户端重聚合&#10;BaseValue + 预测性 Mods&#10;= 最终 CurrentValue" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="680" y="730" width="140" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="51" value="&lt;b&gt;设计核心：&lt;/b&gt;服务器只复制 &lt;b&gt;BaseValue&lt;/b&gt;（永久变更），客户端在 BaseValue 之上&lt;b&gt;重新应用本地 Modifier 聚合&lt;/b&gt;得到 CurrentValue。这样即使客户端有预测性 buff，也能在收到服务器确认后自动得到正确结果。" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e8f4f8;strokeColor=#4a90d9;fontSize=11;align=left;spacingLeft=10;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="830" width="1340" height="50" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

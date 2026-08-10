@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mxGraphModel dx="0" dy="0" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageWidth="1400" pageHeight="1100">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="title" value="UGameplayEffect - Class Diagram" style="text;html=1;fontSize=16;fontStyle=1;align=center;fillColor=#6c8ebf;fontColor=#ffffff;" parent="1" vertex="1">
+      <mxGeometry x="400" y="10" width="400" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="ge-main" value="UGameplayEffect : UObject" style="swimlane;html=1;startSize=28;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=13;fontStyle=1;align=left;spacingLeft=10;" parent="1" vertex="1">
+      <mxGeometry x="80" y="60" width="1040" height="160" as="geometry"/>
+    </mxCell>
+    <mxCell id="ge1a" value="DurationPolicy: EGameplayEffectDurationType" style="text;html=1;align=left;spacingLeft=5;fontSize=11;fontFamily=Courier New;" parent="1" vertex="1">
+      <mxGeometry x="90" y="90" width="1010" height="18" as="geometry"/>
+    </mxCell>
+    <mxCell id="ge1b" value="DurationMagnitude: FGameplayEffectModifierMagnitude" style="text;html=1;align=left;spacingLeft=5;fontSize=11;fontFamily=Courier New;" parent="1" vertex="1">
+      <mxGeometry x="90" y="109" width="1010" height="18" as="geometry"/>
+    </mxCell>
+    <mxCell id="ge2" value="Modifiers: TArray&lt;FGameplayModifierInfo&gt;" style="text;html=1;align=left;spacingLeft=5;fontSize=11;fontFamily=Courier New;" parent="1" vertex="1">
+      <mxGeometry x="90" y="132" width="1010" height="18" as="geometry"/>
+    </mxCell>
+    <mxCell id="ge3" value="Executions: TArray&lt;FGameplayEffectExecutionDefinition&gt;" style="text;html=1;align=left;spacingLeft=5;fontSize=11;fontFamily=Courier New;" parent="1" vertex="1">
+      <mxGeometry x="90" y="151" width="1010" height="18" as="geometry"/>
+    </mxCell>
+    <mxCell id="ge4" value="StackingType / StackLimitCount / StackPolicy" style="text;html=1;align=left;spacingLeft=5;fontSize=11;fontFamily=Courier New;" parent="1" vertex="1">
+      <mxGeometry x="90" y="174" width="1010" height="18" as="geometry"/>
+    </mxCell>
+    <mxCell id="ge5" value="GameplayEffectAssetTags / GrantedTags / ApplicationTagRequirements" style="text;html=1;align=left;spacingLeft=5;fontSize=11;fontFamily=Courier New;" parent="1" vertex="1">
+      <mxGeometry x="90" y="193" width="1010" height="18" as="geometry"/>
+    </mxCell>
+    <mxCell id="ge6" value="OngoingTagRequirements / RemoveGameplayEffectsWithTags" style="text;html=1;align=left;spacingLeft=5;fontSize=11;fontFamily=Courier New;" parent="1" vertex="1">
+      <mxGeometry x="90" y="212" width="1010" height="18" as="geometry"/>
+    </mxCell>
+    <mxCell id="ge7" value="GameplayEffectComponents: Abilities / Immunity / GameplayCues / AdditionalEffects" style="text;html=1;align=left;spacingLeft=5;fontSize=11;fontFamily=Courier New;" parent="1" vertex="1">
+      <mxGeometry x="90" y="235" width="1010" height="18" as="geometry"/>
+    </mxCell>
+    <mxCell id="ge8" value="Period: FGameplayEffectPeriodConfig" style="text;html=1;align=left;spacingLeft=5;fontSize=11;fontFamily=Courier New;" parent="1" vertex="1">
+      <mxGeometry x="90" y="254" width="1010" height="18" as="geometry"/>
+    </mxCell>
+    <mxCell id="ge9" value="CanApply() / OnApplied() / OnExecuted() / GetActiveContext()" style="text;html=1;align=left;spacingLeft=5;fontSize=11;fontFamily=Courier New;" parent="1" vertex="1">
+      <mxGeometry x="90" y="277" width="1010" height="18" as="geometry"/>
+    </mxCell>
+    <mxCell id="mi-hdr" value="FGameplayModifierInfo" style="swimlane;html=1;startSize=24;fillColor=#D5E8D4;strokeColor=#82B366;fontSize=12;fontStyle=1;align=left;spacingLeft=8;" parent="1" vertex="1">
+      <mxGeometry x="80" y="260" width="300" height="90" as="geometry"/>
+    </mxCell>
+    <mxCell id="mi1" value="Attribute: FGameplayAttribute" style="text;html=1;align=left;spacingLeft=5;fontSize=11;fontFamily=Courier New;" parent="1" vertex="1">
+      <mxGeometry x="88" y="288" width="280" height="18" as="geometry"/>
+    </mxCell>
+    <mxCell id="mi2" value="ModifierOp: EGameplayModOp" style="text;html=1;align=left;spacingLeft=5;fontSize=11;fontFamily=Courier New;" parent="1" vertex="1">
+      <mxGeometry x="88" y="307" width="280" height="18" as="geometry"/>
+    </mxCell>
+    <mxCell id="mi3" value="ModifierMagnitude:" style="text;html=1;align=left;spacingLeft=5;fontSize=11;fontFamily=Courier New;" parent="1" vertex="1">
+      <mxGeometry x="88" y="326" width="280" height="18" as="geometry"/>
+    </mxCell>
+    <mxCell id="mi4" value="  ScalableFloat  |  AttributeBased" style="text;html=1;align=left;spacingLeft=5;fontSize=11;fontFamily=Courier New;" parent="1" vertex="1">
+      <mxGeometry x="96" y="345" width="270" height="18" as="geometry"/>
+    </mxCell>
+    <mxCell id="mi5" value="  CustomCalculation  |  SetByCaller" style="text;html=1;align=left;spacingLeft=5;fontSize=11;fontFamily=Courier New;" parent="1" vertex="1">
+      <mxGeometry x="96" y="364" width="270" height="18" as="geometry"/>
+    </mxCell>
+    <mxCell id="mo-hdr" value="EGameplayModOp" style="swimlane;html=1;startSize=20;fillColor=#FFF2CC;strokeColor=#D6B656;fontSize=11;align=left;spacingLeft=6;" parent="1" vertex="1">
+      <mxGeometry x="80" y="370" width="300" height="35" as="geometry"/>
+    </mxCell>
+    <mxCell id="mo1" value="Additive  |  Multiplicitive  |  Division  |  Override" style="text;html=1;align=left;spacingLeft=5;fontSize=11;fontFamily=Courier New;" parent="1" vertex="1">
+      <mxGeometry x="88" y="394" width="280" height="18" as="geometry"/>
+    </mxCell>
+    <mxCell id="mmc-hdr" value="UGameplayModMagnitudeCalculation" style="swimlane;html=1;startSize=24;fillColor=#E1D5E7;strokeColor=#9673A6;fontSize=12;fontStyle=1;align=left;spacingLeft=8;" parent="1" vertex="1">
+      <mxGeometry x="80" y="430" width="300" height="68" as="geometry"/>
+    </mxCell>
+    <mxCell id="mmc1" value="CalculateBaseMagnitude(Spec) : float" style="text;html=1;align=left;spacingLeft=5;fontSize=11;fontFamily=Courier New;" parent="1" vertex="1">
+      <mxGeometry x="88" y="458" width="280" height="18" as="geometry"/>
+    </mxCell>
+    <mxCell id="fs-hdr" value="FGameplayEffectSpec" style="swimlane;html=1;startSize=24;fillColor=#F8CECC;strokeColor=#B85450;fontSize=12;fontStyle=1;align=left;spacingLeft=8;" parent="1" vertex="1">
+      <mxGeometry x="410" y="260" width="340" height="130" as="geometry"/>
+    </mxCell>
+    <mxCell id="fs1" value="Def: const UGameplayEffect*" style="text;html=1;align=left;spacingLeft=5;fontSize=11;fontFamily=Courier New;" parent="1" vertex="1">
+      <mxGeometry x="418" y="288" width="320" height="18" as="geometry"/>
+    </mxCell>
+    <mxCell id="fs2" value="Level / Duration / Period" style="text;html=1;align=left;spacingLeft=5;fontSize=11;fontFamily=Courier New;" parent="1" vertex="1">
+      <mxGeometry x="418" y="307" width="320" height="18" as="geometry"/>
+    </mxCell>
+    <mxCell id="fs3" value="EffectContext: FGameplayEffectContextHandle" style="text;html=1;align=left;spacingLeft=5;fontSize=11;fontFamily=Courier New;" parent="1" vertex="1">
+      <mxGeometry x="418" y="326" width="320" height="18" as="geometry"/>
+    </mxCell>
+    <mxCell id="fs4" value="CapturedSourceTags / CapturedTargetTags" style="text;html=1;align=left;spacingLeft=5;fontSize=11;fontFamily=Courier New;" parent="1" vertex="1">
+      <mxGeometry x="418" y="345" width="320" height="18" as="geometry"/>
+    </mxCell>
+    <mxCell id="fs5" value="SetByCallerTagMagnitudes" style="text;html=1;align=left;spacingLeft=5;fontSize=11;fontFamily=Courier New;" parent="1" vertex="1">
+      <mxGeometry x="418" y="364" width="320" height="18" as="geometry"/>
+    </mxCell>
+    <mxCell id="ctx-hdr" value="FGameplayEffectContext" style="swimlane;html=1;startSize=24;fillColor=#D5E8D4;strokeColor=#82B366;fontSize=12;fontStyle=1;align=left;spacingLeft=8;" parent="1" vertex="1">
+      <mxGeometry x="410" y="415" width="340" height="95" as="geometry"/>
+    </mxCell>
+    <mxCell id="ctx1" value="Instigator / EffectCauser / SourceObject" style="text;html=1;align=left;spacingLeft=5;fontSize=11;fontFamily=Courier New;" parent="1" vertex="1">
+      <mxGeometry x="418" y="443" width="320" height="18" as="geometry"/>
+    </mxCell>
+    <mxCell id="ctx2" value="InstigatorAbilitySystemComponent" style="text;html=1;align=left;spacingLeft=5;fontSize=11;fontFamily=Courier New;" parent="1" vertex="1">
+      <mxGeometry x="418" y="462" width="320" height="18" as="geometry"/>
+    </mxCell>
+    <mxCell id="ctx3" value="Ability: UGameplayAbility*" style="text;html=1;align=left;spacingLeft=5;fontSize=11;fontFamily=Courier New;" parent="1" vertex="1">
+      <mxGeometry x="418" y="481" width="320" height="18" as="geometry"/>
+    </mxCell>
+    <mxCell id="exc-hdr" value="UGameplayEffectExecutionCalculation" style="swimlane;html=1;startSize=24;fillColor=#D5E8D4;strokeColor=#82B366;fontSize=12;fontStyle=1;align=left;spacingLeft=8;" parent="1" vertex="1">
+      <mxGeometry x="410" y="535" width="340" height="95" as="geometry"/>
+    </mxCell>
+    <mxCell id="exc1" value="RelevantAttributesToCapture" style="text;html=1;align=left;spacingLeft=5;fontSize=11;fontFamily=Courier New;" parent="1" vertex="1">
+      <mxGeometry x="418" y="563" width="320" height="18" as="geometry"/>
+    </mxCell>
+    <mxCell id="exc2" value="Execute(Params, Output) : virtual" style="text;html=1;align=left;spacingLeft=5;fontSize=11;fontFamily=Courier New;" parent="1" vertex="1">
+      <mxGeometry x="418" y="582" width="320" height="18" as="geometry"/>
+    </mxCell>
+    <mxCell id="exc3" value="InvalidScopedModifierAttributes" style="text;html=1;align=left;spacingLeft=5;fontSize=11;fontFamily=Courier New;" parent="1" vertex="1">
+      <mxGeometry x="418" y="601" width="320" height="18" as="geometry"/>
+    </mxCell>
+    <mxCell id="dt-hdr" value="EGameplayEffectDurationType" style="swimlane;html=1;startSize=20;fillColor=#FFF2CC;strokeColor=#D6B656;fontSize=11;align=left;spacingLeft=6;" parent="1" vertex="1">
+      <mxGeometry x="780" y="260" width="280" height="35" as="geometry"/>
+    </mxCell>
+    <mxCell id="dt1" value="Instant  |  Duration  |  Infinite" style="text;html=1;align=left;spacingLeft=5;fontSize=11;fontFamily=Courier New;" parent="1" vertex="1">
+      <mxGeometry x="788" y="284" width="260" height="18" as="geometry"/>
+    </mxCell>
+    <mxCell id="st-hdr" value="EGameplayEffectStackingType" style="swimlane;html=1;startSize=20;fillColor=#FFF2CC;strokeColor=#D6B656;fontSize=11;align=left;spacingLeft=6;" parent="1" vertex="1">
+      <mxGeometry x="780" y="310" width="280" height="35" as="geometry"/>
+    </mxCell>
+    <mxCell id="st1" value="None  |  AggregateBySource  |  AggregateByTarget" style="text;html=1;align=left;spacingLeft=5;fontSize=11;fontFamily=Courier New;" parent="1" vertex="1">
+      <mxGeometry x="788" y="334" width="260" height="18" as="geometry"/>
+    </mxCell>
+    <mxCell id="fa-hdr" value="FActiveGameplayEffect" style="swimlane;html=1;startSize=24;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=12;fontStyle=1;align=left;spacingLeft=8;" parent="1" vertex="1">
+      <mxGeometry x="780" y="380" width="280" height="115" as="geometry"/>
+    </mxCell>
+    <mxCell id="fa1" value="Spec: FGameplayEffectSpec" style="text;html=1;align=left;spacingLeft=5;fontSize=11;fontFamily=Courier New;" parent="1" vertex="1">
+      <mxGeometry x="788" y="408" width="260" height="18" as="geometry"/>
+    </mxCell>
+    <mxCell id="fa2" value="Handle / StartServerWorldTime" style="text;html=1;align=left;spacingLeft=5;fontSize=11;fontFamily=Courier New;" parent="1" vertex="1">
+      <mxGeometry x="788" y="427" width="260" height="18" as="geometry"/>
+    </mxCell>
+    <mxCell id="fa3" value="StackCount: int32" style="text;html=1;align=left;spacingLeft=5;fontSize=11;fontFamily=Courier New;" parent="1" vertex="1">
+      <mxGeometry x="788" y="446" width="260" height="18" as="geometry"/>
+    </mxCell>
+    <mxCell id="fa4" value="bIsInhibited: bool" style="text;html=1;align=left;spacingLeft=5;fontSize=11;fontFamily=Courier New;" parent="1" vertex="1">
+      <mxGeometry x="788" y="465" width="260" height="18" as="geometry"/>
+    </mxCell>
+    <mxCell id="e1" value="Modifiers[]" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeWidth=2;endArrow=block;endFill=1;rounded=0;exitX=0.5;exitY=1;entryX=0.5;entryY=0;strokeColor=#82B366;" parent="1" edge="1" source="ge-main" target="mi-hdr">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="256.8" y="240"/>
+          <mxPoint x="230.0" y="240"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e2" value="MakeOutgoingSpec()" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeWidth=2;endArrow=block;endFill=1;rounded=0;exitX=0.5;exitY=1;entryX=0.5;entryY=0;strokeColor=#B85450;" parent="1" edge="1" source="ge-main" target="fs-hdr">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="537.6" y="240"/>
+          <mxPoint x="580.0" y="240"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e3" value="DurationPolicy" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeWidth=2;endArrow=block;endFill=1;rounded=0;exitX=0.5;exitY=1;entryX=0.5;entryY=0;strokeColor=#6C8EBF;" parent="1" edge="1" source="ge-main" target="dt-hdr">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="880.8000000000001" y="240"/>
+          <mxPoint x="920.0" y="240"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e4" value="Stacking" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeWidth=2;endArrow=block;endFill=1;rounded=0;exitX=0.5;exitY=1;entryX=0.5;entryY=0;strokeColor=#6C8EBF;" parent="1" edge="1" source="ge-main" target="st-hdr">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="964.0" y="240"/>
+          <mxPoint x="1016.0" y="240"/>
+          <mxPoint x="920.0" y="240"/>
+          <mxPoint x="920.0" y="327"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e5" value="Executions[]" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeWidth=2;endArrow=block;endFill=1;rounded=0;exitX=0.5;exitY=1;entryX=0.5;entryY=0;strokeColor=#6C8EBF;" parent="1" edge="1" source="ge-main" target="exc-hdr">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="662.4000000000001" y="240"/>
+          <mxPoint x="580.0" y="240"/>
+          <mxPoint x="580.0" y="549"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e6" value="Custom Magnitude" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeWidth=2;endArrow=block;endFill=1;rounded=0;exitX=0.5;exitY=1;entryX=0.5;entryY=0;strokeColor=#9673A6;" parent="1" edge="1" source="ge-main" target="mmc-hdr">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="319.20000000000005" y="240"/>
+          <mxPoint x="230.0" y="240"/>
+          <mxPoint x="230.0" y="450"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e7" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeWidth=2;endArrow=block;endFill=1;rounded=0;exitX=0.5;exitY=1;entryX=0.5;entryY=0;strokeColor=#82B366;" parent="1" edge="1" source="mi-hdr" target="mo-hdr">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="230.0" y="358"/>
+          <mxPoint x="230.0" y="364"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e8" value="Custom Calc" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeWidth=2;endArrow=block;endFill=1;rounded=0;exitX=0.5;exitY=1;entryX=0.5;entryY=0;strokeColor=#9673A6;" parent="1" edge="1" source="mi-hdr" target="mmc-hdr">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="335.0" y="305"/>
+          <mxPoint x="395" y="305"/>
+          <mxPoint x="395" y="458"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e9" value="EffectContext" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeWidth=2;endArrow=block;endFill=1;rounded=0;exitX=0.5;exitY=1;entryX=0.5;entryY=0;strokeColor=#82B366;" parent="1" edge="1" source="fs-hdr" target="ctx-hdr">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="580.0" y="398"/>
+          <mxPoint x="580.0" y="409"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e10" value="FActiveGE.Spec" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeWidth=2;endArrow=block;endFill=1;rounded=0;exitX=0.5;exitY=1;entryX=0.5;entryY=0;strokeColor=#6C8EBF;" parent="1" edge="1" source="fs-hdr" target="fa-hdr">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="750" y="325"/>
+          <mxPoint x="765.0" y="325"/>
+          <mxPoint x="765.0" y="437"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e11" value="Apply -&gt; ActiveGE" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeWidth=2;endArrow=block;endFill=1;rounded=0;exitX=0.5;exitY=1;entryX=0.5;entryY=0;strokeColor=#6C8EBF;" parent="1" edge="1" source="ge-main" target="fa-hdr">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="1036.8000000000002" y="240"/>
+          <mxPoint x="920.0" y="240"/>
+          <mxPoint x="920.0" y="437"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="leg-hdr" value="Legend" style="swimlane;html=1;startSize=22;fillColor=#F5F5F5;strokeColor=#666666;fontSize=12;fontStyle=1;" parent="1" vertex="1">
+      <mxGeometry x="80" y="650" width="700" height="100" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg1" value="Blue outline     = Core gameplay types (UGameplayEffect, FActiveGameplayEffect)" style="text;html=1;align=left;spacingLeft=10;fontSize=11;fontFamily=Courier New;" parent="1" vertex="1">
+      <mxGeometry x="85" y="676" width="690" height="18" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg2" value="Green outline    = Data structures (FGameplayModifierInfo, Context, Execution)" style="text;html=1;align=left;spacingLeft=10;fontSize=11;fontFamily=Courier New;" parent="1" vertex="1">
+      <mxGeometry x="85" y="695" width="690" height="18" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg3" value="Red outline      = Runtime instance (FGameplayEffectSpec)" style="text;html=1;align=left;spacingLeft=10;fontSize=11;fontFamily=Courier New;" parent="1" vertex="1">
+      <mxGeometry x="85" y="714" width="690" height="18" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg4" value="Purple outline   = Custom calculation (UGameplayModMagnitudeCalculation)" style="text;html=1;align=left;spacingLeft=10;fontSize=11;fontFamily=Courier New;" parent="1" vertex="1">
+      <mxGeometry x="85" y="733" width="690" height="18" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg5" value="Yellow outline   = Enums" style="text;html=1;align=left;spacingLeft=10;fontSize=11;fontFamily=Courier New;" parent="1" vertex="1">
+      <mxGeometry x="85" y="752" width="690" height="18" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

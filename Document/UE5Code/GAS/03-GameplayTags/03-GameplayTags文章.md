@@ -278,4 +278,24 @@ GameplayTags 是 GAS 的神经系统：
 
 ---
 
-*下一篇：[04-GameplayEffect — GAS 的"血液"系统](../04-GameplayEffect/04-ExecutionCalculation文章.md)*
+*下一篇：[04-AttributeSet — 属性定义、回调链与网络复制](../04-AttributeSet/04-AttributeSet文章.md)*
+
+---
+
+> **系列导航**
+> 
+> | 阶段 | 篇章 | 内容 | 状态 |
+> |------|------|------|------|
+> | 🟢 基础 | 01 | GAS 总览与核心架构 | ✅ |
+> | | 02 | ASC — 核心调度器 | ✅ |
+> | | **03** | **GameplayTags — 通用语言** | ✅ |
+> | | 04 | AttributeSet — 属性定义与复制 | 📝 |
+> | 🔵 核心 | 05-06 | GameplayEffect — 效果与计算 (上/下) | 📝 |
+> | | 07-08 | GameplayAbility — 技能激活与任务 (上/下) | 📝 |
+> | | 09 | GameplayCue — 表现层触发机制 | 📝 |
+> | 🔴 高级 | 10 | Prediction — 预测与回滚 | 📝 |
+> | | 11 | GE Components — 组件化架构演进 | 📝 |
+> | | 12 | Network & Serial — 网络序列化 | 📝 |
+> | | 13 | Targeting — 瞄准系统 | 📝 |
+> | | 14 | Debug & Optimization — 调试与优化 | 📝 |
+> | | 15 | 终篇回顾 — 全景复习 | 📝 |
