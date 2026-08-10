@@ -1,10 +1,32 @@
 # 02 | ASC：GAS 的核心调度器
 
-> **本系列文章**：深入 Unreal Engine Gameplay Ability System 源码，逐模块拆解设计思路。
+> **系列**: 《Inside GAS》— UE5 GameplayAbilitySystem 源码深度分析  
+> **难度**: 🟢 入门  
+> **字数**: ~6000  
+> **前置**: 01-GAS总览与核心架构  
+> **源码路径**: `Engine/Plugins/Runtime/GameplayAbilities/Source/GameplayAbilities/Public/AbilitySystemComponent.h`
+
+---
+
+> **系列导航**
 > 
-> **上一篇**：[01-GAS总览与核心架构](../01-Overview/01-GAS总览与核心架构.md) — 建立了 GAS 的全局认知：四个入口、能力系统接口、核心数据流。
-> 
-> **本文聚焦**：ASC（`UAbilitySystemComponent`）的 Owner vs Avatar 分离机制、三种网络复制模式、初始化时序，以及"为什么一个 Actor 只能有一个 ASC"。
+> | 阶段 | 篇章 | 内容 | 状态 |
+> |------|------|------|------|
+> | 🟢 基础 | 01 | GAS 总览与核心架构 | ✅ |
+> | | **02** | **ASC — 核心调度器** | ✅ |
+> | | 03 | GameplayTags — 通用语言 | 📝 |
+> | | 04 | AttributeSet — 属性定义与复制 | 📝 |
+> | 🔵 核心 | 05 | GameplayEffect — 效果与计算 (上) | 📝 |
+> | | 06 | GameplayEffect — 效果与计算 (下) | 📝 |
+> | | 07 | GameplayAbility — 技能激活与核心框架 (上) | 📝 |
+> | | 08 | GameplayAbility — Task/输入/预测 (下) | 📝 |
+> | | 09 | GameplayCue — 表现层触发机制 | 📝 |
+> | 🔴 高级 | 10 | Prediction — 预测与回滚 | 📝 |
+> | | 11 | GE Components — 组件化架构演进 | 📝 |
+> | | 12 | Network & Serial — 网络序列化 | 📝 |
+> | | 13 | Targeting — 瞄准系统 | 📝 |
+> | | 14 | Debug & Optimization — 调试与优化 | 📝 |
+> | | 15 | 终篇回顾 — 全景复习 | 📝 |
 
 ---
 
@@ -44,7 +66,7 @@ Epic 的解决方案是引入两个角色：
 ### 2.2 源码证据
 
 ```cpp
-// AbilitySystemComponent.h 第 1564-1590 行附近
+// AbilitySystemComponent.h 第 1488-1493 行附近
 // FGameplayAbilityActorInfo 中的关键字段
 
 /** The Actor that owns the abilities, shouldn't be null */
@@ -444,16 +466,22 @@ public:
 
 ## 八、总结
 
-| 维度 | 要点 |
-|------|------|
-| **Owner vs Avatar** | Owner 管逻辑权限（PlayerState 跨死亡存活），Avatar 管物理表现（Pawn 可销毁可替换） |
-| **InitAbilityActorInfo** | SetReplicationMode → InitAbilityActorInfo → GiveAbility → 应用 GE，**顺序不能错** |
-| **三种复制模式** | Minimal（NPC 推荐）→ Mixed（玩家推荐）→ Full（开发/单人），带宽从低到高 |
-| **内部六层结构** | 技能容器 / 效果容器 / 属性数组 / 标签计数 / 阻塞标签 / 表现 Cue |
-| **不主动 Tick** | ASC 是调度器而非驱动器，期望技能和外部系统驱动，GE 用 Timer 管理生命周期 |
-| **一个 Actor 一个 ASC** | API 设计 + 架构一致性要求，无变通必要 |
+1. **Owner 与 Avatar 分离是 GAS 架构的基石**。Owner 管逻辑权限（PlayerState 跨死亡存活），Avatar 管物理表现（Pawn 可销毁可替换），一次设计解决"状态延续"问题。
+2. **InitAbilityActorInfo 的顺序不能错**。SetReplicationMode 必须跑在 InitAbilityActorInfo 前面，否则设置无效。
+3. **三种复制模式按需选择**：Minimal 给 NPC/AI，Mixed 给玩家，Full 给单机/Debug。Mixed 是最实用的生产模式。
+4. **ASC 内部是六层结构**：技能容器 / 效果容器 / 属性数组 / 标签计数 / 阻塞标签 / 表现 Cue。
+5. **ASC 是调度器而非驱动器**。它不主动 Tick，技能和外部系统驱动流程，GE 用 Timer 管理自身生命周期。
+6. **一个 Actor 一个 ASC** 不是限制而是设计选择：用灵活性换一致性，状态集中管理。
 
-> **下一篇预告**：在理解了 ASC 这个"CPU"之后，我们将深入第三个基础模块——**GameplayTags**。它被 Epic 称为 GAS 的"通用语言"，但它的能力远不止标签匹配那么简单。我们将拆解：Tag 层级关系如何实现 OR/AND/排除逻辑？`TagQuery` 能做什么？`GameplayTagReponseTable` 如何让策划用编辑器写逻辑？
+---
+
+**上一篇**：[01 | GAS 总览与核心架构](../01-Overview/01-GAS总览与核心架构.md)
+
+**下一篇**：[03 | GameplayTags — 通用语言](../03-GameplayTags/03-GameplayTags文章.md) — 拆解 Tag 层级关系、TagQuery 查询匹配，以及 GameplayTagReponseTable 如何让策划用编辑器写逻辑。
+
+---
+
+*本文基于 UE 5.8 源码分析。系列文章将逐模块深入，从基础到高级，从 API 到设计哲学。*
 
 ---
 
@@ -463,10 +491,12 @@ public:
 > |------|------|------|------|
 > | 🟢 基础 | 01 | GAS 总览与核心架构 | ✅ |
 > | | **02** | **ASC — 核心调度器** | ✅ |
-> | | 03 | GameplayTags — 通用语言 | ✅ |
+> | | 03 | GameplayTags — 通用语言 | 📝 |
 > | | 04 | AttributeSet — 属性定义与复制 | 📝 |
-> | 🔵 核心 | 05-06 | GameplayEffect — 效果与计算 (上/下) | 📝 |
-> | | 07-08 | GameplayAbility — 技能激活与任务 (上/下) | 📝 |
+> | 🔵 核心 | 05 | GameplayEffect — 效果与计算 (上) | 📝 |
+> | | 06 | GameplayEffect — 效果与计算 (下) | 📝 |
+> | | 07 | GameplayAbility — 技能激活与核心框架 (上) | 📝 |
+> | | 08 | GameplayAbility — Task/输入/预测 (下) | 📝 |
 > | | 09 | GameplayCue — 表现层触发机制 | 📝 |
 > | 🔴 高级 | 10 | Prediction — 预测与回滚 | 📝 |
 > | | 11 | GE Components — 组件化架构演进 | 📝 |

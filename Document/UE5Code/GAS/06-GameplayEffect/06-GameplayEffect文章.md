@@ -750,14 +750,14 @@ Period GE 不是"每 N 秒维持一个效果"，它是**每 N 秒执行一次 In
 > 
 > | 阶段 | 篇章 | 内容 | 状态 |
 > |------|------|------|------|
-> | 🟢 基础 | 01 | GAS 总览与核心架构 | ✅ |
-> | | 02 | ASC — 核心调度器 | ✅ |
-> | | 03 | GameplayTags — 通用语言 | ✅ |
-> | | 04 | AttributeSet — 属性定义与复制 | ✅ |
-> | 🔵 核心 | 05 | GameplayEffect — 效果与计算 (上) | ✅ |
+> | 🟢 基础 | 01 | GAS 总览与核心架构 | 📝 |
+> | | 02 | ASC — 核心调度器 | 📝 |
+> | | 03 | GameplayTags — 通用语言 | 📝 |
+> | | 04 | AttributeSet — 属性定义与复制 | 📝 |
+> | 🔵 核心 | 05 | GameplayEffect — 效果与计算 (上) | 📝 |
 > | | **06** | **GameplayEffect — 效果与计算 (下)** | ✅ |
-> | | 07 | GameplayAbility — 技能激活与核心框架 (上) | ✅ |
-> | | 08 | GameplayAbility — Task/输入/预测 (下) | ✅ |
+> | | 07 | GameplayAbility — 技能激活与核心框架 (上) | 📝 |
+> | | 08 | GameplayAbility — Task/输入/预测 (下) | 📝 |
 > | | 09 | GameplayCue — 表现层触发机制 | 📝 |
 > | 🔴 高级 | 10 | Prediction — 预测与回滚 | 📝 |
 > | | 11 | GE Components — 组件化架构演进 | 📝 |

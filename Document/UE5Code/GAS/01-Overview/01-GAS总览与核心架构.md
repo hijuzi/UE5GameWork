@@ -8,6 +8,28 @@
 
 ---
 
+> **系列导航**
+> 
+> | 阶段 | 篇章 | 内容 | 状态 |
+> |------|------|------|------|
+> | 🟢 基础 | **01** | **GAS 总览与核心架构** | ✅ |
+> | | 02 | ASC — 核心调度器 | 📝 |
+> | | 03 | GameplayTags — 通用语言 | 📝 |
+> | | 04 | AttributeSet — 属性定义与复制 | 📝 |
+> | 🔵 核心 | 05 | GameplayEffect — 效果与计算 (上) | 📝 |
+> | | 06 | GameplayEffect — 效果与计算 (下) | 📝 |
+> | | 07 | GameplayAbility — 技能激活与核心框架 (上) | 📝 |
+> | | 08 | GameplayAbility — Task/输入/预测 (下) | 📝 |
+> | | 09 | GameplayCue — 表现层触发机制 | 📝 |
+> | 🔴 高级 | 10 | Prediction — 预测与回滚 | 📝 |
+> | | 11 | GE Components — 组件化架构演进 | 📝 |
+> | | 12 | Network & Serial — 网络序列化 | 📝 |
+> | | 13 | Targeting — 瞄准系统 | 📝 |
+> | | 14 | Debug & Optimization — 调试与优化 | 📝 |
+> | | 15 | 终篇回顾 — 全景复习 | 📝 |
+
+---
+
 ## 一、问题引入：为什么需要 GAS？
 
 假设你要做一个 RPG 游戏。角色有血量、魔法、攻击力，技能有冷却、消耗、伤害结算，Buff 需要叠层、计时、互斥——如果每个项目都从零写这些逻辑，你的 `AActor` 类很快会膨胀成几千行的怪兽。
@@ -100,69 +122,118 @@ public:
 **② AbilitySystemGlobals — 全局配置单例**
 
 ```cpp
-// GameplayAbilities/Public/AbilitySystemGlobals.h
-UCLASS(config=Game)
+// GameplayAbilities/Public/AbilitySystemGlobals.h (行 56-57)
+// Holds global data for the ability system.
+// Configuration is done via the Developer Settings, Project -> Gameplay Abilities Settings
+UCLASS(config = Game, MinimalAPI)
 class UAbilitySystemGlobals : public UObject
 {
-    // 核心配置
-    FGameplayAbilityActorInfo ActorInfoCache;  // 线程安全的 ActorInfo 缓存
-    bool bUseDebugTargetFromHud = false;       // 调试用
-    TSubclassOf<UGameplayCueManager> GlobalGameplayCueManagerClass;
-    
-    // 全局查找 — 注意：单例访问器
-    static UAbilitySystemGlobals& Get();
+    friend class UGameplayAbilitiesDeveloperSettings;  // 5.5+ 配置迁移入口
+    GENERATED_UCLASS_BODY()
+
+public:
+    // 单例访问 — 由 IGameplayAbilitiesModule 管理生命周期，按需创建
+    static UAbilitySystemGlobals& Get()
+    {
+        return *IGameplayAbilitiesModule::Get().GetAbilitySystemGlobals();
+    }
+
+    // === 初始化 ===
+    virtual void InitGlobalData();   // 首次使用时调用，加载全局表和标签
+
+    // === 全局数据访问 ===
+    UCurveTable* GetGlobalCurveTable();              // 全局 ScalableFloat 曲线表
+    FAttributeSetInitter* GetAttributeSetInitter();  // 属性默认值初始化器
+    UGameplayCueManager* GetGameplayCueManager();    // GC 管理器单例
+    UGameplayTagReponseTable* GetGameplayTagResponseTable();  // Tag 响应映射
+
+    // === 项目级扩展点（virtual，子类可覆写） ===
+    virtual FGameplayAbilityActorInfo* AllocAbilityActorInfo() const;
+    virtual FGameplayEffectContext* AllocGameplayEffectContext() const;
+
+    // === 全局开关（推荐通过 Project Settings 配置） ===
+    bool ShouldPredictTargetGameplayEffects() const;   // 客户端预测目标效果
+    bool ShouldReplicateActivationOwnedTags() const;    // 复制激活拥有的 Tag
+    bool ShouldIgnoreCooldowns() const;                 // 调试：忽略冷却
+    bool ShouldIgnoreCosts() const;                     // 调试：忽略消耗
+
+    // === 静态工具 ===
+    static UAbilitySystemComponent* GetAbilitySystemComponentFromActor(
+        const AActor* Actor, bool LookForComponent = true);
 };
 ```
 
-它定义全局行为：`ShouldAbilityIgnoreLocks()`、全局预测开关、CurveTable 路径等。你的项目应该继承它来配置项目级 GAS 行为。
+> **设计要点**：
+> - **真正的单例来源是 `IGameplayAbilitiesModule`**，`Get()` 只是代理——这与普通 `static` 单例的关键区别在于：引擎模块控制了创建和销毁时机。
+> - 从 UE 5.5 起，大量 `UPROPERTY(config)` 被标记为 `DEPRECATED`，配置项迁移到了 `UGameplayAbilitiesDeveloperSettings`（Project Settings → Gameplay Abilities Settings）。这体现了 Epic 将"配置"从运行时类中剥离的趋势。
+> - `AllocAbilityActorInfo` 和 `AllocGameplayEffectContext` 是两个关键扩展点——如果你的项目需要额外的上下文数据（如伤害来源的团队 ID），继承这两个方法即可。
 
 **③ AbilitySystemComponent — 千行级的核心类**
 
-ASC 的类声明有 **1000+ 行**（不包括实现），它是 GAS 的大脑。我们先看结构，不深挖细节：
+ASC 的完整声明超过 **1900+ 行**（不含实现文件），是 GAS 的调度中枢。我们抽取出最核心的骨架，按功能分组：
 
 ```cpp
 // AbilitySystemComponent.h (精简结构)
-UCLASS(ClassGroup=AbilitySystem, ...)
-class UAbilitySystemComponent : public UGameplayTasksComponent, 
-                                 public IAbilitySystemInterface, 
-                                 public IGameplayTagAssetInterface
+UCLASS(ClassGroup=AbilitySystem, MinimalAPI, BlueprintSpawnableComponent)
+class UAbilitySystemComponent : public UGameplayTasksComponent,
+                                 public IGameplayTagAssetInterface,
+                                 public IAbilitySystemReplicationProxyInterface   // ← 注意，不是 IAbilitySystemInterface
 {
-    // === 技能管理 ===
-    FGameplayAbilitySpecContainer ActivatableAbilities;  // 已授予的技能
-    FGameplayAbilitySpecContainer AllReplicatedInstancedAbilities; // 复制用
-    
-    // === 效果管理 ===
-    FActiveGameplayEffectsContainer ActiveGameplayEffects; // 活跃的 GE 实例
-    
-    // === 属性聚合 ===
-    TMap<FGameplayAttribute, TSharedPtr<FActiveGameplayEffectAccumulator>> AttributeAggregatorMap;
+    GENERATED_UCLASS_BODY()
 
-    // === 标签管理 (实现 IGameplayTagAssetInterface) ===
-    FGameplayTagCountContainer GameplayTagCountContainer;
+    // === 属性集 (Attribute Sets)—— 直接管理 ===
+    TArray<UAttributeSet*> SpawnedAttributes;                    // 实际持有的属性集实例
+    TArray<FAttributeDefaults> DefaultStartingData;              // 默认值表
+    template<class T> const T* GetSet() const;                   // 获取指定类型的 AttributeSet
+    void SetNumericAttributeBase(FGameplayAttribute, float);     // 修改属性基础值
 
-    // === 核心 API ===
-    // 技能
+    // === 技能管理 (protected + replicated) ===
+    FGameplayAbilitySpecContainer ActivatableAbilities;           // 已授予的全部技能(Replicated)
+    // (私有) TArray<TObjectPtr<UGameplayAbility>> AllReplicatedInstancedAbilities;
+
     FGameplayAbilitySpecHandle GiveAbility(const FGameplayAbilitySpec& Spec);
-    bool TryActivateAbility(FGameplayAbilitySpecHandle Handle, ...);
+    bool TryActivateAbility(FGameplayAbilitySpecHandle Handle, bool bAllowRemoteActivation = true);
     void CancelAbility(UGameplayAbility* Ability);
-    
-    // 效果
-    FActiveGameplayEffectHandle ApplyGameplayEffectSpecToSelf(const FGameplayEffectSpec& Spec, ...);
-    FActiveGameplayEffectHandle ApplyGameplayEffectSpecToTarget(const FGameplayEffectSpec& Spec, ...);
-    bool RemoveActiveGameplayEffect(FActiveGameplayEffectHandle Handle, int32 StacksToRemove=1);
-    
-    // 属性
-    float GetGameplayAttributeValue(FGameplayAttribute Attribute, ...) const;
-    void SetNumericAttributeBase(const FGameplayAttribute& Attribute, float NewBaseValue);
+
+    // === 效果管理 (replicated) ===
+    FActiveGameplayEffectsContainer ActiveGameplayEffects;       // 活跃的 GE 实例(Replicated)
+    FActiveGameplayCueContainer  ActiveGameplayCues;             // 活跃的 GC 实例(Replicated)
+
+    FActiveGameplayEffectHandle ApplyGameplayEffectSpecToSelf(
+        const FGameplayEffectSpec& Spec, FPredictionKey PredictionKey = FPredictionKey());
+    FActiveGameplayEffectHandle ApplyGameplayEffectSpecToTarget(
+        const FGameplayEffectSpec& Spec, UAbilitySystemComponent* Target,
+        FPredictionKey PredictionKey = FPredictionKey());
+    bool RemoveActiveGameplayEffect(FActiveGameplayEffectHandle Handle, int32 StacksToRemove = -1);
+
+    // === 标签管理 (实现 IGameplayTagAssetInterface，Replicated) ===
+    FGameplayTagCountContainer GameplayTagCountContainer;         // 标签加速映射
+    FGameplayTagCountContainer BlockedAbilityTags;                // 阻止技能激活的标签
+    bool HasMatchingGameplayTag(FGameplayTag) const;
+    bool HasAllMatchingGameplayTags(const FGameplayTagContainer&) const;
+
+    // === 网络与预测 ===
+    EGameplayEffectReplicationMode ReplicationMode;               // GE 复制策略
+    FPredictionKey ScopedPredictionKey;                            // 当前预测窗口 Key
+    bool IsOwnerActorAuthoritative() const;                        // 是否有网络权限
+
+    // === 静态工具 ===
+    static const UAbilitySystemComponent* FindAbilitySystemComponent(const AActor*);
 };
 ```
 
-关键观察：**ASC 同时继承了三个接口类**：
-- `UGameplayTasksComponent` — 能力内建异步任务支持
-- `IAbilitySystemInterface` — 自我标识
-- `IGameplayTagAssetInterface` — 内建标签管理
+**关键观察**：
 
-这意味着任何拥有 ASC 的 Actor 自动就是 "GAS-enabled"，不需要手动注册。
+1. **ASC 不继承 `IAbilitySystemInterface`**。它继承的是 `IAbilitySystemReplicationProxyInterface`——这是"复制代理"接口，用于将 GameplayCue RPC、Montage RPC 等通过 Avatar Actor 代理发送。而 `IAbilitySystemInterface` 是让 Actor 暴露自身 ASC 的接口，不由 ASC 自身实现。
+
+2. **四个核心容器的复制策略不同**：
+   - `ActivatableAbilities` → `ReplicatedUsing = OnRep_ActivateAbilities`
+   - `ActiveGameplayEffects` → `Replicated`
+   - `ActiveGameplayCues` → `Replicated`
+   - `GameplayTagCountContainer` → `Replicated`
+   属性集（`SpawnedAttributes`）本身不做网络复制，而是复制的 GE 聚合在客户端重建最终值。
+
+3. **技能管理的 `AbilityScopeLock` 机制**：`GiveAbility`/`RemoveAbility` 期间加锁，挂起变更到 `AbilityPendingAdds`/`AbilityPendingRemoves`，释放后批量提交——保证迭代器安全且避免中间状态的网络同步抖动。
 
 上面看了三个入口的静态结构——`AbilitySystemInterface` 定义了"谁有能力"、`AbilitySystemGlobals` 定义了"全局规则"、`ASC` 定义了"有什么数据"。下面用一个动态场景把它们串起来：**当一个技能被激活时，数据到底怎么流动？**
 
@@ -260,46 +331,42 @@ if (EffectTag.MatchesTag(Tag_Status_Debuff_Poison))
 ### 5.4 可预测同步 (Predictive Replication)
 
 ```cpp
-// GameplayAbility.h — NetExecutionPolicy 枚举
+// GameplayAbilityTypes.h (行 58-76) — 回答：能力在网络上的执行位置
 UENUM(BlueprintType)
-enum class EGameplayAbilityNetExecutionPolicy : uint8
+namespace EGameplayAbilityNetExecutionPolicy
 {
-    LocalPredicted  UMETA(DisplayName="Local Predicted"),  // 客户端预测
-    LocalOnly       UMETA(DisplayName="Local Only"),       // 仅本地
-    ServerInitiated UMETA(DisplayName="Server Initiated"), // 服务器发起
-    ServerOnly      UMETA(DisplayName="Server Only"),      // 仅服务器
-};
+    // 能力在网络上的执行策略 —— 客户端是"请求并预测"、"请求并等待"，还是"不请求（直接执行）"
+    enum Type : int
+    {
+        LocalPredicted   UMETA(DisplayName = "Local Predicted"),
+        // 本地预测：部分能力在本地客户端预测性执行
+
+        LocalOnly        UMETA(DisplayName = "Local Only"),
+        // 仅本地：能力仅在有本地控制的客户端或服务器上执行
+
+        ServerInitiated  UMETA(DisplayName = "Server Initiated"),
+        // 服务器发起：由服务器发起，但也会在本地客户端执行
+
+        ServerOnly       UMETA(DisplayName = "Server Only"),
+        // 仅服务器：能力仅在服务器上执行
+    };
+}
 ```
 
-`LocalPredicted` 是 GAS 最精妙的设计——客户端立即执行技能，同时发 RPC 给服务器；服务器校验后返回确认。如果预测错误（例如服务器判定目标已死亡），客户端回滚状态。
+| 策略 | 谁发起 | 客户端执行 | 服务器执行 | 典型场景 |
+|------|--------|-----------|-----------|---------|
+| `LocalPredicted` | 客户端 | 立即预测执行 | 校验→确认/回滚 | 移动、跳跃、射击 |
+| `LocalOnly` | 拥有本地控制的端 | 单端执行 | — | 单机 / UI 交互类技能 |
+| `ServerInitiated` | 服务器 | 作为镜像执行 | 权威执行 | AI 技能、自动触发 |
+| `ServerOnly` | 服务器 | 不执行 | 权威执行 | 纯服务端逻辑（伤害结算） |
+
+`LocalPredicted` 是 GAS 最精巧的设计——客户端立即执行技能，同时发 RPC 给服务器；服务器校验后返回确认。如果预测错误（例如服务器判定目标已死亡），客户端回滚状态。
 
 我们会在第 10 篇文章中详细解读 `PredictionKey` 的生成、传递和校验机制。
 
 ---
 
-## 六、从入门到精通的阅读路线
-
-| 阶段 | 文章 | 核心收获 |
-|------|------|---------|
-| 🟢 基础 | 01 总览 ← **你在这里** | 建立全局坐标系 |
-| | 02 ASC | 理解中心调度器的初始化、复制模式、Tick 循环 |
-| | 03 GameplayTags | 掌握 GAS 的"通用语言" |
-| | 04 AttributeSet | 理解属性定义、回调链、网络复制 |
-| 🔵 核心 | 05-06 GE (上/下) | 掌握效果系统的所有细节——这是 GAS 最大最复杂的子系统 |
-| | 07-08 GA (上/下) | 技能从激活到取消的完整生命周期 |
-| | 09 GameplayCue | 表现层的触发机制和自定义 |
-| 🔴 高级 | 10 Prediction | 客户端预测的完整链路 |
-| | 11 GE Components | 组件化架构的演进 |
-| | 12 Network & Serial | 自定义序列化器 |
-| | 13 Targeting | 瞄准系统 |
-| | 14 Debug & Optimization | 实战调试工具链 |
-| | 15 终篇回顾 | 全景复习 + 设计模式总结 |
-
-**重点篇章**：ASC (02)、GE (05-06)、GA (07-08)、GC (09) 是整个系列的四个核心支柱，建议细读。
-
----
-
-## 七、关键术语速查
+## 六、关键术语速查
 
 | 术语 | 全称 | 含义 |
 |------|------|------|
@@ -315,7 +382,7 @@ enum class EGameplayAbilityNetExecutionPolicy : uint8
 
 ---
 
-## 八、总结
+## 七、总结
 
 1. **GAS 的本质是解耦**。它将属性、效果、技能、表现分成 7 个独立子系统，通过 ASC 协调运转。
 2. **Tag 是通用语言**。GAS 不使用硬编码枚举或字符串匹配，一切耦合通过 GameplayTag 消解。
@@ -323,7 +390,9 @@ enum class EGameplayAbilityNetExecutionPolicy : uint8
 4. **数据驱动优先**。绝大多数 GAS 行为可以在编辑器配置完成，不需要写 C++ 代码。
 5. **128 个头文件看似庞大，但只需记住 4 个核心文件就能入门**：`AbilitySystemComponent.h`、`GameplayEffect.h`、`GameplayAbility.h`、`AttributeSet.h`。
 
-下一篇文章，我们将深入 ASC——理解它的初始化流程、三种网络复制模式，以及为什么"一个 Actor 只能有一个 ASC"。
+---
+
+**下一篇**：[02 | ASC — 核心调度器](../02-ASC/02-ASC文章.md) — 理解它的初始化流程、三种网络复制模式，以及为什么"一个 Actor 只能有一个 ASC"。
 
 ---
 
