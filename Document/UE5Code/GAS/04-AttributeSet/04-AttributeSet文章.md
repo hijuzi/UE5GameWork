@@ -156,6 +156,8 @@ float FGameplayAttribute::GetNumericValue(const UAttributeSet* Src) const
 | `PreAttributeChange` | CurrentValue 即将被写入 | `NewValue` 可 Clamp | 「Health = Clamp(NewHealth, 0, MaxHealth)」 |
 | `PostAttributeChange` | CurrentValue 已被写入 | 不可 | 血条 UI 刷新 |
 
+> **补充**：除上述六个核心回调外，还有一个第七个虚函数 `OnAttributeAggregatorCreated`（`AttributeSet.h:237`），在聚合器创建时回调，可用于自定义聚合器初始化（如注入额外 ModChannel）。因使用频率极低，本文不单独展开。
+
 六函数不是各自为战——它们挂载在三条引擎调用链上，触发范围从窄到宽：
 
 | 回调对 | 调用点（UE 5.8 实测） | 宿主函数 | 触发范围 |
@@ -240,7 +242,7 @@ void ULyraHealthSet::PostGameplayEffectExecute(const FGameplayEffectModCallbackD
 
 走 `SetAttributeBaseValue`（本工程 `GameplayEffect.cpp:4048-4102`，UE 5.8 为 `:3986-4040`），且是 `const` 成员函数。官方注释（AttributeSet.h:225-231）两条硬性要求：1. 要约束 BaseValue 就在这 Clamp，与 `PreAttributeChange` 形成"base 和 final 双保险"；2. **不要在这触发游戏事件**——"This function should NOT invoke gameplay related events or callbacks"，那些留给 `PreAttributeChange`。
 
-先看调用点的引擎原文——**【源码】**（`GameplayEffect.cpp:4048-4102`，已删减非关键行）：
+先看调用点的引擎原文——**【源码】**（`GameplayEffect.cpp:3986-4040`，已删减非关键行）：
 
 ```cpp
 void FActiveGameplayEffectsContainer::SetAttributeBaseValue(FGameplayAttribute Attribute, float NewBaseValue)
@@ -329,9 +331,9 @@ void FGameplayAttribute::SetNumericValueChecked(float& NewValue, UAttributeSet* 
 
 那么它和 PreAttributeBaseChange 的 `SetAttributeBaseValue` 是什么关系？`SetAttributeBaseValue` 函数体内部**并不直接调** PreAttributeChange / PostAttributeChange，而是靠"写入动作"间接触发。汇总查证过的全部调用点，所有路径最终都汇进 `SetNumericValueChecked`：
 
-- **GE 修改路径**：`SetAttributeBaseValue`（GameplayEffect.cpp:4048）→ `InternalUpdateNumericalAttribute`（:4007）→ `SetNumericAttribute_Internal`（AbilitySystemComponent.cpp:480）→ `SetNumericValueChecked`（:72）
-- **聚合器 dirty 路径**：`FAggregator::OnDirty` → `OnAttributeAggregatorDirty`（GameplayEffect.cpp:3509，末尾 :3567 刷新数值）→ `InternalUpdateNumericalAttribute` → 同上
-- **复制回滚路径**：客户端收到 BaseValue 先回滚旧值再写新值（GameplayEffect.cpp:3824，保证 PostAttributeChange 的 `OldValue` 正确）→ `SetNumericAttribute_Internal` → 同上
+- **GE 修改路径**：`SetAttributeBaseValue`（GameplayEffect.cpp:3986）→ `InternalUpdateNumericalAttribute`（:3945）→ `SetNumericAttribute_Internal`（AbilitySystemComponent.cpp:476）→ `SetNumericValueChecked`（:72）
+- **聚合器 dirty 路径**：`FAggregator::OnDirty` → `OnAttributeAggregatorDirty`（GameplayEffect.cpp:3452，末尾 :3510 刷新数值）→ `InternalUpdateNumericalAttribute` → 同上
+- **复制回滚路径**：客户端收到 BaseValue 后在 `OnAttributeAggregatorDirty`（GameplayEffect.cpp:3452 → 内 :3487-3494 执行 ReverseEvaluate）反向推算并写回 → `InternalUpdateNumericalAttribute` → 同上
 
 所以"任何写 CurrentValue 的路径都过 `SetNumericValueChecked`"字面成立——瞬时 GE、持续效果、叠层变化、效果移除、`SetNumericAttribute` 直写，全部触发 PreAttributeChange / PostAttributeChange。这也正是官方注释（AttributeSet.h:214-220）把职责边界划得这么死的原因：
 
@@ -515,32 +517,32 @@ void ULyraHealthSet::PostGameplayEffectExecute(const FGameplayEffectModCallbackD
 **入口 `ExecuteActiveEffectsFrom`**（`GameplayEffect.cpp:3223`）：GE 施加到目标后，从这里开始。它遍历 GE Spec 里的所有 Modifier，逐个评估、逐个执行：
 
 ```cpp
-// GameplayEffect.cpp:3271-3272（关键两行）
+// GameplayEffect.cpp:3258-3259（关键两行）
 FGameplayModifierEvaluatedData EvalData(ModDef.Attribute, ModDef.ModifierOp, SpecToUse.GetModifierMagnitude(ModIdx));
 ModifierSuccessfullyExecuted |= InternalExecuteMod(SpecToUse, EvalData);
 ```
 
 `EvalData` 打包了三个关键信息：**改哪个属性**（Attribute）、**用什么运算**（ModifierOp，加/乘/覆盖…）、**力度是多少**（Magnitude，已经过曲线/Custom Calculation/ExecCalc 评估）。
 
-**核心执行体 `InternalExecuteMod`**（`GameplayEffect.cpp:4152`）——这是 **PreGameplayEffectExecute 和 PostGameplayEffectExecute 的家**：
+**核心执行体 `InternalExecuteMod`**（`GameplayEffect.cpp:4090`）——这是 **PreGameplayEffectExecute 和 PostGameplayEffectExecute 的家**：
 
 ```cpp
-// GameplayEffect.cpp:4152-4215（精简注释版）
+// GameplayEffect.cpp:4090-4153（精简注释版）
 bool FActiveGameplayEffectsContainer::InternalExecuteMod(FGameplayEffectSpec& Spec, FGameplayModifierEvaluatedData& ModEvalData)
 {
-	UAttributeSet* AttributeSet = /* 通过 Attribute 定位到所属 AttributeSet */;   // :4160-4164
+	UAttributeSet* AttributeSet = /* 通过 Attribute 定位到所属 AttributeSet */;   // :4098-4102
 
 	if (AttributeSet)
 	{
-		FGameplayEffectModCallbackData ExecuteData(Spec, ModEvalData, *Owner);     // :4169 贯穿全程的"上下文包"
+		FGameplayEffectModCallbackData ExecuteData(Spec, ModEvalData, *Owner);     // :4107 贯穿全程的"上下文包"
 
-		if (AttributeSet->PreGameplayEffectExecute(ExecuteData))                   // PreGameplayEffectExecute :4174 返回 false 拒绝整个修改
+		if (AttributeSet->PreGameplayEffectExecute(ExecuteData))                   // PreGameplayEffectExecute :4112 返回 false 拒绝整个修改
 		{
-			ApplyModToAttribute(ModEvalData.Attribute, ModEvalData.ModifierOp, ModEvalData.Magnitude, &ExecuteData); // :4177 真正动手改 BaseValue（下一层）
+			ApplyModToAttribute(ModEvalData.Attribute, ModEvalData.ModifierOp, ModEvalData.Magnitude, &ExecuteData); // :4115 真正动手改 BaseValue（下一层）
 
-			ModifiedAttribute->TotalMagnitude += ModEvalData.Magnitude;            // :4185 记账：实际生效了多少（发给客户端做飘字/UI）
+			ModifiedAttribute->TotalMagnitude += ModEvalData.Magnitude;            // :4123 记账：实际生效了多少（发给客户端做飘字/UI）
 
-			AttributeSet->PostGameplayEffectExecute(ExecuteData);                  // PostGameplayEffectExecute :4190 结算中心：伤害结算、死亡判定
+			AttributeSet->PostGameplayEffectExecute(ExecuteData);                  // PostGameplayEffectExecute :4128 结算中心：伤害结算、死亡判定
 		}
 	}
 	return bExecuted;
@@ -554,16 +556,16 @@ bool FActiveGameplayEffectsContainer::InternalExecuteMod(FGameplayEffectSpec& Sp
 
 ### 7.3 L1：BaseValue 写入层 —— 把 Mod 算到 BaseValue 上
 
-**`ApplyModToAttribute`**（`GameplayEffect.cpp:4217`）——L0 的下一站，也是最简单的一层：读旧值 → 运算 → 写新值。
+**`ApplyModToAttribute`**（`GameplayEffect.cpp:4155`）——L0 的下一站，也是最简单的一层：读旧值 → 运算 → 写新值。
 
 ```cpp
-// GameplayEffect.cpp:4217-4231（精简注释版）
+// GameplayEffect.cpp:4155-4169（精简注释版）
 void FActiveGameplayEffectsContainer::ApplyModToAttribute(FGameplayAttribute Attribute,
 	EGameplayModOp::Type ModifierOp, float ModifierMagnitude, FGameplayEffectModCallbackData* ModCallbackData)
 {
-	float CurrentBase = GetAttributeBaseValue(Attribute);                                          // :4220 读当前 BaseValue
-	float NewBase = FAggregator::StaticExecModOnBaseValue(CurrentBase, ModifierOp, ModifierMagnitude); // :4221 按运算规则算出新 BaseValue
-	SetAttributeBaseValue(Attribute, NewBase);                                                     // :4223 写回（下一站）
+	float CurrentBase = GetAttributeBaseValue(Attribute);                                          // :4158 读当前 BaseValue
+	float NewBase = FAggregator::StaticExecModOnBaseValue(CurrentBase, ModifierOp, ModifierMagnitude); // :4159 按运算规则算出新 BaseValue
+	SetAttributeBaseValue(Attribute, NewBase);                                                     // :4161 写回（下一站）
 }
 ```
 
@@ -576,29 +578,29 @@ void FActiveGameplayEffectsContainer::ApplyModToAttribute(FGameplayAttribute Att
 | `MultiplyAdditive` / `MultiplyCompound` | `Base *= Magnitude` |
 | `DivideAdditive` | `Base /= Magnitude`（除数为 0 时安全兜底） |
 
-**`SetAttributeBaseValue`**（`GameplayEffect.cpp:4048`）——**PreAttributeBaseChange / PostAttributeBaseChange 的家，也是整条链的分叉点**：
+**`SetAttributeBaseValue`**（`GameplayEffect.cpp:3986`）——**PreAttributeBaseChange / PostAttributeBaseChange 的家，也是整条链的分叉点**：
 
 ```cpp
-// GameplayEffect.cpp:4048-4102（精简注释版）
+// GameplayEffect.cpp:3986-4040（精简注释版）
 void FActiveGameplayEffectsContainer::SetAttributeBaseValue(FGameplayAttribute Attribute, float NewBaseValue)
 {
 	UAttributeSet* Set = /* 定位 AttributeSet */;
 	if (Set)
 	{
-		Set->PreAttributeBaseChange(Attribute, NewBaseValue);   // PreAttributeBaseChange :4063 写入前，唯一能 Clamp BaseValue 的地方
+		Set->PreAttributeBaseChange(Attribute, NewBaseValue);   // PreAttributeBaseChange :4001 写入前，唯一能 Clamp BaseValue 的地方
 
 		float OldBaseValue = GetAttributeBaseValue(Attribute);
-		FAggregator* Aggregator = FindOrCreateAggregator(Attribute);   // :4083 每个被 GE 修改的属性都有聚合器
+		FAggregator* Aggregator = FindOrCreateAggregator(Attribute);   // :4021 每个被 GE 修改的属性都有聚合器
 		if (Aggregator)
 		{
-			Aggregator->SetBaseValue(NewBaseValue);                     // :4093 写入聚合器 → 触发 dirty 链（见 3.4）
+			Aggregator->SetBaseValue(NewBaseValue);                     // :4031 写入聚合器 → 触发 dirty 链（见 3.4）
 		}
 		else
 		{
-			InternalUpdateNumericalAttribute(Attribute, NewBaseValue, nullptr); // :4098 没有聚合器：直写 CurrentValue（跳到 L3）
+			InternalUpdateNumericalAttribute(Attribute, NewBaseValue, nullptr); // :4036 没有聚合器：直写 CurrentValue（跳到 L3）
 		}
 
-		Set->PostAttributeBaseChange(Attribute, OldBaseValue, GetAttributeBaseValue(Attribute)); // PostAttributeBaseChange :4101 写入后（重读的值）
+		Set->PostAttributeBaseChange(Attribute, OldBaseValue, GetAttributeBaseValue(Attribute)); // PostAttributeBaseChange :4039 写入后（重读的值）
 	}
 }
 ```
@@ -613,9 +615,9 @@ void FActiveGameplayEffectsContainer::SetAttributeBaseValue(FGameplayAttribute A
 FAggregator::SetBaseValue (Agg.cpp:438)
  └─ BroadcastOnDirty (Agg.cpp:443 → :585)        标记所有活跃聚合器为脏
       └─ OnDirty.Broadcast (Agg.cpp:629)         多播委托，普通 GE 也在这里注册监听
-           └─ ASC::OnAttributeAggregatorDirty (ASC.cpp:2189)
-                └─ 容器::OnAttributeAggregatorDirty (GE.cpp:3509)
-                     ├─ [仅客户端] ReverseEvaluate 反推 Base (GE.cpp:3548)
+           └─ ASC::OnAttributeAggregatorDirty (ASC.cpp:2132)
+                └─ 容器::OnAttributeAggregatorDirty (GE.cpp:3452)
+                     ├─ [仅客户端] ReverseEvaluate 反推 Base (GE.cpp:~3470)
                      │       服务器只同步 BaseValue，客户端需由最终值反推 Base
                      └─ Evaluate → EvaluateWithBase (Agg.cpp:76 → :98)
                           └─ 算出最终 CurrentValue（进入 L3 落盘）
@@ -638,7 +640,7 @@ CurrentValue = ((BaseValue + Additive) × Multiplicative) ÷ Division × Compoun
 
 ### 7.5 L3：CurrentValue 落盘层 —— 收银台，数值终于写进内存
 
-dirty 链算出最终值后，容器调 `InternalUpdateNumericalAttribute`（`GE.cpp:3567 → :4007`）→ `SetNumericAttribute_Internal`（`ASC.cpp:480`），最终到达**核心写入点** `SetNumericValueChecked`（`AttributeSet.cpp:72-104`）：
+dirty 链算出最终值后，容器调 `InternalUpdateNumericalAttribute`（`GE.cpp:3510 → :3945`）→ `SetNumericAttribute_Internal`（`ASC.cpp:476`），最终到达**核心写入点** `SetNumericValueChecked`（`AttributeSet.cpp:72-117`）：
 
 ```cpp
 // AttributeSet.cpp:72-104（精简注释版）
@@ -690,40 +692,40 @@ void FGameplayAttribute::SetNumericValueChecked(float& NewValue, UAttributeSet* 
 把四层拼成一条完整的链，从 GE 执行到结算，每一步都标上行号：
 
 ```
-外部入口：TryActivateAbility → ApplyGameplayEffectToTarget → ExecuteActiveEffectsFrom (GE.cpp:3223)
- └─ [L0] InternalExecuteMod (GE.cpp:4152)
-      ├─ PreGameplayEffectExecute (GE.cpp:4174) —— return false 可拒绝
-      └─ ApplyModToAttribute (GE.cpp:4177)
-           └─ [L1] SetAttributeBaseValue (GE.cpp:4048)
-                ├─ PreAttributeBaseChange (GE.cpp:4063) —— 唯一可 Clamp BaseValue
-                ├─ Aggregator->SetBaseValue (GE.cpp:4093)
+外部入口：TryActivateAbility → ApplyGameplayEffectToTarget → ExecuteActiveEffectsFrom (GE.cpp:3210)
+ └─ [L0] InternalExecuteMod (GE.cpp:4090)
+      ├─ PreGameplayEffectExecute (GE.cpp:4112) —— return false 可拒绝
+      └─ ApplyModToAttribute (GE.cpp:4115)
+           └─ [L1] SetAttributeBaseValue (GE.cpp:3986)
+                ├─ PreAttributeBaseChange (GE.cpp:4001) —— 唯一可 Clamp BaseValue
+                ├─ Aggregator->SetBaseValue (GE.cpp:4031)
                 │    └─ [L2] FAggregator::SetBaseValue (Agg.cpp:438) —— dirty 链（同步递归）
                 │         └─ BroadcastOnDirty (Agg.cpp:443 → :585)
                 │              └─ OnDirty.Broadcast (Agg.cpp:629)
-                │                   └─ ASC::OnAttributeAggregatorDirty (ASC.cpp:2189)
-                │                        └─ 容器::OnAttributeAggregatorDirty (GE.cpp:3509)
-                │                             ├─ [仅客户端] ReverseEvaluate (GE.cpp:3548)
+                │                   └─ ASC::OnAttributeAggregatorDirty (ASC.cpp:2132)
+                │                        └─ 容器::OnAttributeAggregatorDirty (GE.cpp:3452)
+                │                             ├─ [仅客户端] ReverseEvaluate (GE.cpp:~3470)
                 │                             └─ Evaluate → EvaluateWithBase (Agg.cpp:76 → :98)
-                │                                  └─ [L3] InternalUpdateNumericalAttribute (GE.cpp:3567 → :4007)
-                │                                       └─ SetNumericAttribute_Internal (ASC.cpp:480)
+                │                                  └─ [L3] InternalUpdateNumericalAttribute (GE.cpp:3510 → :3945)
+                │                                       └─ SetNumericAttribute_Internal (ASC.cpp:476)
                 │                                            └─ SetNumericValueChecked (AttributeSet.cpp:72)
                 │                                                 ├─ PreAttributeChange
                 │                                                 └─ PostAttributeChange
-                └─ PostAttributeBaseChange (GE.cpp:4101) —— 等 dirty 链返回后才执行
-                     └─ TotalMagnitude += Magnitude (GE.cpp:4185) —— 记账（UI 用）
-                          └─ PostGameplayEffectExecute (GE.cpp:4190) —— 结算、死亡判定
+                └─ PostAttributeBaseChange (GE.cpp:4039) —— 等 dirty 链返回后才执行
+                     └─ TotalMagnitude += Magnitude (GE.cpp:4123) —— 记账（UI 用）
+                          └─ PostGameplayEffectExecute (GE.cpp:4128) —— 结算、死亡判定
 ```
 
 **六个回调位置总表**：
 
 | 序号 | 回调 | 所在层 | 位置 | 能力 |
 |------|------|--------|------|------|
-| 1 | `PreGameplayEffectExecute` | L0 | GE.cpp:4174 | 否决整个修改（返回 false） |
-| 2 | `PostGameplayEffectExecute` | L0 | GE.cpp:4190 | 结算中心：伤害结算、死亡判定 |
-| 3 | `PreAttributeBaseChange` | L1 | GE.cpp:4063 | 唯一可 Clamp BaseValue |
-| 4 | `PostAttributeBaseChange` | L1 | GE.cpp:4101 | BaseValue 已生效（重读值，只能看） |
-| 5 | `PreAttributeChange` | L3 | AttributeSet.cpp:74/97 | 可 Clamp CurrentValue |
-| 6 | `PostAttributeChange` | L3 | AttributeSet.cpp:78/101 | 写入后，只能看 |
+| 1 | `PreGameplayEffectExecute` | L0 | GE.cpp:4112 | 否决整个修改（返回 false） |
+| 2 | `PostGameplayEffectExecute` | L0 | GE.cpp:4128 | 结算中心：伤害结算、死亡判定 |
+| 3 | `PreAttributeBaseChange` | L1 | GE.cpp:4001 | 唯一可 Clamp BaseValue |
+| 4 | `PostAttributeBaseChange` | L1 | GE.cpp:4039 | BaseValue 已生效（重读值，只能看） |
+| 5 | `PreAttributeChange` | L3 | AttributeSet.cpp:82/95 | 可 Clamp CurrentValue |
+| 6 | `PostAttributeChange` | L3 | AttributeSet.cpp:84/97 | 写入后，只能看 |
 
 ### 7.7 两个易误解点
 
@@ -923,3 +925,4 @@ AttributeSet 让属性变得可测量、可追踪、可拦截。下一篇文章�
 ---
 
 *本文基于 UE 5.8 源码分析。系列文章会继续按模块拆解，从基础到高级，从 API 到设计哲学。*
+
