@@ -60,6 +60,11 @@ Desktop.ini
 LyraStarterGame/
 
 # --------------------------------------------
+# Tool Config (local paths)
+# --------------------------------------------
+.codebuddy/skills/tool/tech-article-writer/source-paths.md
+
+# --------------------------------------------
 # Misc
 # --------------------------------------------
 *.log
