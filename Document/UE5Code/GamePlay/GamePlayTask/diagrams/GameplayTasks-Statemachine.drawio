@@ -39,7 +39,7 @@
     </mxCell>
 
     <!-- Active -->
-    <mxCell id="15" value="Active&#xa;（BeginPlay → PerformActivation → TickTask）"
+    <mxCell id="15" value="Active&#xa;（PerformActivation → Activate → TickTask）"
       style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;"
       vertex="1" parent="1">
       <mxGeometry x="310" y="650" width="230" height="60" as="geometry"/>
@@ -53,7 +53,7 @@
     </mxCell>
 
     <!-- Paused (side branch) -->
-    <mxCell id="17" value="Paused&#xa;（调用 OnPaused）"
+    <mxCell id="17" value="Paused&#xa;（调用 OnGameplayTaskDeactivated）"
       style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;"
       vertex="1" parent="1">
       <mxGeometry x="600" y="780" width="160" height="55" as="geometry"/>
@@ -130,12 +130,12 @@
       <mxGeometry relative="1" as="geometry"/>
     </mxCell>
 
-    <!-- Paused → AwaitingActivation (Resume, re-queue) -->
-    <mxCell id="29" value="Resume()&#xa;重新入队" style="edgeStyle=orthogonalEdgeStyle;endArrow=block;endFill=1;fontSize=10;exitX=0;exitY=0.5;entryX=1;entryY=0.5;" edge="1" parent="1" source="17" target="13">
+    <!-- Paused → Active (Resume, direct restore) -->
+    <mxCell id="29" value="Resume()&#xa;直接恢复 Active" style="edgeStyle=orthogonalEdgeStyle;endArrow=block;endFill=1;fontSize=10;exitX=0;exitY=0.5;entryX=1;entryY=0.5;" edge="1" parent="1" source="17" target="15">
       <mxGeometry relative="1" as="geometry">
         <Array as="points">
           <mxPoint x="580" y="807"/>
-          <mxPoint x="580" y="417"/>
+          <mxPoint x="580" y="680"/>
         </Array>
       </mxGeometry>
     </mxCell>
