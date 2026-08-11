@@ -1,6 +1,33 @@
-# GameplayTags — 掌握 GAS 的"通用语言"
+# 03 | GameplayTags：GAS 的通用语言
 
-> 阅读本文前，建议先理解 [ASC（AbilitySystemComponent）](../02-ASC/02-ASC文章.md) 的基本架构。
+> **系列**: 《Inside GAS》— UE5 GameplayAbilitySystem 源码深度分析  
+> **难度**: 🟢 入门 → 🔴 源码  
+> **字数**: ~5000  
+> **前置**: 01-GAS总览与核心架构、02-ASC  
+> **定位**: §一~§二 入门速览；§三~§四 源码与设计思考，建议先掌握前两节再阅读  
+> **源码路径**: `Engine/Source/Runtime/GameplayTags/Classes/GameplayTagContainer.h`
+
+---
+
+> **系列导航**
+> 
+> | 阶段 | 篇章 | 内容 | 状态 |
+> |------|------|------|------|
+> | 🟢 基础 | 01 | GAS 总览与核心架构 | ✅ |
+> | | 02 | ASC — 核心调度器 | ✅ |
+> | | **03** | **GameplayTags — 通用语言** | ✅ |
+> | | 04 | AttributeSet — 属性定义与复制 | 📝 |
+> | 🔵 核心 | 05 | GameplayEffect — 效果与计算 (上) | 📝 |
+> | | 06 | GameplayEffect — 效果与计算 (下) | 📝 |
+> | | 07 | GameplayAbility — 技能激活与核心框架 (上) | 📝 |
+> | | 08 | GameplayAbility — Task/输入/预测 (下) | 📝 |
+> | | 09 | GameplayCue — 表现层触发机制 | 📝 |
+> | 🔴 高级 | 10 | Prediction — 预测与回滚 | 📝 |
+> | | 11 | GE Components — 组件化架构演进 | 📝 |
+> | | 12 | Network & Serial — 网络序列化 | 📝 |
+> | | 13 | Targeting — 瞄准系统 | 📝 |
+> | | 14 | Debug & Optimization — 调试与优化 | 📝 |
+> | | 15 | 终篇回顾 — 全景复习 | 📝 |
 
 ---
 
@@ -53,11 +80,11 @@ GAS 的 Tag 系统建立在六个关键类型之上：
 | **FGameplayTag** | 单个 Tag | 层次化名称，如 `Status.Debuff.Stun` |
 | **FGameplayTagContainer** | Tag 集合 | 支持 `HasTag` / `HasAll` / `HasAny` 查询，父级自动展开 |
 | **FGameplayTagQuery** | 逻辑查询 | 表达式树：`AnyTagsMatch` / `AllTagsMatch` / `NoTagsMatch` + 嵌套组合 |
-| **FGameplayTagRequirements** | 需求/忽略 | `RequireTags` + `IgnoreTags` 成对模式 |
-| **FGameplayTagCountContainer** | 引用计数 | 内部通过 `TMap<FGameplayTag, int32>` 引用计数管理，多来源释放不冲突（详见 §三.3） |
+| **FGameplayTagRequirements** | 需求/忽略（GAS 插件 `GameplayEffectTypes.h`，而非 Runtime/GameplayTags） | `RequireTags` + `IgnoreTags` 成对模式 |
+| **FGameplayTagCountContainer** | 引用计数（GAS 插件 `GameplayEffectTypes.h`，而非 Runtime/GameplayTags） | 内部通过 `TMap<FGameplayTag, int32>` 引用计数管理，多来源释放不冲突（详见 §三.3） |
 | **FGameplayTagNode** | 树节点 | 内部层次结构，管理父子关系 |
 
-**FGameplayTag** 和 **FGameplayTagContainer** 是日常使用最多的两个类型。**FGameplayTagCountContainer** 是 ASC 内部的"状态账本"：它记录了每个 Tag 被多少个来源持有。这彻底解决了"多个 GE 同时添加同一 Tag，一个 GE 过期后 Tag 不该消失"的问题。
+**FGameplayTag** 和 **FGameplayTagContainer** 是日常使用最多的两个类型。**FGameplayTagCountContainer** 是 ASC 内部的"状态账本"：它记录了每个 Tag 被多少个来源持有。这解决了"多个 GE 同时添加同一 Tag，一个 GE 过期后 Tag 不该消失"的问题。
 
 ### 2.3 FGameplayTagQuery：逻辑表达式
 
@@ -77,7 +104,7 @@ FGameplayTagQuery Query = FGameplayTagQuery::BuildQuery(RootExpr, "DebuffCheck")
 // 注：以上为伪代码示意，实际 API 见 FGameplayTagQueryExpression 和 FGameplayTagQuery::BuildQuery
 ```
 
-表达式类型共 8 种（`GameplayTagContainer.h` 中 `EGameplayTagQueryType` 枚举定义处）：
+表达式类型共 8 种（`GameplayTagContainer.h` 中 `EGameplayTagQueryExprType` 枚举定义处，`GameplayTagContainer.h:690`）：
 
 | 表达式类型 | 语义 |
 |-----------|------|
@@ -96,7 +123,9 @@ FGameplayTagQuery Query = FGameplayTagQuery::BuildQuery(RootExpr, "DebuffCheck")
 
 ## 三、源码分析：Tag 如何串起三件套
 
-如果说 ASC 是大脑，Skill 是手脚，GE 是血液——那么 Tag 就是**神经系统**。三个子系统之间不直接调用对方的方法，而是通过 Tag 发布和订阅状态。
+> 从本节起进入源码层。前两节建立的"六大类型"和"层次命名"概念是本节的地基，建议先回顾再继续。
+
+如果说 ASC 是大脑，GA 是手脚，GE 是血液——那么 Tag 就是**神经系统**。三个子系统之间不直接调用对方的方法，而是通过 Tag 发布和订阅状态。
 
 ![Tag 通信全景图](diagrams/Tag_Communication.png)
 
@@ -105,8 +134,7 @@ FGameplayTagQuery Query = FGameplayTagQuery::BuildQuery(RootExpr, "DebuffCheck")
 打开 `GameplayAbility.h`（`Category = Tags` 分组下的 UPROPERTY 成员），一个技能暴露了 5 类 Tag 字段：
 
 ```cpp
-// GameplayAbility.h — Tag 相关成员变量（精简）
-
+// GameplayAbility.h — Tag 相关成员变量（①~②）
 // ① 技能的"身份标签"——这个技能是什么类型的
 UPROPERTY(EditDefaultsOnly, Category = Tags)
 FGameplayTagContainer AbilityTags;
@@ -117,24 +145,27 @@ FGameplayTagContainer ActivationRequiredTags;   // 必须全部拥有
 
 UPROPERTY(EditDefaultsOnly, Category = Tags)
 FGameplayTagContainer ActivationBlockedTags;    // 拥有任一即阻塞
+```
 
+```cpp
+// GameplayAbility.h — Tag 相关成员变量（③~⑤）
 // ③ 激活后副作用——激活时自动给 Owner 打的 Tag
 UPROPERTY(EditDefaultsOnly, Category = Tags)
 FGameplayTagContainer ActivationOwnedTags;
 
 // ④ 互斥关系——取消/阻塞其他技能
 UPROPERTY(EditDefaultsOnly, Category = Tags)
-FGameplayTagContainer CancelAbilitiesWithTag;   // 取消带有这些 Tag 的技能
+FGameplayTagContainer CancelAbilitiesWithTag;   // 取消已激活的同 Tag 技能
 
 UPROPERTY(EditDefaultsOnly, Category = Tags)
-FGameplayTagContainer BlockAbilitiesWithTag;    // 阻塞带有这些 Tag 的技能
+FGameplayTagContainer BlockAbilitiesWithTag;    // 阻塞即将激活的同 Tag 技能
 
-// ⑤ 触发来源——技能还需要满足来源/目标的 Tag 条件
+// ⑤ 触发来源——来源/目标身上的 Tag 条件
 UPROPERTY(EditDefaultsOnly, Category = Tags)
-FGameplayTagRequirements SourceRequiredTags;     // 来源身上需要的 Tag 条件
+FGameplayTagRequirements SourceRequiredTags;    // 来源身上需要的条件
 
 UPROPERTY(EditDefaultsOnly, Category = Tags)
-FGameplayTagRequirements TargetRequiredTags;     // 目标身上需要的 Tag 条件
+FGameplayTagRequirements TargetRequiredTags;    // 目标身上需要的条件
 ```
 
 **实际场景**：一个"旋风斩"技能可以这样配置：
@@ -154,33 +185,198 @@ FGameplayTagRequirements TargetRequiredTags;     // 目标身上需要的 Tag �
 GameplayEffect 通过四个通道使用 Tag（通过独立的 Component 解耦，而非集中在 GE 基类中）：
 
 ```cpp
-// 通道①：授予 Tag（GE 存在期间 Owner 持有该 Tag）
-// AssetTagsGameplayEffectComponent.h — UPROPERTY(EditDefaultsOnly)
-FInheritedTagContainer InheritableGrantedTags;
+// 通道①：授予 Tag（GE 施加后，目标持有该 Tag）
+// TargetTagsGameplayEffectComponent.h — UTargetTagsGameplayEffectComponent
+FInheritedTagContainer InheritableGrantedTagsContainer;   // 编辑器显示名 "Add Tags"
 
-// 通道②：持续条件（GE 生效期间，Owner 必须一直满足的 Tag 条件）
-// OngoingTagRequirementsGameplayEffectComponent.h
-FGameplayTagRequirements OngoingTagRequirements;
-
-// 通道③：施加条件（GE 能否施加到目标上的 Tag 判断）
+// 通道②③：施加条件 + 持续条件（同一组件 UTargetTagRequirementsGameplayEffectComponent）
 // TargetTagRequirementsGameplayEffectComponent.h
-FGameplayTagRequirements ApplicationTagRequirements;
+FGameplayTagRequirements ApplicationTagRequirements;      // 施加时 pass/fail，不满足则施加失败
+FGameplayTagRequirements OngoingTagRequirements;           // 施加后判定 "on/off"，不满足则 GE 暂停生效
 
-// 通道④：移除连锁（该 GE 移除时，同时移除带特定 Tag 的其他 GE）
-// RemoveOtherGameplayEffectComponent.h
-FGameplayTagRequirements RemoveGameplayEffectsWithTags;
+// 通道④：移除其他 GE（查询式匹配，而非简单 Tag 列表）
+// RemoveOtherGameplayEffectComponent.h — URemoveOtherGameplayEffectComponent
+TArray<FGameplayEffectQuery> RemoveGameplayEffectQueries; // 匹配 OwningTagQuery/EffectTagQuery 的 GE 被移除
+
+// 补充：AssetTags 组件（UAssetTagsGameplayEffectComponent）持有的是 InheritableAssetTags，
+// 表示"GE 资产自身拥有什么 Tag"，并不会授予目标——别和通道①混淆
 ```
 
 **流程示例——"燃烧"GE 的完整 Tag 生命周期**：
 
-1. **施加前**：检查 `ApplicationTagRequirements` → 目标不能有 `Status.Immune.Fire`
-2. **施加时**：通过 AssetTagsComponent 的 `InheritableGrantedTags` → 目标获得 `Status.Debuff.Burning`
-3. **持续中**：检查 `OngoingTagRequirements` → 目标身上必须有 `Status.Alive`（死亡则 GE 移除）
-4. **移除时**：通过 `RemoveGameplayEffectsWithTags` → 同时移除所有带 `Status.Buff.WaterShield` 的 GE
+以"燃烧"GE 为例：它授予 `Status.Debuff.Burning`，要求目标必须有 `Status.Alive` 才能持续生效；目标死亡，或施加"水盾"（授予 `Status.Buff.WaterShield`）时被移除。对应源码（`Engine\Plugins\Runtime\GameplayAbilities\Source\GameplayAbilities`）分 4 个阶段：
+
+**① 施加前：`ApplicationTagRequirements` 检查（能否施加）**
+
+目标尝试施加该 GE 时，`UAbilitySystemComponent::ApplyGameplayEffectSpecToSelf` 在正式加入活跃列表前先调用 `CanApply`——失败直接返回空 Handle：
+
+```cpp
+// AbilitySystemComponent.cpp:1046-1050
+// check if the effect being applied actually succeeds
+if (!Spec.Def->CanApply(ActiveGameplayEffects, Spec))
+{
+	return FActiveGameplayEffectHandle();
+}
+```
+
+`UGameplayEffect::CanApply` 遍历所有 GEComponent，任一组件拒绝即整体失败（短路返回）。`ApplicationTagRequirements` 就在 `UTargetTagRequirementsGameplayEffectComponent::CanGameplayEffectApply` 中被检查：
+
+```cpp
+// GameplayEffect.cpp:958-970
+bool UGameplayEffect::CanApply(const FActiveGameplayEffectsContainer& ActiveGEContainer, const FGameplayEffectSpec& GESpec) const
+{
+	for (const UGameplayEffectComponent* GEComponent : GEComponents)
+	{
+		if (GEComponent && !GEComponent->CanGameplayEffectApply(ActiveGEContainer, GESpec))
+		{
+			UE_VLOG_UELOG(ActiveGEContainer.Owner, LogGameplayEffects, Verbose, TEXT("%s could not apply. Blocked by %s"), *GetNameSafe(GESpec.Def), *GetNameSafe(GEComponent));
+			return false;
+		}
+	}
+
+	return true;
+}
+```
+
+`RequirementsMet` 的判定规则来自结构体 `FGameplayTagRequirements` 的三个字段（`GameplayEffectTypes.h:1527-1537`）：
+
+```cpp
+// GameplayEffectTypes.h — struct FGameplayTagRequirements
+FGameplayTagContainer RequireTags;  // 编辑器显示名 "Must Have Tags"：必须全部存在
+FGameplayTagContainer IgnoreTags;   // 编辑器显示名 "Must Not Have Tags"：必须全部不存在
+FGameplayTagQuery TagQuery;         // 编辑器显示名 "Query Must Match"：复杂查询（空则不限制）
+```
+
+判定实现（`GameplayEffectTypes.cpp:1165-1172`）：
+
+```cpp
+// GameplayEffectTypes.cpp:1165-1172
+bool FGameplayTagRequirements::RequirementsMet(const FGameplayTagContainer& Container) const
+{
+	const bool bHasRequired = Container.HasAll(RequireTags);
+	const bool bHasIgnored = Container.HasAny(IgnoreTags);
+	const bool bMatchQuery = TagQuery.IsEmpty() || TagQuery.Matches(Container);
+
+	return bHasRequired && !bHasIgnored && bMatchQuery;
+}
+```
+
+> 燃烧 GE 配置 `IgnoreTags = Status.Immune.Fire`：目标免疫火焰时 `RequirementsMet` 返回 false → `CanApply` 返回 false → 施加被拒绝。
+
+**② 施加时：授予 Tag（`CachedGrantedTags` → `UpdateTagMap` +1）**
+
+施加通过后 GE 加入活跃列表，`UGameplayEffect::OnAddedToActiveContainer` 逐一通知各组件。TargetTagRequirements 组件在此注册"持续条件"用到的 Tag 回调，并做首次 Ongoing 检查（返回值决定初始是否 active）：
+
+```cpp
+// TargetTagRequirementsGameplayEffectComponent.cpp:90-108（节选）
+for (const FGameplayTag& Tag : GameplayTagsToBind)
+{
+	FOnGameplayEffectTagCountChanged& OnTagEvent = ASC->RegisterGameplayTagEvent(Tag, EGameplayTagEventType::NewOrRemoved);
+	FDelegateHandle Handle = OnTagEvent.AddUObject(this, &UTargetTagRequirementsGameplayEffectComponent::OnTagChanged, ActiveGEHandle);
+	AllBoundEvents.Emplace(Tag, Handle);
+}
+...
+FGameplayTagContainer TagContainer;
+ASC->GetOwnedGameplayTags(TagContainer);
+
+return OngoingTagRequirements.RequirementsMet(TagContainer);
+```
+
+真正把 Tag 写入目标 ASC 的是 `AddActiveGameplayEffectGrantedTagsAndModifiers`。它写入的 `GetGrantedTags()` 来自 GE 的 `CachedGrantedTags`——该缓存由 TargetTags 组件在加载时聚合（`ApplyTargetTagChanges` → `InheritableGrantedTagsContainer.ApplyTo(Owner->CachedGrantedTags)`）：
+
+```cpp
+// GameplayEffect.cpp:4676-4678
+// Update our owner with the tags this GameplayEffect grants them
+Owner->UpdateTagMap(Effect.Spec.Def->GetGrantedTags(), 1, ...);
+Owner->UpdateTagMap(Effect.Spec.DynamicGrantedTags, 1, ...);
+```
+
+`UpdateTagMap` 最终在 `FGameplayTagCountContainer::UpdateTagCount` 中把 `Status.Debuff.Burning` 计数 +1 并广播 Tag 变化——目标从此"拥有"燃烧状态。
+
+**③ 持续中：`OngoingTagRequirements`（on/off 开关）**
+
+目标身上任何 Tag 变化都会触发 ASC 广播，已注册的 `OnTagChanged` 被调用。它重新评估 Ongoing 条件：不满足就抑制（inhibit）GE，满足则恢复。注意抑制 ≠ 移除——抑制只是让 GE 暂时"不干活"：
+
+```cpp
+// TargetTagRequirementsGameplayEffectComponent.cpp:137-149
+const bool bRemovalRequirementsMet = HaveRemovalRequirementsBeenMet(OwnedTags, Owner->IsOwnerActorAuthoritative());
+if (bRemovalRequirementsMet)
+{
+	// 先检查 Removal 条件：命中则直接移除整个 GE
+	Owner->RemoveActiveGameplayEffect(ActiveGEHandle);
+}
+else
+{
+	// 否则按 Ongoing 条件决定 on/off
+	constexpr bool bInvokeCuesIfStateChanged = true;
+	const bool bOngoingRequirementsMet = OngoingTagRequirements.IsEmpty() || OngoingTagRequirements.RequirementsMet(OwnedTags);
+	Owner->SetActiveGameplayEffectInhibit(MoveTemp(ActiveGEHandle), !bOngoingRequirementsMet, bInvokeCuesIfStateChanged);
+}
+```
+
+`SetActiveGameplayEffectInhibit` 切换 `bIsInhibited`：抑制时把 GE 的 modifier 与授予 Tag 从账本中摘除（计数 -1），恢复时再加回——这就是"暂停生效"的实现。翻转标志位只是第一步，真正的"摘除/加回"动作在函数体内完成：
+
+```cpp
+// AbilitySystemComponent.cpp:371-389（节选）
+if (ActiveGE->bIsInhibited != bInhibit)
+{
+	ActiveGE->bIsInhibited = bInhibit;
+	...
+	if (bInhibit)
+	{
+		// Remove our ActiveGameplayEffects modifiers with our Attribute Aggregators
+		ActiveGameplayEffects.RemoveActiveGameplayEffectGrantedTagsAndModifiers(*ActiveGE, bInvokePredictedEffects);
+	}
+	else
+	{
+		ActiveGameplayEffects.AddActiveGameplayEffectGrantedTagsAndModifiers(*ActiveGE, bInvokePredictedEffects);
+	}
+	...
+}
+```
+
+> 燃烧 GE 配 `OngoingTagRequirements.RequireTags = Status.Alive`：目标活着 → 持续燃烧；目标死亡（`Status.Alive` 计数归零触发广播）→ `OnTagChanged` → Removal 未命中、Ongoing 不满足 → 先被抑制，随后由死亡逻辑主动 `RemoveActiveGameplayEffect` 彻底移除。
+
+**④ 移除时：RemoveOther 查询移除 + 自身 Tag 清理**
+
+"水盾"GE 施加时触发 `URemoveOtherGameplayEffectComponent::OnGameplayEffectApplied`，用 `RemoveGameplayEffectQueries` 构造查询批量移除匹配的 GE（通过 `IgnoreHandles` 保证不误删自己）：
+
+```cpp
+// RemoveOtherGameplayEffectComponent.cpp:31-49（节选）
+constexpr int32 RemoveAllStacks = -1;
+for (const FGameplayEffectQuery& RemoveQuery : RemoveGameplayEffectQueries)
+{
+	if (!RemoveQuery.IsEmpty())
+	{
+		if (ActiveGEHandles.IsEmpty())
+		{
+			// Faster path: No copy needed
+			ActiveGEContainer.RemoveActiveEffects(RemoveQuery, RemoveAllStacks);
+		}
+		else
+		{
+			FGameplayEffectQuery MutableRemoveQuery = RemoveQuery;
+			MutableRemoveQuery.IgnoreHandles = MoveTemp(ActiveGEHandles);
+			ActiveGEContainer.RemoveActiveEffects(MutableRemoveQuery, RemoveAllStacks);
+		}
+	}
+}
+```
+
+`FGameplayEffectQuery` 按 Tag 匹配的关键字段是 `OwningTagQuery`（匹配 GE 授予的 Tag）与 `EffectTagQuery`（匹配 GE 自有的 Tag）。燃烧 GE 被水盾移除（或自然到期）时，`RemoveActiveGameplayEffectGrantedTagsAndModifiers` 把授予的 Tag 计数 -1，归 0 时广播"Tag 消失"：
+
+```cpp
+// GameplayEffect.cpp:4984-4986
+// Update gameplaytag count and broadcast delegate if we are at 0
+Owner->UpdateTagMap(Effect.Spec.Def->GetGrantedTags(), -1, ...);
+Owner->UpdateTagMap(Effect.Spec.DynamicGrantedTags, -1, ...);
+```
+
+> 至此目标身上的 `Status.Debuff.Burning` 归零消失，燃烧 GE 的完整 Tag 生命周期结束。四步与四个通道的对应关系：**①施加前 = 通道③（Application）→ ②施加时 = 通道①（Granted）→ ③持续中 = 通道②（Ongoing）→ ④移除时 = 通道④（RemoveOther）**。
 
 #### 思考：为什么 GE 的 Tag 配置要拆成多个 Component？
 
-一个 GE 涉及 4 个独立的 Tag 维度——授予、持续条件、施加条件、移除连锁。如果全部塞进 `UGameplayEffect` 基类，那么一个只有简单数值修改的 GE 也要背负这 4 套 Tag 逻辑的内存开销。拆成独立 Component 后，你按需组合：一个纯伤害 GE 只需要 `AssetTagsComponent` 和 `TargetTagRequirementsComponent`，不需要 `OngoingTagRequirementsComponent` 或 `RemoveOtherGameplayEffectComponent`。这种 Component 化设计让每个 GE 只为它真正用到的功能付费。
+一个 GE 涉及 4 个独立的 Tag 维度——授予、持续条件、施加条件、移除连锁。如果全部塞进 `UGameplayEffect` 基类，那么一个只有简单数值修改的 GE 也要背负这 4 套 Tag 逻辑的内存开销。拆成独立 Component 后，你按需组合：一个纯伤害 GE 只需要 `TargetTagsGameplayEffectComponent`（授予 Tag）和 `TargetTagRequirementsGameplayEffectComponent`（施加/持续条件），不需要 `RemoveOtherGameplayEffectComponent`。这种 Component 化设计让每个 GE 只为它真正用到的功能付费。
 
 ### 3.3 ASC 中的 Tag 调度
 
@@ -240,7 +436,7 @@ Tag 的层次化解决了这个问题。`Status.Debuff` 自动匹配所有子 Ta
 
 用 `bool` 数组或 `TSet<FGameplayTag>` 管理状态的问题是：当来源 A 和来源 B 都设置了同一个状态，来源 A 释放后，你无法知道状态是否还应该存在。
 
-`FGameplayTagCountContainer` 的 `TMap<FGameplayTag, int32>` 设计优雅地解决此事：每个 Tag 不是一个"是非问题"，而是一个"有几个人说它是"的问题。
+`FGameplayTagCountContainer` 的 `TMap<FGameplayTag, int32>` 恰好解决这个难题：每个 Tag 不是一个"是非问题"，而是一个"有几个人说它是"的问题。
 
 ### 4.3 网络复制策略
 
@@ -252,7 +448,7 @@ Tag 的网络复制也分为两档（`AbilitySystemComponent.h` 中 `MinimalRepl
 FGameplayTagCountContainer MinimalReplicationTags;
 ```
 
-在 `Mixed` 复制模式下，非 Owner 客户端只收到 `MinimalReplicationTags`，其中仅包含 GameplayCue 相关的 Tag，用于驱动视觉表现。完整的 Tag 状态只发给 Owner，节省带宽。
+在 `Mixed` 复制模式下，非 Owner 客户端只收到 `MinimalReplicationTags`。这个容器不是自动收集的——ASC 在 GameplayCue 相关流程中显式 `AddTag` 填入需要轻量复制的 Tag（通常用于驱动视觉表现），其余完整 Tag 状态只发给 Owner，节省带宽。
 
 ### 4.4 跨引擎对比
 
@@ -261,6 +457,16 @@ FGameplayTagCountContainer MinimalReplicationTags;
 对比 Godot：Godot 的 `StringName`（类似 UE 的 `FName`）提供了高效的字符串比较，但没有内置层次 Tag 系统和引用计数。要实现 GAS 级别的 Tag 互操作，需要额外搭建层次匹配、引用计数和表达式查询等基础设施。
 
 UE 的 GameplayTags 虽然看起来只是一个"命名字符串的包装"，但它的层次匹配、引用计数、表达式查询、网络复制这四项能力叠加后，构成了一个完整的运行时状态通信协议。
+
+### 4.5 代价与边界
+
+GameplayTags 不是免费的，这里坦诚列出它的代价：
+
+- **Tag 膨胀（Tag Explosion）**：层级命名天然鼓励细分，项目后期容易积累上千个 Tag，审查和文档维护成本随数量上升。
+- **调试成本**：状态被拆散成无数个 Tag，要定位"某个状态为什么存在"，得逆向追踪每一个 +1 的来源，可读性不如枚举直观。
+- **不适用场景**：纯数值、连续量（血量、等级、冷却进度）用 Tag 表达是灾难——它们该交给 AttributeSet；仅在一个系统内部生效的私有状态，也不必上升到全局 Tag。
+
+> 所以正确的姿势不是"全部用 Tag"，而是分工：**跨系统通信用 Tag，数值归 AttributeSet，单系统内部状态用枚举。**
 
 ---
 
@@ -274,30 +480,14 @@ GameplayTags 是 GAS 的神经系统：
 - **技能 5 类 Tag 字段**（身份/条件/副作用/互斥/来源）和 **GE 4 个 Tag 通道**（授予/持续/施加/移除）通过 ASC 统一调度，实现了子系统间的解耦通信
 - 网络复制通过 `MinimalReplicationTags` 分层——Owner 看全家，旁观者只看表现
 
-一句话：**写逻辑时不问"现在是眩晕状态吗"，而是问"身上有 `Status.Debuff.Stun` 这个 Tag 吗"。** 从主动查询到被动响应，从硬编码枚举到层次化 Tag，这便是 GAS 后处理模型的核心转变。
+一句话：**写逻辑时不问"现在是眩晕状态吗"，而是问"身上有 `Status.Debuff.Stun` 这个 Tag 吗"。** 从主动查询到被动响应，从硬编码枚举到层次化 Tag，这便是 GAS 事件驱动（发布-订阅）模型的核心转变。
 
 ---
 
-*下一篇：[04-AttributeSet — 属性定义、回调链与网络复制](../04-AttributeSet/04-AttributeSet文章.md)*
+**上一篇**：[02 | ASC — 核心调度器](../02-ASC/02-ASC文章.md)
+
+**下一篇**：[04 | AttributeSet — 属性定义、回调链与网络复制](../04-AttributeSet/04-AttributeSet文章.md) — 看属性如何定义与复制、修改回调如何触发，以及 AttributeSet 如何与 ASC 协作支撑数值驱动。
 
 ---
 
-> **系列导航**
-> 
-> | 阶段 | 篇章 | 内容 | 状态 |
-> |------|------|------|------|
-> | 🟢 基础 | 01 | GAS 总览与核心架构 | 📝 |
-> | | 02 | ASC — 核心调度器 | 📝 |
-> | | **03** | **GameplayTags — 通用语言** | ✅ |
-> | | 04 | AttributeSet — 属性定义与复制 | 📝 |
-> | 🔵 核心 | 05 | GameplayEffect — 效果与计算 (上) | 📝 |
-> | | 06 | GameplayEffect — 效果与计算 (下) | 📝 |
-> | | 07 | GameplayAbility — 技能激活与核心框架 (上) | 📝 |
-> | | 08 | GameplayAbility — Task/输入/预测 (下) | 📝 |
-> | | 09 | GameplayCue — 表现层触发机制 | 📝 |
-> | 🔴 高级 | 10 | Prediction — 预测与回滚 | 📝 |
-> | | 11 | GE Components — 组件化架构演进 | 📝 |
-> | | 12 | Network & Serial — 网络序列化 | 📝 |
-> | | 13 | Targeting — 瞄准系统 | 📝 |
-> | | 14 | Debug & Optimization — 调试与优化 | 📝 |
-> | | 15 | 终篇回顾 — 全景复习 | 📝 |
+*本文基于 UE 5.8 源码分析。系列文章会继续按模块拆解，从基础到高级，从 API 到设计哲学。*

@@ -1,4 +1,32 @@
-# 04 — AttributeSet：属性定义、回调链与网络复制
+# 04 | AttributeSet：属性定义、回调链与网络复制
+
+> **系列**: 《Inside GAS》— UE5 GameplayAbilitySystem 源码深度分析  
+> **难度**: 🟢 入门 → 🔴 源码  
+> **字数**: ~5000  
+> **前置**: 03-GameplayTags  
+> **源码路径**: `Engine/Plugins/Runtime/GameplayAbilities/Source/GameplayAbilities/Public/AttributeSet.h`
+
+---
+
+> **系列导航**
+> 
+> | 阶段 | 篇章 | 内容 | 状态 |
+> |------|------|------|------|
+> | 🟢 基础 | 01 | GAS 总览与核心架构 | ✅ |
+> | | 02 | ASC — 核心调度器 | ✅ |
+> | | 03 | GameplayTags — 通用语言 | ✅ |
+> | | **04** | **AttributeSet — 属性定义与复制** | ✅ |
+> | 🔵 核心 | 05 | GameplayEffect — 效果与计算 (上) | 📝 |
+> | | 06 | GameplayEffect — 效果与计算 (下) | 📝 |
+> | | 07 | GameplayAbility — 技能激活与核心框架 (上) | 📝 |
+> | | 08 | GameplayAbility — Task/输入/预测 (下) | 📝 |
+> | | 09 | GameplayCue — 表现层触发机制 | 📝 |
+> | 🔴 高级 | 10 | Prediction — 预测与回滚 | 📝 |
+> | | 11 | GE Components — 组件化架构演进 | 📝 |
+> | | 12 | Network & Serial — 网络序列化 | 📝 |
+> | | 13 | Targeting — 瞄准系统 | 📝 |
+> | | 14 | Debug & Optimization — 调试与优化 | 📝 |
+> | | 15 | 终篇回顾 — 全景复习 | 📝 |
 
 ---
 
@@ -69,23 +97,49 @@ FString AttributeName;             // 属性名（缓存）
 
 有了 `FProperty*`，`FGameplayAttribute` 可以做两件关键的事：
 
-**写入**（`AttributeSet.cpp` 中 `FGameplayAttribute::SetNumericValueChecked`）：
+**写入**（`AttributeSet.cpp:72` 中 `FGameplayAttribute::SetNumericValueChecked`，简化示意，完整版见 §3.2）：
 ```
 void FGameplayAttribute::SetNumericValueChecked(float& NewValue, UAttributeSet* Dest) const
 {
-    // 如果是 FGameplayAttributeData 属性：
-    FGameplayAttributeData* DataPtr = StructProperty->ContainerPtrToValuePtr<FGameplayAttributeData>(Dest);
-    DataPtr->SetCurrentValue(NewValue);
-    // 如果是原生 float 属性（旧版兼容）：
-    NumericProperty->SetFloatingPointPropertyValue(ValuePtr, NewValue);
+    // 分支A：原生 float 属性，直接写 FProperty
+    if (FNumericProperty* NumericProperty = CastField<FNumericProperty>(Attribute.Get()))
+    {
+        void* ValuePtr = NumericProperty->ContainerPtrToValuePtr<void>(Dest);
+        NumericProperty->SetFloatingPointPropertyValue(ValuePtr, NewValue);
+    }
+    // 分支B：FGameplayAttributeData 属性，写 CurrentValue（推荐）
+    else if (IsGameplayAttributeDataProperty(Attribute.Get()))
+    {
+        FStructProperty* StructProperty = CastField<FStructProperty>(Attribute.Get());
+        FGameplayAttributeData* DataPtr = StructProperty->ContainerPtrToValuePtr<FGameplayAttributeData>(Dest);
+        DataPtr->SetCurrentValue(NewValue);
+    }
 }
 ```
 
-**读取**（`AttributeSet.cpp` 中 `FGameplayAttribute::GetNumericValue`）：
+**读取**（`AttributeSet.cpp:119-139` 中 `FGameplayAttribute::GetNumericValue`）：
 ```
 float FGameplayAttribute::GetNumericValue(const UAttributeSet* Src) const
 {
-    // 通过反射找到属性在内存中的位置，返回 CurrentValue
+    // 分支A：原生 float 属性，直接读 FProperty
+    const FNumericProperty* const NumericProperty = CastField<FNumericProperty>(Attribute.Get());
+    if (NumericProperty)
+    {
+        const void* ValuePtr = NumericProperty->ContainerPtrToValuePtr<void>(Src);
+        return NumericProperty->GetFloatingPointPropertyValue(ValuePtr);
+    }
+    // 分支B：FGameplayAttributeData 属性，读 CurrentValue（推荐）
+    else if (IsGameplayAttributeDataProperty(Attribute.Get()))
+    {
+        const FStructProperty* StructProperty = CastField<FStructProperty>(Attribute.Get());
+        const FGameplayAttributeData* DataPtr = StructProperty->ContainerPtrToValuePtr<FGameplayAttributeData>(Src);
+        if (ensure(DataPtr))
+        {
+            return DataPtr->GetCurrentValue();
+        }
+    }
+
+    return 0.f;   // 空属性或非法属性统一返回 0
 }
 ```
 
@@ -106,7 +160,237 @@ float FGameplayAttribute::GetNumericValue(const UAttributeSet* Src) const
 | `PreAttributeChange` | CurrentValue 即将被写入 | `NewValue` 可 Clamp | 「Health = Clamp(NewHealth, 0, MaxHealth)」 |
 | `PostAttributeChange` | CurrentValue 已被写入 | 不可 | 血条 UI 刷新 |
 
-> 注释原文特别强调了 `PreAttributeChange` 的职责边界："This function is meant to enforce things like `Health = Clamp(Health, 0, MaxHealth)` and NOT things like 'trigger this extra thing if damage is applied'." Clamp 放 Pre，副作用放 Post，这是 GAS 的约定。
+六函数不是各自为战——它们挂载在三条引擎调用链上，触发范围从窄到宽：
+
+| 回调对 | 调用点（UE 5.8 实测） | 宿主函数 | 触发范围 |
+|--------|----------------------|----------|----------|
+| `Pre/PostGameplayEffectExecute` | GameplayEffect.cpp:4112 / :4128 | `FActiveGameplayEffectsContainer::InternalExecuteMod` | 最窄：仅瞬时 GE 的 execute |
+| `Pre/PostAttributeBaseChange` | GameplayEffect.cpp:4001 / :4039 | `FActiveGameplayEffectsContainer::SetAttributeBaseValue` | 中：BaseValue 被修改时 |
+| `Pre/PostAttributeChange` | AttributeSet.cpp:82-84 / :95-97 | `FGameplayAttribute::SetNumericValueChecked` | 最广：任何 CurrentValue 写入 |
+
+它们还会**嵌套触发**：一次瞬时伤害 GE 的完整路径是 `InternalExecuteMod` → `ApplyModToAttribute` → `SetAttributeBaseValue`（触发 BaseChange 回调）；属性若有聚合器，dirty 链继续走 `InternalUpdateNumericalAttribute` → `SetNumericAttribute_Internal`（AbilitySystemComponent.cpp:476）→ `SetNumericValueChecked`（再触发 Change 回调）。所以一套 Execute 会按「Execute → BaseChange → Change」次序连打三组回调——写回调时别重复处理同一件事。
+
+> **代码块图例**：本节代码块分两类——**【源码】** 为引擎原文摘录（附 `文件:行号`）；**【示例】** 为参考/演示代码，来源见各代码块说明（如 LyraStarterGame 官方项目或教学示意），**非引擎源码**，请勿照抄。
+
+#### 2.3.1 PreGameplayEffectExecute —— 唯一能"否决"的关卡
+
+官方注释（AttributeSet.h:196-200）："Called just before modifying the value of an attribute... Return true to continue, or false to throw out the modification." 并特别注明**只对 execute 触发**："It is not called during an application of a GameplayEffect, such as a 5 second +10 movement speed buff"——持续 buff 的 modifier 应用不走这里。
+
+六个回调里只有它返回 `bool`。先看调用点的引擎原文——**【源码】**（`GameplayEffect.cpp:4112-4129`，已删减非关键行）：
+
+```cpp
+if (AttributeSet->PreGameplayEffectExecute(ExecuteData))   // return false 则整个修改被丢弃
+{
+    float OldValueOfProperty = Owner->GetNumericAttribute(ModEvalData.Attribute);
+    ApplyModToAttribute(ModEvalData.Attribute, ModEvalData.ModifierOp, ModEvalData.Magnitude, &ExecuteData);
+    // ...
+    AttributeSet->PostGameplayEffectExecute(ExecuteData);  // 值已写入，进入结算
+}
+```
+
+`Data` 类型是 `FGameplayEffectModCallbackData`（GameplayEffectTypes.h 内联结构体），三个成员：`EffectSpec`（来源 GE）、`EvaluatedData`（含 `Attribute`/`Magnitude`，可改）、`Target`（目标 ASC）。免疫、减伤、吸收盾都在这一层做。下面这段是**【示例】**（`LyraHealthSet.cpp:68-106` 精简，删去了 GodMode 作弊检查等非核心分支；引擎默认实现只有 `return true` 一行）：
+
+```cpp
+bool ULyraHealthSet::PreGameplayEffectExecute(FGameplayEffectModCallbackData& Data)
+{
+    // 1. 免疫检查：目标带 Gameplay.DamageImmunity 时，直接把伤害归零并否决
+    //    （tag 定义在 LyraGameplayTags.h：UE_DEFINE_GAMEPLAY_TAG(..., "Gameplay.DamageImmunity")）
+    if (Data.EvaluatedData.Attribute == GetDamageAttribute()
+        && Data.EvaluatedData.Magnitude > 0.0f
+        && Data.Target.HasMatchingGameplayTag(LyraGameplayTags::Get().Gameplay_DamageImmunity))
+    {
+        Data.EvaluatedData.Magnitude = 0.0f;
+        return false;
+    }
+
+    // 2. 快照修改前的值：PostGameplayEffectExecute 用它计算"真实变化量"
+    HealthBeforeAttributeChange = GetHealth();
+    MaxHealthBeforeAttributeChange = GetMaxHealth();
+
+    return true;
+}
+```
+
+注意一个细节：这里否决的不是"改属性"，而是"改 `EvaluatedData.Magnitude`"——配合 Damage 元属性（见 2.3.2），把免疫语义从"拦截扣血"解耦成了"源头把伤害改成 0"。
+
+#### 2.3.2 PostGameplayEffectExecute —— 结算中心
+
+官方注释（AttributeSet.h:202-206）："Called just after a GameplayEffect is executed to modify the base value of an attribute. **No more changes can be made.**" —— 值已写死，只读不改。
+
+典型用途：实际扣血结算（计算值 - 护甲）、死亡判定、受击飘字、血条刷新。Lyra 在这一层做的是"**元属性转换**"（`LyraHealthSet.cpp:108-183` 精简）：把临时属性（`Damage`/`Healing`）换算成真实属性（`Health`），**用完即清零**，再广播事件：
+
+```cpp
+void ULyraHealthSet::PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data)
+{
+    // Damage 是"需求值"，Health 才是"落点值"——这就是元属性转换
+    if (Data.EvaluatedData.Attribute == GetDamageAttribute())
+    {
+        SetHealth(FMath::Clamp(GetHealth() - GetDamage(), 0.0f, GetMaxHealth()));
+        SetDamage(0.0f);                        // 用后即焚：防止重复结算
+        OnHealthChanged.Broadcast(GetHealth());
+    }
+    else if (Data.EvaluatedData.Attribute == GetHealingAttribute())
+    {
+        SetHealth(FMath::Clamp(GetHealth() + GetHealing(), 0.0f, GetMaxHealth()));
+        SetHealing(0.0f);
+        OnHealthChanged.Broadcast(GetHealth());
+    }
+}
+```
+
+这里 `SetHealth` 走 `SetNumericAttributeBase` 重新触发 Base/Current 回调，所以 Clamp 其实会被 2.3.3/2.3.5 再兜一遍——`Post` 层只负责"业务换算"，**数值合法性的兜底永远留给 Pre 层**。
+
+#### 2.3.3 PreAttributeBaseChange —— BaseValue 的 Clamp 关卡（const）
+
+走 `SetAttributeBaseValue`（本工程 `GameplayEffect.cpp:4048-4102`，UE 5.8 为 `:3986-4040`），且是 `const` 成员函数。官方注释（AttributeSet.h:225-231）两条硬性要求：1. 要约束 BaseValue 就在这 Clamp，与 `PreAttributeChange` 形成"base 和 final 双保险"；2. **不要在这触发游戏事件**——"This function should NOT invoke gameplay related events or callbacks"，那些留给 `PreAttributeChange`。
+
+先看调用点的引擎原文——**【源码】**（`GameplayEffect.cpp:4048-4102`，已删减非关键行）：
+
+```cpp
+void FActiveGameplayEffectsContainer::SetAttributeBaseValue(FGameplayAttribute Attribute, float NewBaseValue)
+{
+    // 1. 校验 Owner 与 AttributeSet 合法（不合法直接 return）
+    // ...
+
+    // 2. PreAttributeBaseChange 回调：写入前，NewBaseValue 可在此被 Clamp
+    float OldBaseValue = 0.0f;
+    Set->PreAttributeBaseChange(Attribute, NewBaseValue);
+
+    // 3. 写入（见正文：先落 BaseValue，再刷 CurrentValue）
+    // ...
+
+    // 4. PostAttributeBaseChange 回调：写入后
+    Set->PostAttributeBaseChange(Attribute, OldBaseValue, GetAttributeBaseValue(Attribute));
+}
+```
+
+拆开看就四步，一句话一步：
+
+- **校验**：拿不到 `Owner` 或 `AttributeSet`，直接走人（return），什么都不写。
+- **`PreAttributeBaseChange` 回调**：写入前先问属性集——这里 Clamp 了，写入的就是钳制后的值。
+- **写入**：先把 BaseValue 记到 `FGameplayAttributeData`（这步只记账，不触发回调），再刷 CurrentValue——有聚合器走聚合器（dirty 链自动刷新），没有就直写；两条路最后都进 `SetNumericValueChecked`（`PreAttributeChange` 的入口）。
+- **`PostAttributeBaseChange` 回调**：写完了通知属性集，拿到旧值和新值。
+
+一句话总结：**`PreAttributeBaseChange` 管"要写的值合不合法"，`PostAttributeBaseChange` 管"写完了告诉你"**；并且无论走哪条路，之后都会触发 `PreAttributeChange`——CurrentValue 这道 Clamp 兜底不会漏。
+
+Lyra 的写法（`LyraHealthSet.cpp:185-190`）：函数体只有一行——把规则抽进公共的 `ClampAttribute`（:221-233），让 Base 层与 Current 层**共用同一套约束**，避免两处规则漂移：
+
+```cpp
+void ULyraHealthSet::PreAttributeBaseChange(const FGameplayAttribute& Attribute, float& NewValue) const
+{
+    Super::PreAttributeBaseChange(Attribute, NewValue);
+    ClampAttribute(Attribute, NewValue);   // 与 PreAttributeChange 共用一个规则函数
+}
+
+// ClampAttribute（LyraHealthSet.cpp:221-233）
+void ULyraHealthSet::ClampAttribute(const FGameplayAttribute& Attribute, float& NewValue) const
+{
+    if (Attribute == GetHealthAttribute())
+    {
+        NewValue = FMath::Clamp(NewValue, 0.0f, GetMaxHealth());   // 血量：上下限都管
+    }
+    else if (Attribute == GetMaxHealthAttribute())
+    {
+        NewValue = FMath::Max(NewValue, 1.0f);                     // 上限血量：只保下限
+    }
+}
+```
+
+注意 `MaxHealth` 只保下限、不设上限——上限不该由属性自身约束（否则"加血上限"玩法会失效），这正是"**Base 层不硬约束上限，只把好源头下限**"的思路。
+
+#### 2.3.4 PostAttributeBaseChange —— BaseValue 已定
+
+`SetAttributeBaseValue` 末尾调用（GameplayEffect.cpp:4039），同样 `const`，带 `OldValue/NewValue`。典型用途：派生属性重算（护甲 → 减伤率）。一个易错点：**没有聚合器的属性**（`SetAttributeBaseValue` 会退化为直接写 CurrentValue）也照样触发 BaseChange 回调——别假设它只在"有聚合器"时发生。
+
+Lyra 也**未覆写**这个回调（头文件只声明了除 2.3.4 外的五个回调）——它没有需要基于 BaseValue 重算的派生属性，Clamp 约束在 2.3.3 已经完成，这个回调就空着了。
+
+#### 2.3.5 PreAttributeChange —— 最常用的 Clamp 关卡
+
+与 2.3.3/2.3.4 不同，2.3.5/2.3.6 的调用点**不在 `SetAttributeBaseValue` 函数体内**，而在它写入动作的下游——`FGameplayAttribute::SetNumericValueChecked`（`AttributeSet.cpp:72-117`）。这个函数是"任何 CurrentValue 写入"的最终收敛点。核心逻辑如下——**【源码】**（`AttributeSet.cpp:72-99`，仅保留核心写入部分，其余以注释说明）：
+
+```cpp
+void FGameplayAttribute::SetNumericValueChecked(float& NewValue, UAttributeSet* Dest) const
+{
+	// check(Dest) 与反射定位属性已省略：属性分两路——裸 float（FNumericProperty）
+	// 或 FGameplayAttributeData 包装，两路分支结构完全同构。核心就四行：
+
+	OldValue = /* 属性当前值 */;
+	Dest->PreAttributeChange(*this, NewValue);                          // 2.3.5：写入前，NewValue 可变引用可 Clamp
+	NumericProperty->SetFloatingPointPropertyValue(ValuePtr, NewValue); // 真正的写入动作
+	Dest->PostAttributeChange(*this, OldValue, NewValue);               // 2.3.6：写入后
+
+	// 分支二（FGameplayAttributeData）结构同构，唯一差异：
+	// 2.3.6 的 NewValue 是写入后重读的 GetCurrentValue()（见 2.3.6 细节）
+}
+```
+
+拆开看就四步，2.3.5/2.3.6 一前一后"包住"写入：
+
+- **读旧值**：反射定位到属性内存，先读 `OldValue`——裸 float 分支直接读内存，Data 分支读 `GetCurrentValue()`。
+- **`PreAttributeChange`**：写入前回调，`NewValue` 是可变引用——在这里 Clamp，改的就是即将落盘的值。
+- **写入**：`SetFloatingPointPropertyValue` / `SetCurrentValue` 真正落盘。
+- **`PostAttributeChange`**：写入后回调，拿到 `OldValue` 与最终落地值。
+
+那么它和 2.3.3 的 `SetAttributeBaseValue` 是什么关系？`SetAttributeBaseValue` 函数体内部**并不直接调** 2.3.5/2.3.6，而是靠"写入动作"间接触发。汇总查证过的全部调用点，所有路径最终都汇进 `SetNumericValueChecked`：
+
+- **GE 修改路径**：`SetAttributeBaseValue`（GameplayEffect.cpp:4048）→ `InternalUpdateNumericalAttribute`（:4007）→ `SetNumericAttribute_Internal`（AbilitySystemComponent.cpp:480）→ `SetNumericValueChecked`（:72）
+- **聚合器 dirty 路径**：`FAggregator::OnDirty` → `OnAttributeAggregatorDirty`（GameplayEffect.cpp:3509，末尾 :3567 刷新数值）→ `InternalUpdateNumericalAttribute` → 同上
+- **复制回滚路径**：客户端收到 BaseValue 先回滚旧值再写新值（GameplayEffect.cpp:3824，保证 2.3.6 的 `OldValue` 正确）→ `SetNumericAttribute_Internal` → 同上
+
+所以"任何写 CurrentValue 的路径都过 `SetNumericValueChecked`"字面成立——瞬时 GE、持续效果、叠层变化、效果移除、`SetNumericAttribute` 直写，全部触发 2.3.5/2.3.6。这也正是官方注释（AttributeSet.h:214-220）把职责边界划得这么死的原因：
+
+> "This function is meant to enforce things like `Health = Clamp(Health, 0, MaxHealth)` and NOT things like 'trigger this extra thing if damage is applied'."
+
+——正因为触发最频繁、上下文最少（只有 `Attribute + NewValue`），它只配做"无条件约束"，带业务上下文的事一律留给 2.3.1/2.3.2。与 2.3.3 的分工对比：
+
+| | 2.3.3 `PreAttributeBaseChange` | 2.3.5 `PreAttributeChange` |
+|---|---|---|
+| 调用点 | `SetAttributeBaseValue` 函数体**内部** | `SetNumericValueChecked`（写入**下游**） |
+| 触发面 | 仅改 BaseValue 时 | 任何 CurrentValue 写入 |
+| 捕获值 | 源头值 | 最终值（含聚合器汇总结果） |
+| 典型用途 | 约束"属性自身的合法范围" | 约束"最终显示值" |
+
+Lyra 的写法（`LyraHealthSet.cpp:192-197`）——注意函数体与 2.3.3 **一字不差**：这就是真实项目的 DRY 设计，两层共用同一个 `ClampAttribute`，保证"源头"和"最终值"的约束永远一致：
+
+```cpp
+void ULyraHealthSet::PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue)
+{
+    Super::PreAttributeChange(Attribute, NewValue);
+    ClampAttribute(Attribute, NewValue);   // 与 PreAttributeBaseChange 是同一个函数
+}
+```
+
+#### 2.3.6 PostAttributeChange —— 只读观察者
+
+与 2.3.5 同住一个调用点（AttributeSet.cpp:84/97），只是站在写入动作的另一侧。一个容易忽略的源码细节：**`NewValue` 不是调用方传进来的那个值**，而是写入后 `DataPtr->GetCurrentValue()` 重读一遍的落地值——因为 `FGameplayAttributeData::SetCurrentValue` 可能被子类覆写，最终落盘的值未必等于你传进去的，做对账要以落地值为准。
+
+GE modifier 聚合、`SetNumericAttribute`、初始值设置全都会路过它，**血条绑定刷这条最省心**——任何合法修改都不会漏。但注意它和 2.3.5 一样只有 `Attribute + OldValue/NewValue`，没有 GE 上下文，所以只适合做"无条件的连带修正"，需要来源信息的判断请放回 2.3.1/2.3.2。
+
+Lyra 在这里做的是"**属性间的连带修正**"（`LyraHealthSet.cpp:199-219` 精简）：当前 Health 超过缩小后的 MaxHealth 时，用 `Override` 修正一次；顺带维护死亡标记复位：
+
+```cpp
+void ULyraHealthSet::PostAttributeChange(const FGameplayAttribute& Attribute, float OldValue, float NewValue)
+{
+    Super::PostAttributeChange(Attribute, OldValue, NewValue);
+
+    if (Attribute == GetMaxHealthAttribute())
+    {
+        // 上限被压低时，当前血量不能超过新上限——用 Override 覆盖一次
+        if (GetHealth() > NewValue)
+        {
+            GetOwningAbilitySystemComponent()->ApplyModToAttribute(
+                GetHealthAttribute(), EGameplayModOp::Override, NewValue);
+        }
+    }
+
+    if (bOutOfHealth && (GetHealth() > 0.0f))
+    {
+        bOutOfHealth = false;   // 复活复位
+    }
+}
+```
+
+> 总结：**Pre 层负责"改得对"（Clamp/免疫/减伤），Post 层负责"看得见"（结算/UI/派生）。** 越靠后的回调触发范围越大，但上下文越少——`PreGameplayEffectExecute` 手里有完整 GE 信息，`PreAttributeChange` 只有 `Attribute + NewValue`。所以"需要上下文的判断"放前，"无条件约束"放后，职责才不会重叠。
 
 ### 2.4 ATTRIBUTE_ACCESSORS 宏体系
 
@@ -203,30 +487,42 @@ CurrentValue = ((BaseValue + Additive) × Multiplicitive) ÷ Division × Compoun
 
 Aggregator 重新评估后，算出新的 `CurrentValue`，调用 `InternalUpdateNumericalAttribute` → `SetNumericAttribute_Internal`，最终到达本文最关键的函数——`FGameplayAttribute::SetNumericValueChecked`。
 
-它的完整实现（`AttributeSet.cpp`）：
+它的完整实现（`AttributeSet.cpp:72-104`）：
 
 ```
 void FGameplayAttribute::SetNumericValueChecked(float& NewValue, UAttributeSet* Dest) const
 {
-    // 分支1：FGameplayAttributeData 属性（推荐用法）
-    if (IsGameplayAttributeDataProperty(Attribute.Get()))
-    {
-        FGameplayAttributeData* DataPtr = StructProperty->ContainerPtrToValuePtr<FGameplayAttributeData>(Dest);
-        float OldValue = DataPtr->GetCurrentValue();
-        Dest->PreAttributeChange(*this, NewValue);       // ← ① 修改前回调
-        DataPtr->SetCurrentValue(NewValue);               // ← ② 真正的写入
-        Dest->PostAttributeChange(*this, OldValue, NewValue); // ← ③ 修改后回调
-        MARK_PROPERTY_DIRTY(Dest, StructProperty);        // ← ④ 标记网络脏
-    }
-    // 分支2：原生 float 属性（旧版兼容，不推荐）
-    else if (NumericProperty)
+    check(Dest);
+
+    FNumericProperty* NumericProperty = CastField<FNumericProperty>(Attribute.Get());
+    float OldValue = 0.f;
+
+    // 分支A：原生 float 属性（FProperty 直接读写）
+    if (NumericProperty)
     {
         void* ValuePtr = NumericProperty->ContainerPtrToValuePtr<void>(Dest);
-        float OldValue = *static_cast<float*>(ValuePtr);
-        Dest->PreAttributeChange(*this, NewValue);
+        OldValue = *static_cast<float*>(ValuePtr);
+        Dest->PreAttributeChange(*this, NewValue);              // ← 1. 修改前回调
         NumericProperty->SetFloatingPointPropertyValue(ValuePtr, NewValue);
-        Dest->PostAttributeChange(*this, OldValue, NewValue);
-        MARK_PROPERTY_DIRTY(Dest, NumericProperty);
+        Dest->PostAttributeChange(*this, OldValue, NewValue);   // ← 3. 修改后回调
+        MARK_PROPERTY_DIRTY(Dest, NumericProperty);             // ← 4. 标记网络脏
+    }
+    // 分支B：FGameplayAttributeData 属性（推荐用法）
+    else if (IsGameplayAttributeDataProperty(Attribute.Get()))
+    {
+        FStructProperty* StructProperty = CastField<FStructProperty>(Attribute.Get());
+        check(StructProperty);
+        FGameplayAttributeData* DataPtr = StructProperty->ContainerPtrToValuePtr<FGameplayAttributeData>(Dest);
+        check(DataPtr);
+        OldValue = DataPtr->GetCurrentValue();
+        Dest->PreAttributeChange(*this, NewValue);              // ← 1. 修改前回调
+        DataPtr->SetCurrentValue(NewValue);                     // ← 2. 真正的写入
+        Dest->PostAttributeChange(*this, OldValue, DataPtr->GetCurrentValue()); // ← 3. 修改后回调
+        MARK_PROPERTY_DIRTY(Dest, StructProperty);              // ← 4. 标记网络脏
+    }
+    else
+    {
+        check(false);   // 非法 Attribute，直接断言
     }
 }
 ```
@@ -235,10 +531,10 @@ void FGameplayAttribute::SetNumericValueChecked(float& NewValue, UAttributeSet* 
 
 | 步骤 | 代码 | 含义 |
 |------|------|------|
-| ① | `Dest->PreAttributeChange(*this, NewValue)` | 给你最后一次机会修改 `NewValue`。在这里 Clamp：`NewValue = FMath::Clamp(NewValue, 0, MaxHealth.GetCurrentValue())` |
-| ② | `DataPtr->SetCurrentValue(NewValue)` | 真正写入 CurrentValue |
-| ③ | `Dest->PostAttributeChange(...)` | 值已生效。在这里通知 UI、触发派生属性重算 |
-| ④ | `MARK_PROPERTY_DIRTY(Dest, StructProperty)` | 标记该属性为网络脏，下一帧将复制给客户端 |
+| 1 | `Dest->PreAttributeChange(*this, NewValue)` | 给你最后一次机会修改 `NewValue`。在这里 Clamp：`NewValue = FMath::Clamp(NewValue, 0, MaxHealth.GetCurrentValue())` |
+| 2 | `DataPtr->SetCurrentValue(NewValue)` | 真正写入 CurrentValue |
+| 3 | `Dest->PostAttributeChange(...)` | 值已生效。在这里通知 UI、触发派生属性重算 |
+| 4 | `MARK_PROPERTY_DIRTY(Dest, StructProperty)` | 标记该属性为网络脏，下一帧将复制给客户端 |
 
 四点值得单独拎出来说：
 
@@ -254,66 +550,85 @@ void FGameplayAttribute::SetNumericValueChecked(float& NewValue, UAttributeSet* 
 ```
 GE 执行（决定修改 Health）
  │
- ├─ ① PreGameplayEffectExecute(Data)
+ ├─ 2.3.1 PreGameplayEffectExecute(Data)
  │    Data.EvaluatedData.Magnitude = 修改后的 Magnitude
  │    返回 false 可以拒绝整个修改（免疫）
  │
  ├─ Aggregator.SetBaseValue(NewBaseValue)
  │    │
- │    ├─ ② PreAttributeBaseChange(Attribute, NewBaseValue)
+ │    ├─ 2.3.2 PreAttributeBaseChange(Attribute, NewBaseValue)
  │    │    Clamp BaseValue（如不允许 BaseValue < 0）
  │    │
  │    └─ BaseValue = NewBaseValue（写入）
  │         │
- │         └─ ③ PostAttributeBaseChange(Attribute, OldValue, NewValue)
+ │         └─ 2.3.3 PostAttributeBaseChange(Attribute, OldValue, NewValue)
  │              BaseValue 已生效；重新计算派生属性
  │
  ├─ Aggregator.EvaluateWithBase（BaseValue + 所有 Modifier = CurrentValue）
  │
  └─ SetNumericAttribute_Internal → SetNumericValueChecked
       │
-      ├─ ④ PreAttributeChange(Attribute, CurrentValue)
+      ├─ 2.3.4 PreAttributeChange(Attribute, CurrentValue)
       │    经典：NewValue = FMath::Clamp(NewValue, 0, MaxHealth)
       │
       ├─ CurrentValue = NewValue（写入）
       │
-      └─ ⑤ PostAttributeChange(Attribute, OldCurrentValue, NewCurrentValue)
+      └─ 2.3.5 PostAttributeChange(Attribute, OldCurrentValue, NewCurrentValue)
            │  当前值已生效；刷新 UI、触发效果
            │
-           └─ ⑥ PostGameplayEffectExecute(Data)
+           └─ 2.3.6 PostGameplayEffectExecute(Data)
                 GE 执行完毕；伤害结算、死亡判定
 ```
 
-**实战代码——在自定义 AttributeSet 中覆写回调：**
+**实战代码——在自定义 AttributeSet 中覆写回调：**（**【示例】**，`LyraHealthSet` 精简，演示"四属性 + 元属性模式"与两个最常用钩子的组合用法）
 
 ```
-void UMyAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue)
+// ---- 头文件：四属性。Damage/Healing 是"元属性"，结算后即清零，不长期存在 ----
+UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_Health, Category="Lyra|Health")
+FGameplayAttributeData Health;
+ATTRIBUTE_ACCESSORS(ULyraHealthSet, Health);
+
+UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_MaxHealth, Category="Lyra|Health")
+FGameplayAttributeData MaxHealth;
+ATTRIBUTE_ACCESSORS(ULyraHealthSet, MaxHealth);
+
+UPROPERTY(BlueprintReadOnly, Category="Lyra|Health")
+FGameplayAttributeData Healing;                 // 元属性：+ 输入量
+ATTRIBUTE_ACCESSORS(ULyraHealthSet, Healing);
+
+UPROPERTY(BlueprintReadOnly, Category="Lyra|Health")
+FGameplayAttributeData Damage;                  // 元属性：- 输入量
+ATTRIBUTE_ACCESSORS(ULyraHealthSet, Damage);
+
+// ---- .cpp：两个最常用钩子 ----
+void ULyraHealthSet::PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue)
 {
     // Clamp 是 PreAttributeChange 的唯一职责
-    if (Attribute == GetHealthAttribute())
-    {
-        NewValue = FMath::Clamp(NewValue, 0.f, GetMaxHealth());
-    }
-    if (Attribute == GetManaAttribute())
-    {
-        NewValue = FMath::Clamp(NewValue, 0.f, GetMaxMana());
-    }
+    Super::PreAttributeChange(Attribute, NewValue);
+    ClampAttribute(Attribute, NewValue);        // 规则见 2.3.3
 }
 
-void UMyAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data)
+void ULyraHealthSet::PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data)
 {
-    // 副作用逻辑——在这个钩子里做伤害结算、死亡判定
-    if (Data.EvaluatedData.Attribute == GetHealthAttribute())
+    // 副作用逻辑——伤害结算、死亡判定都在这个钩子做
+    if (Data.EvaluatedData.Attribute == GetDamageAttribute())
     {
-        // 扣血后检查死亡
-        if (GetHealth() <= 0.f)
+        SetHealth(FMath::Clamp(GetHealth() - GetDamage(), 0.0f, GetMaxHealth()));
+        SetDamage(0.0f);                        // 元属性用后即焚
+        if (GetHealth() <= 0.0f)
         {
-            GetOwningAbilitySystemComponent()->HandleGameplayEvent(
-                FGameplayTag::RequestGameplayTag("Event.Death"));
+            bOutOfHealth = true;                // 死亡判定（配合 2.3.6 复活复位）
         }
+    }
+    else if (Data.EvaluatedData.Attribute == GetHealingAttribute())
+    {
+        SetHealth(FMath::Clamp(GetHealth() + GetHealing(), 0.0f, GetMaxHealth()));
+        SetHealing(0.0f);
     }
 }
 ```
+
+设计要点：GE 从不直接改 `Health`，而是"向 `Damage` 写入数值 → `PostGameplayEffectExecute` 把它换算成 `Health` 的扣减"。这样**所有外部接口统一走元属性**，`Health` 的唯一写入者就是 AttributeSet 自己，配合 2.3.3/2.3.5 的 Clamp 兜底，数据流清晰可控。
 
 ### 3.4 网络复制：DOREPLIFETIME + OnRep 的完整流程
 
@@ -475,22 +790,10 @@ AttributeSet 让属性变得可测量、可追踪、可拦截。下一篇文章�
 
 ---
 
-> **系列导航**
-> 
-> | 阶段 | 篇章 | 内容 | 状态 |
-> |------|------|------|------|
-> | 🟢 基础 | 01 | GAS 总览与核心架构 | 📝 |
-> | | 02 | ASC — 核心调度器 | 📝 |
-> | | 03 | GameplayTags — 通用语言 | 📝 |
-> | | **04** | **AttributeSet — 属性定义与复制** | ✅ |
-> | 🔵 核心 | 05 | GameplayEffect — 效果与计算 (上) | 📝 |
-> | | 06 | GameplayEffect — 效果与计算 (下) | 📝 |
-> | | 07 | GameplayAbility — 技能激活与核心框架 (上) | 📝 |
-> | | 08 | GameplayAbility — Task/输入/预测 (下) | 📝 |
-> | | 09 | GameplayCue — 表现层触发机制 | 📝 |
-> | 🔴 高级 | 10 | Prediction — 预测与回滚 | 📝 |
-> | | 11 | GE Components — 组件化架构演进 | 📝 |
-> | | 12 | Network & Serial — 网络序列化 | 📝 |
-> | | 13 | Targeting — 瞄准系统 | 📝 |
-> | | 14 | Debug & Optimization — 调试与优化 | 📝 |
-> | | 15 | 终篇回顾 — 全景复习 | 📝 |
+**上一篇**：[03 | GameplayTags — 通用语言](../03-GameplayTags/03-GameplayTags文章.md)
+
+**下一篇**：[05 | GameplayEffect — 效果与计算 (上)](../05-GameplayEffect/05-GameplayEffect文章.md) — 看 GE 如何定义效果、执行计算与持久化，以及它和 AttributeSet 回调链的协作方式。
+
+---
+
+*本文基于 UE 5.8 源码分析。系列文章会继续按模块拆解，从基础到高级，从 API 到设计哲学。*

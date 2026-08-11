@@ -122,7 +122,7 @@ void UAbilitySystemComponent::InitializeComponent()
 }
 ```
 
-这意味着：如果你在 `Character::BeginPlay()` 中不做额外调用，你的 Pawn 的 ASC 会把 Pawn 自己同时当作 Owner 和 Avatar——这在单机/合作游戏中完全够用，但多人游戏需要手动拆分。
+这意味着：如果你在 `Character::PossessedBy()` 中不做额外调用，你的 Pawn 的 ASC 会把 Pawn 自己同时当作 Owner 和 Avatar——这在单机/合作游戏中完全够用，但多人游戏需要手动拆分。
 
 理清了 Owner 和 Avatar 的关系，接下来看初始化的具体步骤和正确顺序。
 
