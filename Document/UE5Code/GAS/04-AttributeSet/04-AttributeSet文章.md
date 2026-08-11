@@ -1,6 +1,6 @@
 # 04 | AttributeSet：属性定义、回调链与网络复制
 
-> **系列**: 《Inside GAS》— UE5 GameplayAbilitySystem 源码深度分析  
+> **系列**: 《UE5 GAS 深入浅出》— UE5 GameplayAbilitySystem 源码深度分析   
 > **难度**: 🟢 入门 → 🔴 源码  
 > **字数**: ~5000  
 > **前置**: 03-GameplayTags  
