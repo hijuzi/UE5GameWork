@@ -1,5 +1,7 @@
 # GameplayTasks：一种被低估的异步任务调度框架
 
+## 引言：被忽略的轻量调度引擎
+
 大家做 AI 的时候，第一反应是搬出行为树。这没错——行为树是 UE 官方推的标准方案，文档齐全，社区资料也丰富。
 
 但如果你的需求不是"做一个会巡逻的敌人"，而是"做一个能被打断的引导技能"、"一个需要排队等待资源的动作"、"一个由玩法逻辑动态创建的小型异步任务"，行为树就开始显得笨重了。你得建 Task 节点、配黑板、调参数，最后可能只是为了让角色举一下手。
@@ -161,9 +163,11 @@ void UGameplayTask::OnDestroy()
 
 ---
 
+状态机讲完了任务自身的生命周期。但多个任务同时运行时冲突怎么办？答案在资源系统。
+
 ## 三、资源系统：最被低估的设计
 
-### 3.0 问题场景
+### 问题场景
 
 假设你有一个 AI 角色，同时开启了两个任务：
 1. "举起武器"——需要占用右手
@@ -188,6 +192,8 @@ protected:
 ```
 
 真正的"资源含义"留给子类去定义——你可以创建 `UResource_RightHand`、`UResource_AbilitySlot` 等。这种设计让资源语义完全由项目决定，框架不掺和你的玩法逻辑。
+
+> `AutoResourceCount` 决定此类资源最多可被多少个任务同时 Claim（默认 1，即独占）。设为 2 时允许两个任务同时持有——例如"可双持的武器槽"。
 
 ### 3.2 声明资源
 
@@ -299,6 +305,8 @@ GameplayTasks 对网络有内置支持，但使用方式很克制：
 
 这不是一个"全套网络同步"的方案，而是一个"承认网络差异、给予开发者控制权"的设计。
 
+双端差异的常见处理方式：确定性逻辑（如命中判定）在服务端权威执行，客户端只做表现预测。如果任务本身不涉及关键判定（如播放动画、移动路径），两端的轻微不同步可以接受——GameplayTasks 的设计假设是"不为简单问题引入复杂的同步开销"。
+
 ---
 
 ## 五、代码实践：写一个自定义任务
@@ -377,20 +385,20 @@ void UTask_ChannelSpell::InterruptSpell()
 }
 ```
 
-使用方：
+调用方只需两行——工厂方法创建后调用 `ReadyForActivation()`，Component 收走并按优先级排队：
 
 ```cpp
 auto* SpellTask = UTask_ChannelSpell::ChannelSpell(*this, "Fireball", AbilitySlotResource);
-SpellTask->ReadyForActivation(); // Component 收走并按优先级排队
+SpellTask->ReadyForActivation();
 ```
 
 不需要行为树节点、黑板键值——工厂方法创建，任务自己管理生命周期。
 
 ---
 
-## 六、设计背后的取舍
+上面这个例子展示了 GameplayTasks 的简洁——工厂方法创建、自动排队、框架接管生命周期。但停下来问几个问题：为什么是 UObject 而不是别的？资源系统为什么不用 Tag？优先级为什么要排队重试？
 
-读完代码，有几个设计选择值得单独聊一下。
+## 六、设计背后的取舍
 
 ### 思考：为什么是 UObject 而不是 UActorComponent？
 
@@ -425,7 +433,9 @@ GameplayAbilitySystem 用 GameplayTag 做能力互斥，为什么不直接复用
 - **需要可视化调试工具**：没有内置编辑器面板或可视化资源图，调试要靠日志
 - **多人复杂同步**：双端独立运行意味着如果两边逻辑有差异，需要你自己处理
 
-如果你已经在用 GameplayAbilitySystem，GAS 的 `UGameplayAbility` 内部实际上就是一个特殊的 GameplayTask——但 GAS 加了 AttributeSet、GameplayEffect、Tag 体系等重量级东西。如果你的项目没有上 GAS，单独用 GameplayTasks 是一个非常合理的中间方案。
+如果你已经在用 GameplayAbilitySystem：`UGameplayAbility` 继承了 `UGameplayTask`，GA 内部复用了本文分析的整套调度机制（状态机、优先级排队、资源系统）。但 GA 在此之上附加了 ASC 绑定、Cost/Cooldown、ActivationPolicy、Tag 条件过滤等大量扩展——这些是 GAS 的附加值，不是 GameplayTasks 本身。如果你的项目没有上 GAS，单独用 GameplayTasks 是一个非常合理的中间方案。
+
+> **历史注**：GameplayTasks 随 UE4.0 引入，早于 GAS（4.x 中期加入）。UE5 的 StateTree 和 Mass Entity 提供了更高级的调度范式，但 GameplayTasks 仍然是 Actor 粒度下最轻量的方案——StateTree 需要额外插件，Mass 面向大规模实体而非单 Actor。
 
 ---
 
@@ -437,7 +447,7 @@ GameplayAbilitySystem 用 GameplayTag 做能力互斥，为什么不直接复用
 4. **优先级始终生效**——每一次状态变化都会触发重新调度，不是一次性排序
 5. **轻量到只有 4 个头文件**——能单独用，也在 GAS 内部被复用。该有的抽象一层不少，不该有的一个没加
 
-如果你下次遇到一个"需要排队、可能被打断、和 AI 无关"的异步逻辑，可以试试用 GameplayTasks 来装它。比行为树轻，比协程可控，比手写状态机少犯错。
+如果你下次遇到一个"需要排队、可能被打断、和 AI 无关"的异步逻辑，可以试试用 GameplayTasks 来装它——不需要行为树、不需要协程、不需要手写状态机。
 
 ---
 

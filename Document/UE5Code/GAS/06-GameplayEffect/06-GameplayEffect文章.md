@@ -1,4 +1,34 @@
-# 06 GameplayEffect — 效果与计算 (下)：执行流程与计算
+# 06 | GameplayEffect — 效果与计算 (下)
+
+> **本篇**：执行流程与计算
+
+> **系列**: 《Inside GAS》— UE5 GameplayAbilitySystem 源码深度分析  
+> **难度**: 🔵 核心 → 🔴 源码  
+> **字数**: ~5000  
+> **前置**: 05-GameplayEffect  
+> **源码路径**: `Engine/Plugins/Runtime/GameplayAbilities/Source/GameplayAbilities/Private/GameplayEffect.cpp`
+
+---
+
+> **系列导航**
+> 
+> | 阶段 | 篇章 | 内容 | 状态 |
+> |------|------|------|------|
+> | 🟢 基础 | 01 | GAS 总览与核心架构 | ✅ |
+> | | 02 | ASC — 核心调度器 | ✅ |
+> | | 03 | GameplayTags — 通用语言 | ✅ |
+> | | 04 | AttributeSet — 属性定义与复制 | ✅ |
+> | 🔵 核心 | 05 | GameplayEffect — 效果与计算 (上) | ✅ |
+> | | **06** | **GameplayEffect — 效果与计算 (下)** | ✅ |
+> | | 07 | GameplayAbility — 技能激活与核心框架 (上) | 📝 |
+> | | 08 | GameplayAbility — Task/输入/预测 (下) | 📝 |
+> | | 09 | GameplayCue — 表现层触发机制 | 📝 |
+> | 🔴 高级 | 10 | Prediction — 预测与回滚 | 📝 |
+> | | 11 | GE Components — 组件化架构演进 | 📝 |
+> | | 12 | Network & Serial — 网络序列化 | 📝 |
+> | | 13 | Targeting — 瞄准系统 | 📝 |
+> | | 14 | Debug & Optimization — 调试与优化 | 📝 |
+> | | 15 | 终篇回顾 — 全景复习 | 📝 |
 
 ---
 
@@ -746,22 +776,10 @@ Period GE 不是"每 N 秒维持一个效果"，它是**每 N 秒执行一次 In
 | GameplayCue | Execute | Added + WhileActive + Removed |
 | 网络 | Server 执行后不保留 | 保留 FActiveGameplayEffect，同步 Handle |
 
-> **系列导航**
-> 
-> | 阶段 | 篇章 | 内容 | 状态 |
-> |------|------|------|------|
-> | 🟢 基础 | 01 | GAS 总览与核心架构 | 📝 |
-> | | 02 | ASC — 核心调度器 | 📝 |
-> | | 03 | GameplayTags — 通用语言 | 📝 |
-> | | 04 | AttributeSet — 属性定义与复制 | 📝 |
-> | 🔵 核心 | 05 | GameplayEffect — 效果与计算 (上) | 📝 |
-> | | **06** | **GameplayEffect — 效果与计算 (下)** | ✅ |
-> | | 07 | GameplayAbility — 技能激活与核心框架 (上) | 📝 |
-> | | 08 | GameplayAbility — Task/输入/预测 (下) | 📝 |
-> | | 09 | GameplayCue — 表现层触发机制 | 📝 |
-> | 🔴 高级 | 10 | Prediction — 预测与回滚 | 📝 |
-> | | 11 | GE Components — 组件化架构演进 | 📝 |
-> | | 12 | Network & Serial — 网络序列化 | 📝 |
-> | | 13 | Targeting — 瞄准系统 | 📝 |
-> | | 14 | Debug & Optimization — 调试与优化 | 📝 |
-> | | 15 | 终篇回顾 — 全景复习 | 📝 |
+**上一篇**：[05 | GameplayEffect — 效果与计算 (上)](../05-GameplayEffect/05-GameplayEffect文章.md)
+
+**下一篇**：[07 | GameplayAbility — 技能激活与核心框架 (上)](../07-GameplayAbility/07-GameplayAbility文章.md) — 看 GA 如何定义与激活技能，以及 Cooldown/Cost 如何通过 GE 落地。
+
+---
+
+*本文基于 UE 5.8 源码分析。系列文章会继续按模块拆解，从基础到高级，从 API 到设计哲学。*

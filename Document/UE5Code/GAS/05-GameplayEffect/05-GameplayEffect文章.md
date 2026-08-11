@@ -1,14 +1,42 @@
-# 05 GameplayEffect — 效果与计算 (上)：数据结构与配置
+# 05 | GameplayEffect — 数据结构与配置体系
+
+> **本篇**：GE 的配置系统 —— CDO / Spec / ActiveGE 三层模型、Duration / Modifier / Tags / Stacking / Component 七大模块
+
+> **系列**: 《Inside GAS》— UE5 GameplayAbilitySystem 源码深度分析  
+> **难度**: 🔵 核心 → 🔴 源码  
+> **字数**: ~4000  
+> **前置**: 04-AttributeSet  
+> **源码路径**: `Engine/Plugins/Runtime/GameplayAbilities/Source/GameplayAbilities/Public/GameplayEffect.h`
 
 ---
 
-**上篇讲数据结构与配置**：GE 作为 Data Asset 的设计哲学、Duration Policy、Modifier 体系、Tags 系统、Stacking 机制、GameplayEffectComponent 架构、FGameplayEffectSpec 运行时实例、FGameplayEffectContext 上下文。
-
-**下篇讲执行流程与计算**：`ApplyGameplayEffectSpecToSelf` 完整调用链、Instant GE 直写 vs Duration GE 注册、Modifier 计算链路（Magnitude → ModOp → Aggregator → SetBaseValue）、ExecutionCalculation 自定义计算、Period 周期执行、网络同步策略、GameplayCue 触发时机。
+> **系列导航**
+> 
+> | 阶段 | 篇章 | 内容 | 状态 |
+> |------|------|------|------|
+> | 🟢 基础 | 01 | GAS 总览与核心架构 | ✅ |
+> | | 02 | ASC — 核心调度器 | ✅ |
+> | | 03 | GameplayTags — 通用语言 | ✅ |
+> | | 04 | AttributeSet — 属性定义与复制 | ✅ |
+> | 🔵 核心 | **05** | **GameplayEffect — 数据结构与配置体系** | ✅ |
+> | | 06 | GameplayEffect — 执行流程与计算链路 | 📝 |
+> | | 07 | GameplayAbility — 技能激活与核心框架 (上) | 📝 |
+> | | 08 | GameplayAbility — Task/输入/预测 (下) | 📝 |
+> | | 09 | GameplayCue — 表现层触发机制 | 📝 |
+> | 🔴 高级 | 10 | Prediction — 预测与回滚 | 📝 |
+> | | 11 | GE Components — 组件化架构演进 | 📝 |
+> | | 12 | Network & Serial — 网络序列化 | 📝 |
+> | | 13 | Targeting — 瞄准系统 | 📝 |
+> | | 14 | Debug & Optimization — 调试与优化 | 📝 |
+> | | 15 | 终篇回顾 — 全景复习 | 📝 |
 
 ---
 
-## 5.1 问题驱动：为什么需要 GameplayEffect？
+本文按「数据 → 执行 → 设计」的顺序展开：本篇讲 GE 的数据结构与配置体系，下一篇深入执行流程与计算链路。GE 的配置系统涉及 Duration / Modifier / Tags / Stacking / Component / Spec / Context 七大模块，以下按模块逐一拆解。
+
+---
+
+## 一、问题驱动：为什么需要 GameplayEffect？
 
 如果你写过任何游戏逻辑，大概率做过这样的事：
 
@@ -41,7 +69,7 @@ GE 不是一段代码，它是一个 Data Asset。策划/设计师可以在编�
 
 框架会自动处理持续时间、叠加、过期清理、网络同步等所有"脏活"。
 
-### 核心设计理念：模板→实例分离
+### 1.1 核心设计理念：模板→实例分离
 
 | 层级 | 类 | 角色 |
 |------|-----|------|
@@ -57,50 +85,56 @@ FGameplayEffectSpec (冻结 + 运行时上下文)
 FActiveGameplayEffect (开始计时，Aggregator 接管属性计算)
 ```
 
+![GE 核心类结构](diagrams/GE_ClassDiagram.png)
+
+*图：GE 核心类结构 —— UGameplayEffect (CDO) / FGameplayEffectSpec (冻结快照) / FActiveGameplayEffect (运行实例) 三层模型*
+
 **思考**：为什么需要 Spec 这一层？同一 GE 可能被不同来源、不同 Level 多次施加。Spec 是 CDO 的冻结快照，捕获了施加那一刻的 Level、Context、SetByCallerMagnitudes 等运行时参数。
 
 ---
 
-## 5.2 核心概念速览
+## 二、核心概念速览
 
 在深入源码之前，先建立全局认知：
 
 ```
 UGameplayEffect
-├── DurationPolicy        → 决定效果持续多久（Instant / Duration / Infinite）
+├── DurationPolicy        → 决定效果持续多久（Instant / Infinite / HasDuration）
 ├── Modifiers[]           → 修改哪些属性、怎么改
 ├── Tags                  → 标签系统（条件、授予、清理）
 ├── Stacking              → 叠加规则
-├── Period                → 周期执行间隔（仅 Duration 和 Infinite）
-├── GameplayEffectComponents[] → 模块化组件扩展
+├── Period                → 周期执行间隔（仅 Infinite 和 HasDuration）
+├── GEComponents[]        → 模块化组件扩展（编辑器显示名 "Components"）
 └── 其他配置             → 概率、显示信息、GameplayCue 等
 ```
 
 | 属性族 | 作用 | 典型配置 |
 |--------|------|----------|
-| Duration Policy | 效果持续多久 | Instant — 一次性；Duration — 持续 N 秒；Infinite — 永久 |
+| Duration Policy | 效果持续多久 | Instant — 一次性；HasDuration — 持续 N 秒；Infinite — 永久 |
 | Modifiers | 改什么属性、怎么改 | `Health.Add(-20)`; `Speed.Multiply(1.5)` |
 | Tags | 条件与副作用 | Application Tag Requirements: 目标必须有 `Player` Tag 才能生效 |
 | Stacking | 多次施加行为 | AggregateBySource — 同一来源不叠加，不同来源可叠加 |
 
 ---
 
-## 5.3 Duration Policy：三种时间模型
+GE 的配置千头万绪，但有一个问题必须先回答——**效果持续多久**？这决定了 GE 在引擎内部的全部后续行为。
+
+## 三、Duration Policy：三种时间模型
 
 ```cpp
-// GameplayEffectTypes.h / GameplayEffect.h
+// GameplayEffect.h，枚举定义在 GameplayEffectTypes.h（此处为 GameplayEffect.h 内的镜像声明）
 UENUM(BlueprintType)
 enum class EGameplayEffectDurationType : uint8
 {
     Instant,      // 立即执行 → 修改 BaseValue → 然后销毁（无 ActiveGE）
-    Duration,     // 持续一段时间 → 激活 Aggregator → 到期自动移除
     Infinite,     // 永久生效 → 激活 Aggregator → 需手动移除
+    HasDuration,  // 持续一段时间 → 激活 Aggregator → 到期自动移除
 };
 ```
 
 三种模式的本质区别不是"时长"，而是 **BaseValue 修改方式** 和 **是否有 ActiveGameplayEffect**。
 
-### 5.3.1 Instant
+### 3.1 Instant
 
 Instant GE 的本质是 **直接写 BaseValue**。它不创建 `FActiveGameplayEffect`，执行完立刻销毁。类比：吃药瞬间回血。
 
@@ -115,54 +149,69 @@ Instant GE 施加 → ExecuteActiveEffectsFrom → SetAttributeBaseValue → 结
 - **不能** 被 Stack
 - 常用于伤害、治疗、一次性效果
 
-### 5.3.2 Duration
+### 3.2 HasDuration（编辑器显示为 "Duration"）
 
-Duration GE 创建 `FActiveGameplayEffect`，BaseValue 进入 Aggregator 管理。效果持续指定的秒数，到期自动移除。
+HasDuration GE 创建 `FActiveGameplayEffect`，将 Modifier 注册为 AggregatorMod（不改动属性的 BaseValue）。效果持续指定的秒数，到期自动移除。
 
 ```
-Duration GE 施加 → 创建 FActiveGameplayEffect → Aggregator::SetBaseValue → 倒计时 → 到期 → Aggregator 清理 → FActiveGameplayEffect 移除
+Duration GE 施加 → 创建 FActiveGameplayEffect → AddAggregatorMod（注册 Modifier） → SetTimer（倒计时）
+→ 到期触发 CheckDurationExpired → RemoveAggregatorMod（清理 Modifier） → FActiveGameplayEffect 移除
 ```
+
+> **关键区别**：Duration GE **不使用 SetBaseValue 修改属性**，而是通过 `AddAggregatorMod` 将 (Magnitude, ModOp, Channel, Handle) 注册到 `FAggregator::ModChannelsMap`。每次属性被查询时，Aggregator 通过 `EvaluateWithBase` 动态叠加（聚合公式见 §4.1）。BaseValue 本身保持不变，多个 Duration GE 可独立叠加，各自过期清理互不影响。
 
 关键特征：
-- **创建** FActiveGameplayEffect，跟踪开始时间和剩余时间
-- BaseValue 由 **Aggregator** 管理，修改时触发 `InternalUpdateNumericalAttribute`
+- **创建** FActiveGameplayEffect，记录 StartWorldTime，注册 Duration Timer
+- Modifier 以 **AggregatorMod** 形式注册，属性查询时动态计算（不改 BaseValue）
 - 支持 **Period** 周期执行
 - 支持 **Stacking** 叠加
-- 过期后 **自动移除**，Aggregator 自动清理
+- 过期后 Timer 回调 → 清理 AggregatorMod → 移除 FActiveGameplayEffect
 - 常用于：Buff、Debuff、状态效果
 
-### 5.3.3 Infinite
+### 3.3 Infinite
 
-Infinite GE 与 Duration 类似，但 **没有到期时间**，必须手动调用 `RemoveActiveGameplayEffect` 移除。
+Infinite GE 与 Duration 的 Aggregator 机制相同，但 **不设置 Duration Timer**，必须手动调用 `RemoveActiveGameplayEffect` 移除。
 
 关键特征：
-- 与 Duration 相同：创建 FActiveGameplayEffect、Aggregator 管理 BaseValue
-- 不同点：持续时间设为 `-1`（即 "永久"）
+- 与 Duration 相同：创建 FActiveGameplayEffect、注册 AggregatorMod 动态叠加属性
+- 不同点：Duration 设为负数（表示无限），不注册 Timer，不会自动过期
 - 典型用途：被动技能（如永久增加攻击力）、条件性效果（离开范围后手动移除）
 
-### Duration 配置参数
+### 3.4 Duration 配置参数
+
+时长相关配置直接平铺在 `UGameplayEffect` 类上：
 
 ```cpp
-USTRUCT(BlueprintType)
-struct FGameplayEffectDurationDefinition  // GameplayEffectTypes.h 内
-{
-    UPROPERTY()
-    EGameplayEffectDurationType DurationType;  // Instant/Duration/Infinite
-    
-    // Duration > 0 时使用以下字段
-    UPROPERTY()
-    float Duration;                            // 持续时间（秒）
-    
-    UPROPERTY()
-    FGameplayEffectModifierMagnitude DurationMagnitude;  // 支持 SetByCaller 动态时长！
-};
+// GameplayEffect.h — UGameplayEffect 直接成员（无独立封装结构）
+UPROPERTY(EditDefaultsOnly, Category=Duration)
+EGameplayEffectDurationType DurationPolicy;                 // Instant / Infinite / HasDuration
+
+// 持续时长（秒）：类型为 FGameplayEffectModifierMagnitude
+// → 可用 ScalableFloat / AttributeBased / SetByCaller 动态计算！
+UPROPERTY(EditDefaultsOnly, Category=Duration)
+FGameplayEffectModifierMagnitude DurationMagnitude;
+
+// 可选的最大时长（超过则截断），同样支持动态计算
+UPROPERTY(EditDefaultsOnly, Category=Duration)
+FGameplayEffectModifierMagnitude MaxDurationMagnitude;
 ```
 
-注意 `DurationMagnitude` 是一个 `FGameplayEffectModifierMagnitude`，这意味着持续时间本身也可以用 **ScalableFloat / AttributeBased / SetByCaller** 来动态计算。SetByCaller 的 Duration 在实际项目中很常见——比如"眩晕时间 = 技能等级 * 0.5 秒"。
+注意 `DurationMagnitude` 是一个 `FGameplayEffectModifierMagnitude`（见 4.2），这意味着持续时间本身也可以用 **ScalableFloat / AttributeBased / SetByCaller** 来动态计算。SetByCaller 的 Duration 在实际项目中很常见——比如"眩晕时间 = 技能等级 * 0.5 秒"。
+
+另外，**Period（周期）配置**也在 `UGameplayEffect` 上（`Category=Period`）：
+
+```cpp
+// GameplayEffect.h — UGameplayEffect 直接成员
+UPROPERTY(EditDefaultsOnly, Category=Period)
+FScalableFloat Period;                          // 周期（秒），0 表示无周期
+
+UPROPERTY(EditDefaultsOnly, Category=Period)
+bool bExecutePeriodicEffectOnApplication;       // 施加瞬间是否也执行一次
+```
 
 ---
 
-## 5.4 Modifier 体系：GE 最核心的配置
+## 四、Modifier 体系：配置核心
 
 ```cpp
 // GameplayEffect.h
@@ -179,46 +228,62 @@ struct FGameplayModifierInfo
 
 一个 GE 可以有 **多个 Modifiers**，按数组顺序依次计算。
 
-### 5.4.1 ModifierOp：四种运算
+![GE Modifier 体系](diagrams/GE_ModifierSystem.png)
+
+*图：GE Modifier 体系 —— ModifierOp 五种运算 + ModifierMagnitude 四种来源 + Aggregator 聚合链路*
+
+### 4.1 ModifierOp：五种运算（新版枚举）
 
 ```cpp
-// GameplayEffectTypes.h
+// GameplayEffectTypes.h — EGameplayModOp
 namespace EGameplayModOp
 {
     enum Type
     {
-        Additive,       // + (默认)
-        Multiplicitive, // *
-        Division,       // /
-        Override,       // 直接覆盖
+        AddBase = 0,           // 加法（Base 阶段）：BaseValue += Value
+        MultiplyAdditive = 1,  // 乘法（Base 阶段）：×
+        DivideAdditive = 2,    // 除法（Base 阶段）：÷
+        MultiplyCompound = 3,  // 复合乘法（Final 阶段）：×
+        AddFinal = 4,          // 最终加法（Final 阶段）：+
         Max
     };
 }
 ```
 
-| ModOp | 含义 | BaseValue 变化 | 典型用途 |
-|-------|------|----------------|----------|
-| Additive | 加法 | New = Old + Value | 伤害、治疗 |
-| Multiplicitive | 乘法 | New = Old * Value | 百分比加成 / 减速 |
-| Division | 除法 | New = Old / Value | 伤害减免 |
-| Override | 覆盖 | New = Value | 固定值效果 |
+**聚合公式**（Aggregator 计算 `CurrentValue` 的唯一公式）：
 
-**优先级**：Override 最高，Additive 最低。Aggregator 在计算最终 CurrentValue 时，先按优先级聚合所有 GE 的 BaseValue 贡献。
+```
+FinalValue = ((BaseValue + ΣAddBase) × ΣMultiplyAdditive ÷ ΣDivideAdditive × ΣMultiplyCompound) + ΣAddFinal
+```
 
-### 5.4.2 ModifierMagnitude：数值从哪里来
+- `AddBase / MultiplyAdditive / DivideAdditive`：作用于 **BaseValue 聚合阶段**，多个 GE 先各自运算后求和/连续运算
+- `MultiplyCompound / AddFinal`：作用于 **Final 阶段**，对聚合后的值做二次运算
+- 注意 `DivideAdditive` 不是字面"除以 Magnitude"，而是将 Magnitude 归一化为倒数因子：`BaseStageResult ÷ (1 + ΣDivideAdditive)`。这意味着 Magnitude=1 时等效 ½，Magnitude=2 时等效 ⅓，适合做伤害减免（数个大越大减免效果越弱，不会到 100%）
+
+| ModOp | 含义 | 公式阶段 | 典型用途 |
+|-------|------|----------|----------|
+| AddBase | 加法 | Base | 伤害、治疗 |
+| MultiplyAdditive | 乘法 | Base | 百分比加成 / 减速 |
+| DivideAdditive | 除法 | Base | 伤害减免（按 1+N 累加） |
+| MultiplyCompound | 复合乘法 | Final | 多来源叠加的最终倍率 |
+| AddFinal | 最终加法 | Final | 最终修正值（如固定穿透） |
+
+Modifier 的数值来源有 4 种：ScalableFloat 最简单、AttributeBased 最灵活、SetByCaller 最动态、Custom 最开放。如果项目只用固定数值，看完第一种即可跳过。
+
+### 4.2 ModifierMagnitude：数值从哪里来
 
 ```cpp
-// GameplayEffectTypes.h
+// GameplayEffectTypes.h（实际位于 GameplayEffect.h 内）
 USTRUCT(BlueprintType)
 struct FGameplayEffectModifierMagnitude
 {
     EGameplayEffectMagnitude MagnitudeCalculationType;
     
     // 四种来源之一：
-    FScalableFloat                    ScalableFloatMagnitude;     // 1. 固定值/曲线
-    FAttributeBasedFloat              AttributeBasedMagnitude;    // 2. 基于属性
-    FGameplayEffectCustomMagnitude    CustomMagnitude;            // 3. 自定义计算
-    FSetByCallerFloat                 SetByCallerMagnitude;       // 4. 调用时传入
+    FScalableFloat                 ScalableFloatMagnitude;     // 1. 固定值/曲线
+    FAttributeBasedFloat           AttributeBasedMagnitude;    // 2. 基于属性
+    FCustomCalculationBasedFloat   CustomMagnitude;            // 3. 自定义计算
+    FSetByCallerFloat              SetByCallerMagnitude;       // 4. 调用时传入
 };
 ```
 
@@ -235,19 +300,43 @@ FScalableFloat ScalableFloatMagnitude;
 #### (2) AttributeBased — 基于属性计算
 
 ```cpp
+// GameplayEffect.h
 USTRUCT(BlueprintType)
 struct FAttributeBasedFloat
 {
-    FScalableFloat                     Coefficient;            // 系数
-    FScalableFloat                     PreMultiplyAdditiveValue; // 预加值
-    FScalableFloat                     PostMultiplyAdditiveValue;// 后加值
-    FGameplayEffectAttributeCaptureDefinition BackingAttribute; // 捕获哪个属性
-    FGameplayEffectAttributeCaptureDefinition AttributeCurve;    // 曲线映射属性
-    EAttributeBasedMagnitudeCalculation AttributeCalculationType; // 计算类型
+    FScalableFloat                              Coefficient;              // 系数
+    FScalableFloat                              PreMultiplyAdditiveValue; // 预加值
+    FScalableFloat                              PostMultiplyAdditiveValue;// 后加值
+    FGameplayEffectAttributeCaptureDefinition   BackingAttribute;         // 捕获哪个属性
+    FCurveTableRowHandle                        AttributeCurve;           // 曲线表：用属性值查表（可选）
+    EAttributeBasedFloatCalculationType         AttributeCalculationType; // 计算类型（见下）
+    EGameplayModEvaluationChannel               FinalChannel;             // 计算通道（Channel0~9）
+    FGameplayTagContainer                       SourceTagFilter;          // 过滤：来源方含此 Tag 才计入
+    FGameplayTagContainer                       TargetTagFilter;          // 过滤：目标方含此 Tag 才计入
 };
 ```
 
-公式：`Magnitude = (BackingAttribute + PreAdd) * Coefficient + PostAdd`
+`AttributeCalculationType` 枚举值：
+
+```cpp
+// GameplayEffect.h
+UENUM(BlueprintType)
+enum class EAttributeBasedFloatCalculationType : uint8
+{
+    AttributeMagnitude,               // 用属性 CurrentValue（默认）
+    AttributeBaseValue,               // 用属性 BaseValue
+    AttributeBonusMagnitude,          // 用属性 Bonus 值（Current - Base）
+    AttributeMagnitudeEvaluatedUpToChannel, // 取指定通道（FinalChannel）的聚合值
+};
+```
+
+**公式**（源码 `FAttributeBasedFloat::CalculateMagnitude`）：
+
+```
+Magnitude = Coefficient × (AttribValue + PreMultiplyAdditiveValue) + PostMultiplyAdditiveValue
+```
+
+若配置了 `AttributeCurve`，则先用属性值查曲线表（`AttributeCurve.Eval(AttribValue)`）得到新值，再代入公式。
 
 典型例子：**"造成 攻击力 * 1.5 + 20 点伤害"**
 - BackingAttribute = 攻击力
@@ -256,24 +345,46 @@ struct FAttributeBasedFloat
 
 #### (3) CustomCalculationClass — 自定义计算
 
+类型名为 `FCustomCalculationBasedFloat`：
+
 ```cpp
-struct FGameplayEffectCustomMagnitude
+// GameplayEffect.h
+USTRUCT(BlueprintType)
+struct FCustomCalculationBasedFloat
 {
-    TSubclassOf<UGameplayModMagnitudeCalculation> CalculationClass;
+    // 自定义计算类：继承 UGameplayModMagnitudeCalculation，实现 CalculateBaseMagnitude_Implementation
+    TSubclassOf<UGameplayModMagnitudeCalculation> CalculationClassMagnitude;
+
+    FScalableFloat      Coefficient;              // 系数
+    FScalableFloat      PreMultiplyAdditiveValue; // 系数前加值
+    FScalableFloat      PostMultiplyAdditiveValue;// 系数后加值
+    FCurveTableRowHandle FinalLookupCurve;        // 可选：对结果再查曲线表
 };
 ```
 
-指向一个 `UGameplayModMagnitudeCalculation` 子类。跟 ExecutionCalculation 不同，它只算**一个数值**，不直接修改最终输出。适合单一 Modifier 的复杂计算场景。
+计算顺序（源码 `FCustomCalculationBasedFloat::CalculateMagnitude`）：
+
+```
+Raw = CalculationClass.CalculateBaseMagnitude(Spec)     // 自定义类算出的原始值
+Mag = Coefficient × (Raw + PreMultiplyAdditiveValue) + PostMultiplyAdditiveValue
+最终 = FinalLookupCurve.Eval(Mag)                        // 可选查表
+```
+
+与 `UGameplayEffectExecutionCalculation`（Execution）不同，`UGameplayModMagnitudeCalculation` 只算**一个数值**，不直接修改最终输出。适合单一 Modifier 的复杂计算场景。
 
 #### (4) SetByCaller — 调用时传入
 
 ```cpp
+// GameplayEffect.h
 USTRUCT(BlueprintType)
 struct FSetByCallerFloat
 {
-    FGameplayTag DataTag;   // 调用方用此 Tag 作为 Key 传值
+    FName       DataName;  // 调用方用此 Name 作为 Key 传值（旧式）
+    FGameplayTag DataTag;  // 调用方用此 Tag 作为 Key 传值（推荐，Category="SetByCaller"）
 };
 ```
+
+> **双 Key 机制**：`FSetByCallerFloat` 同时提供 **Name Key** 和 **Tag Key** 两条通路，对应 Spec 里的两个 map：`SetByCallerNameMagnitudes`（`FName→float`）和 `SetByCallerTagMagnitudes`（`FGameplayTag→float`）。配置时选其一即可。
 
 施加 GE 时，调用方传入一个 `FGameplayTag → float` 的映射：
 
@@ -287,46 +398,56 @@ ASC->ApplyGameplayEffectSpecToSelf(*Spec.Data);
 
 ---
 
-## 5.5 Tags 系统：GE 的条件与副作用
+## 五、Tags 系统：条件与副作用
 
 GE 的标签系统极其丰富，理解它是"配出正确的 GE"的关键。
 
-### 5.5.1 GE Asset 自身的 Tags
+### 5.1 GE Asset 自身的 Tags
 
 ```cpp
-// UGameplayEffect 类成员
-FGameplayTagContainer GameplayEffectAssetTags;                 // 标记此 GE
-FGameplayTagContainer GrantedTags;                              // 施加时授予目标
-FGameplayTagContainer RemoveGameplayEffectWithTags;             // 移除匹配 Tag 的 GE
-FGameplayTagContainer OngoingTagRequirements.IgnoreTags;        // 持续条件（忽略）
-FGameplayTagContainer OngoingTagRequirements.RequireTags;       // 持续条件（需要）
+// GameplayEffect.h — UGameplayEffect 类成员（源码第 2397-2457 行）
+// 注意：以下字段全部标记 UE_DEPRECATED(5.3)，编辑器里位于 "Deprecated" 分类，
+//       新写法是挂对应的 GameplayEffectComponent（见 七）
+FInheritedTagContainer InheritableGameplayEffectTags;   // (显示名 GameplayEffectAssetTag) 标记此 GE 自身
+FInheritedTagContainer InheritableOwnedTagsContainer;   // (显示名 GrantedTags) 施加时授予目标
+FInheritedTagContainer InheritableBlockedAbilityTagsContainer; // (显示名 GrantedBlockedAbilityTags) 阻止 GA 激活
+FGameplayTagRequirements OngoingTagRequirements;        // 持续条件（GE 是否"生效"）
+FGameplayTagRequirements ApplicationTagRequirements;    // 施加条件
+FGameplayTagRequirements RemovalTagRequirements;        // 移除条件
+FInheritedTagContainer RemoveGameplayEffectsWithTags;   // 施加时移除匹配 Tag 的 GE
+FGameplayTagRequirements GrantedApplicationImmunityTags; // 免疫指定 Tag 的 GE
+FGameplayEffectQuery     GrantedApplicationImmunityQuery;// 免疫匹配查询的 GE
+FGameplayEffectQuery     RemoveGameplayEffectQuery;     // 施加时按查询移除 GE
 ```
 
 | Tag 字段 | 作用 |
 |----------|------|
-| AssetTags | 标记 GE 自身类型。`GE.Damage.Fire`, `GE.Buff.Speed` |
+| GameplayEffectAssetTag | 标记 GE 自身类型。`GE.Damage.Fire`, `GE.Buff.Speed` |
 | GrantedTags | 施加时**授予目标** GameplayTag。`State.Stunned` 会添加到目标 ASC |
-| RemoveGameplayEffectWithTags | 施加时**移除目标已有**的匹配 GE。低等级 Buff 被高等级替换 |
+| GrantedBlockedAbilityTags | 施加时授予目标"阻止激活"的 Tag，目标无法激活对应 GA |
+| RemoveGameplayEffectsWithTags | 施加时**移除目标已有**的匹配 GE。低等级 Buff 被高等级替换 |
 | OngoingTagRequirements | 持续条件。目标必须 **一直有** RequireTags 且 **没有** IgnoreTags，否则 GE 失效 |
+| GrantedApplicationImmunityTags | 施加时授予目标免疫：带这些 Tag 的 GE 无法施加到目标 |
+| RemoveGameplayEffectQuery | 施加时按 `FGameplayEffectQuery` 条件移除目标上匹配的 GE（比 Tag 更灵活） |
+
+> **字段类型注意**：`InheritableGameplayEffectTags` 等三个是 **`FInheritedTagContainer`**（父级 GE 的标签可以被子级继承），不是普通的 `FGameplayTagContainer`。`Ongoing/Application/Removal` 三个是 `FGameplayTagRequirements`（RequireTags + IgnoreTags 双容器）。
 
 **OngoingTagRequirements 是 Duration/Infinite GE 的"保鲜"条件**。比如一个 Buff 要求目标必须有 `State.Alive` Tag，目标死亡后 Tag 消失 → Aggregator 自动禁用此 GE → Buff 效果消失 → 复活后 Tag 重新出现 → GE 自动恢复。
 
-### 5.5.2 Application / Removal Tag Requirements
+### 5.2 Application / Removal Tag Requirements
 
 ```cpp
-// GameplayEffect.h, UGameplayEffect 中
+// GameplayEffect.h, UGameplayEffect 中（均 DEPRECATED 5.3）
 FGameplayTagRequirements ApplicationTagRequirements;   // 施加前检查
 FGameplayTagRequirements RemovalTagRequirements;        // 移除前检查
-FGameplayEffectTagRequirements OwnedTagRequirements;    // 所有者 Tag 条件
 ```
 
 - **ApplicationTagRequirements**: 目标必须满足条件才能施加。检查失败 → GE 不会施加。只有 Duration/Infinite 类型的 GE 会检查。
 - **RemovalTagRequirements**: 只有当目标 Tag 满足条件时，此 GE 才能被移除。
-- **OwnedTagRequirements**: 施加者的 Tag 条件（较少用）。
 
 **注意**：Instant GE 不检查 ApplicationTagRequirements，因为它不创建 FActiveGameplayEffect，没有"持续"的概念。
 
-### 5.5.3 Modifier 级别的 Source/Target Tags
+### 5.3 Modifier 级别的 Source/Target Tags
 
 ```cpp
 // FGameplayModifierInfo 内部
@@ -340,7 +461,7 @@ FGameplayTagRequirements TargetTags;   // 目标方必须满足这些 Tag 才计
 
 ---
 
-## 5.6 Stacking 机制
+## 六、Stacking 机制
 
 多次施加同一 GE 时，"叠加"还是"刷新"？
 
@@ -355,83 +476,128 @@ enum class EGameplayEffectStackingType : uint8
 };
 ```
 
-### 5.6.1 AggregateBySource
+### 6.1 AggregateBySource
 
 **同一施法者施加同一 GE → 叠加 Stack 计数，不创建新实例。**
 
 用例：同一个 Boss 对玩家施放 3 次中毒 → 目标身上只有 1 个 FActiveGameplayEffect，stackCount = 3。
 
-### 5.6.2 AggregateByTarget
+### 6.2 AggregateByTarget
 
 **任何来源施加同一 GE → 都叠加到同一个 Stack。**
 
 用例：玩家被多个敌人施放中毒 → 目标身上仍只有 1 个 FActiveGameplayEffect，stackCount = 施加次数。
 
-### 5.6.3 Stack 配置细节
+### 6.3 Stack 配置细节
+
+Stacking 配置直接平铺在 `UGameplayEffect` 类上：
 
 ```cpp
-USTRUCT(BlueprintType)
-struct FGameplayEffectStackingConfig
+// GameplayEffect.h — UGameplayEffect 直接成员（Category = Stacking）
+EGameplayEffectStackingType StackingType;                // [DEPRECATED(5.7)] 建议改用 GetStackingType()
+int32 StackLimitCount;                                   // 最大层数（-1 或 0 = 无上限）
+EGameplayEffectStackingDurationPolicy StackDurationRefreshPolicy;  // 叠层时 Duration 刷新策略
+EGameplayEffectStackingPeriodPolicy  StackPeriodResetPolicy;       // 叠层时 Period 重置策略
+EGameplayEffectStackingExpirationPolicy StackExpirationPolicy;     // 过期策略
+bool bFactorInStackCount;                                // true：Modifier 数值计算时乘以层数
+```
+
+对应枚举值（GameplayEffectTypes.h）：
+
+```cpp
+enum class EGameplayEffectStackingDurationPolicy : uint8
 {
-    EGameplayEffectStackingType StackingType;
-    int32 StackLimitCount;              // 最大层数（0 = 无上限）
-    
-    // 每层持续时间的处理方式
-    EGameplayEffectStackingDurationPolicy StackDurationRefreshPolicy;  // RefreshOnSuccess / NeverRefresh
-    EGameplayEffectStackingPeriodPolicy StackPeriodResetPolicy;        // ResetOnSuccess / NeverReset
-    
-    // 过期策略
-    EGameplayEffectStackingExpirationPolicy StackExpirationPolicy;     // ClearEntireStack / RemoveSingleStack / RefreshDuration
+    RefreshOnSuccessfulApplication,   // 施加成功 → 刷新所有层 Duration
+    NeverRefresh,                     // 各层独立计时
+    ExtendDuration,                   // 追加新层时长
+};
+enum class EGameplayEffectStackingPeriodPolicy : uint8
+{
+    ResetOnSuccessfulApplication,     // 施加成功 → 重置周期
+    NeverReset,
+};
+enum class EGameplayEffectStackingExpirationPolicy : uint8
+{
+    ClearEntireStack,                          // 到期 → 清除整个 Stack
+    RemoveSingleStackAndRefreshDuration,       // 到期 → 只移除一层并刷新 Duration
+    RefreshDuration,                           // 到期 → 刷新 Duration（不减少层数）
 };
 ```
 
 | 策略 | 含义 |
 |------|------|
-| StackDurationRefreshPolicy: RefreshOnSuccess | 施加新层时刷新所有层的 Duration |
+| StackDurationRefreshPolicy: RefreshOnSuccessfulApplication | 施加新层时刷新所有层的 Duration |
 | StackDurationRefreshPolicy: NeverRefresh | 施加新层时各层独立计时 |
+| StackDurationRefreshPolicy: ExtendDuration | 施加新层时在剩余 Duration 上追加 |
 | StackExpirationPolicy: ClearEntireStack | 到期时移除整个 Stack |
-| StackExpirationPolicy: RemoveSingleStack | 到期时只减少一层 |
+| StackExpirationPolicy: RemoveSingleStackAndRefreshDuration | 到期时只减少一层并刷新时长 |
+| StackExpirationPolicy: RefreshDuration | 到期时仅刷新时长，保持层数 |
+| bFactorInStackCount | true 时，Modifier 数值 = 基础值 × 层数 |
+
+`StackExpirationPolicy` 与 `StackDurationRefreshPolicy` 的区别在于触发时机：
+
+- **DurationRefreshPolicy**：在**施加新层**时触发（主动叠加），决定新层与已有层的 Duration 关系；
+- **ExpirationPolicy**：在**已有层到期**时触发（被动过期），决定过期时的 Stack 行为。
+
+`RemoveSingleStackAndRefreshDuration` 是最精细的策略：单层到期仅减少一层，其余层重新计时。与 `NeverRefresh` 的区别在于——前者逐层到期时保持剩余层有效，后者各层独立计时但到期时整体行为由 ExpirationPolicy 决定。
+
+| 聚合类型 | 适用场景 | 设计原因 |
+|----------|---------|---------|
+| AggregateBySource | 同一来源不重复叠加 | 避免单个 Boss 无限叠毒 |
+| AggregateByTarget | 所有来源共享 Stack | 团队共享 Debuff 计数（如"全队累计减速 5 层触发惩罚"） |
+
+> **常见设计**："中毒"用 `ClearEntireStack`（一次到期全部清除），"护盾"用 `RemoveSingleStackAndRefreshDuration`（逐层消耗），"永续被动"用 `RefreshDuration` + `NeverRefresh`。
 
 ---
 
-## 5.7 GameplayEffectComponent 体系
+## 七、GameplayEffectComponent 体系
 
-从 UE 5.3 开始，GE 引入模块化组件架构。此前的很多配置（如 BlockedAbilityTags、TargetTagRequirements）被迁移到了独立的 Component 中。
+从 UE 5.3 开始，GE 引入模块化组件架构。此前的很多配置（如 BlockAbilityTags、TargetTagRequirements、GrantedAbilities）被迁移到了独立的 Component 中。
 
 ```cpp
-// GameplayEffect.h, UGameplayEffect 成员
-UPROPERTY(EditDefaultsOnly, Category=Components)
-TArray<TObjectPtr<UGameplayEffectComponent>> GameplayEffectComponents;
+// GameplayEffect.h, UGameplayEffect 成员（源码第 2521-2524 行，protected）
+UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Instanced, Category = "GameplayEffect",
+          meta = (DisplayName = "Components"))
+TArray<TObjectPtr<UGameplayEffectComponent>> GEComponents;   // 注意：字段名是 GEComponents
 ```
 
-### 5.7.1 常用 GE Component 列表
+### 7.1 常用 GE Component 列表
 
-| Component | 功能 |
-|-----------|------|
-| `AbilitiesGameplayEffectComponent` | 施加时授予 GA |
-| `TargetTagRequirementsGameplayEffectComponent` | 替代旧的 TargetTagRequirements |
-| `TargetTagsGameplayEffectComponent` | 处理 Tag 授予 |
-| `RemoveOtherGameplayEffectComponent` | 施加时移除其他 GE |
-| `BlockedAbilityTagsGameplayEffectComponent` | 阻止特定 GA 激活 |
-| `AdditionalEffectsGameplayEffectComponent` | 链式施加其他 GE（OnApplication / OnActive / OnRemoved） |
-| `AssetTagsGameplayEffectComponent` | 替代旧的 AssetTags |
-| `ChanceToApplyGameplayEffectComponent` | 概率执行 |
-| `ImmunityGameplayEffectComponent` | 免疫特定 GE |
-| `GameplayCuesGameplayEffectComponent` | 触发 GameplayCue |
+源码目录 `GameplayAbilities/Public/GameplayEffectComponents/` 共 **11 个**内置组件：
 
-### 5.7.2 设计优势
+| Component | 功能 | 替代的旧字段 |
+|-----------|------|--------------|
+| `AbilitiesGameplayEffectComponent` | 施加时授予 GA | `GrantedAbilities` (5.3) |
+| `AdditionalEffectsGameplayEffectComponent` | 链式施加其他 GE（OnApplication / OnActive / OnRemoved） | `ConditionalGameplayEffects` (5.3) |
+| `AssetTagsGameplayEffectComponent` | GE 自身的 Asset Tags | `InheritableGameplayEffectTags` (5.3) |
+| `BlockAbilityTagsGameplayEffectComponent` | 阻止特定 GA 激活 | `InheritableBlockedAbilityTagsContainer` (5.3) |
+| `CancelAbilityTagsGameplayEffectComponent` | 施加时取消特定 GA | 旧无对应 |
+| `ChanceToApplyGameplayEffectComponent` | 概率执行 | `ChanceToApplyToTarget` (5.3) |
+| `CustomCanApplyGameplayEffectComponent` | 自定义施加判定（C++ 回调） | 旧无对应 |
+| `ImmunityGameplayEffectComponent` | 免疫特定 GE | `GrantedApplicationImmunityTags/Query` (5.3) |
+| `RemoveOtherGameplayEffectComponent` | 施加时移除其他 GE | `RemoveGameplayEffectsWithTags/Query` (5.3) |
+| `TargetTagRequirementsGameplayEffectComponent` | 施加/移除/持续 Tag 条件 | `Application/Removal/OngoingTagRequirements` (5.3) |
+| `TargetTagsGameplayEffectComponent` | 目标 Tag 授予与阻止 | `InheritableOwnedTagsContainer` (5.3) |
+
+> **注意**：内置组件中 **没有 `GameplayCuesGameplayEffectComponent`**——GameplayCue 的触发不通过 GE Component 配置，而是由 `UGameplayEffect::GameplayCues`（`TArray<FGameplayEffectCue>`，含 `GameplayCueTags`、`MagnitudeAttribute`、`MinLevel/MaxLevel`）驱动，且受 `bRequireModifierSuccessToTriggerCues` 开关约束。
+
+### 7.2 设计优势
+
+5.3 之前，所有功能字段（`GrantedAbilities`、`BlockAbilityTags`、`ChanceToApplyToTarget`、`ApplicationTagRequirements` 等）直接挂在 `UGameplayEffect` 基类。每新增一个功能特性都要改基类头文件，编译成本高且所有 GE 都得为没用到的字段买单。5.3 的 Component 化解决了两个核心痛点：
 
 - **模块化**：不再需要 `UGameplayEffect` 基类包含所有可能的功能，按需添加 Component
-- **可扩展**：项目可以写自定义 GE Component
-- **一致性**：同一 Component 模式贯穿 GA 系统
+- **可扩展**：项目可以写自定义 GE Component（比如自定义"先判定后施加"逻辑），不需要改引擎代码
+- **一致性**：同一 Component 模式贯穿 GA 系统，降低学习曲线
 
 ---
 
-## 5.8 FGameplayEffectSpec：运行时冻结实例
+## 八、FGameplayEffectSpec：运行时冻结实例
+
+> Spec 的创建需要 `FGameplayEffectContext` 作为参数（Context 详见下一章），本章先聚焦 Spec 自身的结构和"冻结"语义。
 
 UE 在 `MakeOutgoingSpec` 时，从 UGameplayEffect CDO 复制出一个 `FGameplayEffectSpec`。这个复制过程就是冻结：Spec 携带了施加那一刻的所有运行时上下文。
 
-### 5.8.1 核心结构
+### 8.1 核心结构
 
 ```cpp
 // GameplayEffect.h
@@ -439,81 +605,102 @@ USTRUCT(BlueprintType)
 struct GAMEPLAYABILITIES_API FGameplayEffectSpec
 {
     UPROPERTY()
-    TObjectPtr<const UGameplayEffect>  Def;         // → 原始 GE CDO（只读引用）
-    
-    TArray<FGameplayEffectModifiedAttribute> ModifiedAttributes;  // 已修改的属性记录
-    
-    FGameplayEffectAttributeCaptureSpecContainer   CapturedRelevantAttributes;  // 捕获的属性
-    FGameplayEffectAttributeCaptureSpecContainer   TargetEffectSpec;
-    
+    TObjectPtr<const UGameplayEffect>  Def;        // → 原始 GE CDO（只读引用）
+
+    UPROPERTY()
+    TArray<FGameplayEffectModifiedAttribute> ModifiedAttributes;   // 已修改的属性记录
+
+    UPROPERTY(NotReplicated)
+    FGameplayEffectAttributeCaptureSpecContainer CapturedRelevantAttributes; // 捕获的属性快照
+
+    // [DEPRECATED(5.3)] 旧"链式效果"字段（现用 AdditionalEffectsGameplayEffectComponent）
+    TArray<FGameplayEffectSpecHandle> TargetEffectSpecs;
+
+    UPROPERTY()
     float Duration;     // 冻结快照值（可能来自 SetByCaller）
+    UPROPERTY()
     float Period;       // 冻结快照值
-    float Level;        // GE 等级
-    float ChanceToApplyToTarget;
-    
-    FGameplayEffectContextHandle EffectContext;     // 来源信息
-    FGameplayTagContainer CapturedSourceTags;       // 冻结时刻的来源 Tags
-    FGameplayTagContainer CapturedTargetTags;       // 冻结时刻的目标 Tags
-    FGameplayTagContainer DynamicAssetTags;         // 动态 Asset Tags
-    FGameplayTagContainer DynamicGrantedTags;       // 动态 Granted Tags
-    
-    TMap<FGameplayTag, float> SetByCallerTagMagnitudes;  // SetByCaller 映射
+
+    UPROPERTY(NotReplicated)
+    FTagContainerAggregator CapturedSourceTags;   // 冻结时刻的来源 Tags（聚合器，非裸容器）
+    UPROPERTY(NotReplicated)
+    FTagContainerAggregator CapturedTargetTags;   // 冻结时刻的目标 Tags
+
+    UPROPERTY()
+    FGameplayTagContainer DynamicGrantedTags;     // 运行时动态追加的授予 Tags
+
+    UPROPERTY()
+    TArray<FModifierSpec> Modifiers;              // 计算后的 Modifier 列表
+
+    // [DEPRECATED(5.3)] 旧"授予能力"字段（现用 AbilitiesGameplayEffectComponent）
+    TArray<FGameplayAbilitySpecDef> GrantedAbilitySpecs;
+
+    TMap<FName, float>          SetByCallerNameMagnitudes;  // SetByCaller 按 Name 传值
+    TMap<FGameplayTag, float>   SetByCallerTagMagnitudes;   // SetByCaller 按 Tag 传值
+
+private:
+    FGameplayEffectContextHandle EffectContext;   // 来源信息（私有，通过 GetContext() 访问）
+    float Level;                                  // GE 等级（私有，通过 GetLevel() 访问）
+    FGameplayTagContainer DynamicAssetTags;       // 动态 Asset Tags（私有）
+    int32 StackCount;                             // 当前层数（私有）
 };
 ```
 
-### 5.8.2 为什么需要"冻结"？
+### 8.2 为什么需要"冻结"？
 
 思考一个场景：GE 通过 `AttributeBasedMagnitude` 计算伤害，源属性是"攻击力"。如果 BaseValue 在计算过程中被其他 GE 修改，那么最终伤害就不明确了。
 
 "冻结" 意味着：**在 Spec 创建时刻捕获所有相关属性值，后续计算只用冻结值。**
 
 ```cpp
-// GameplayEffect.cpp
+// AbilitySystemComponent.cpp — 真实源码（第 529-546 行）
 FGameplayEffectSpecHandle UAbilitySystemComponent::MakeOutgoingSpec(
     TSubclassOf<UGameplayEffect> GameplayEffectClass,
     float Level,
-    FGameplayEffectContextHandle Context)
+    FGameplayEffectContextHandle Context) const
 {
-    // 1. 从 CDO 复制
-    FGameplayEffectSpec* NewSpec = new FGameplayEffectSpec();
-    NewSpec->InitializeFromLinkedSpec(CDO);  // 拷贝所有配置字段
-    
-    // 2. 冻结运行时上下文
-    NewSpec->Level = Level;
-    NewSpec->EffectContext = Context;
-    
-    return SpecHandle;
+    // 1. 从 CDO 复制：构造函数内部调用 InitializeFromLinkedSpec(CDO)
+    //    并冻结 Level、Context（Duration/Period/Modifier 等快照一次性计算）
+    FGameplayEffectSpec* NewSpec = new FGameplayEffectSpec(
+        GameplayEffectClass->GetDefaultObject<UGameplayEffect>(),
+        Context, Level);
+
+    return FGameplayEffectSpecHandle(NewSpec);
 }
 ```
 
+> 构造函数 `FGameplayEffectSpec(const UGameplayEffect*, const FGameplayEffectContextHandle&, float Level)` 会完成：拷贝配置字段、计算 Duration/Period 快照、填充 `ModifiedAttributes`。此后 Spec 就是一个**与源 GE 解耦的冻结实例**。
+
 ---
 
-## 5.9 FGameplayEffectContext：来源信息容器
+## 九、FGameplayEffectContext：来源信息容器
 
 ```cpp
 // GameplayEffectTypes.h
-USTRUCT(BlueprintType)
-struct FGameplayEffectContext
+class FGameplayEffectContext : public TSharedFromThis<FGameplayEffectContext>
 {
-    // 网络相关
-    bool bReplicateInstigator;     // 是否同步 Instigator
-    bool bReplicateEffectCauser;   // 是否同步 EffectCauser
-    bool bHasWorldOrigin;          // 是否有世界坐标
-    
-    FGameplayAbilityTargetDataHandle TargetData;  // 所有命中信息
-    
-    // 来源身份
-    TWeakObjectPtr<AActor> Instigator;       // 施法者（通常是 Pawn）
-    TWeakObjectPtr<AActor> EffectCauser;     // 效果产生者（可能是 Projectile）
-    TWeakObjectPtr<UObject> SourceObject;    // 来源对象（如武器）
-    TWeakObjectPtr<UAbilitySystemComponent> InstigatorAbilitySystemComponent; // ASC
-    TWeakObjectPtr<UGameplayAbility> Ability; // 来源 GA
-    
+protected:
+    // 网络复制开关
+    bool bReplicateSourceObject;         // 是否同步 SourceObject
+    bool bReplicateInstigator;           // 是否同步 Instigator
+    bool bReplicateEffectCauser;         // 是否同步 EffectCauser
+
+    // 来源身份链
+    TWeakObjectPtr<AActor> Instigator;   // 施法者（通常是 Pawn）
+    TWeakObjectPtr<AActor> EffectCauser; // 效果产生者（可能是 Projectile）
+    TWeakObjectPtr<UGameplayAbility> AbilityCDO;                  // 来源 GA 的 CDO（可复制）
+    TWeakObjectPtr<UGameplayAbility> AbilityInstanceNotReplicated;// 来源 GA 实例（不复制）
+    int32 AbilityLevel;                  // 能力等级
+    TWeakObjectPtr<UObject> SourceObject;// 来源对象（如武器）
+    TWeakObjectPtr<UAbilitySystemComponent> InstigatorAbilitySystemComponent; // 来源方 ASC（不复制）
+
+    TArray<TWeakObjectPtr<AActor>> Actors; // 参与此效果的所有 Actor
+
+    TSharedPtr<FHitResult> HitResult;    // 物理碰撞信息（共享指针）
+
     // 位置
-    FVector WorldOrigin;                     // 效果世界坐标
-    
-    // Hit Result
-    FHitResult HitResult;                    // 物理碰撞信息
+    FVector WorldOrigin;                 // 效果世界坐标
+    bool bHasWorldOrigin;                // 是否有世界坐标
 };
 ```
 
@@ -525,56 +712,53 @@ struct FGameplayEffectContext
 
 ---
 
-## 5.10 设计思考
+## 十、设计思考
 
-### 为什么 GE 要作为 Data Asset 而不是代码？
+### 10.1 为什么需要 CDO + Spec 双层结构？
 
-1. **策划友好**：策划不需要打开 C++，直接在编辑器中配伤害、Buff、数值曲线
-2. **网络自动同步**：GAS 框架接管同步，不需要手写 RPC
-3. **统一模式**：伤害、Buff、被动技能、状态效果 — 全用同一套 GE 框架表达
-4. **可组合**：Tags + Stacking + Component 三大系统任意组合
+GE 的 CDO（`UGameplayEffect`）是模板，Spec（`FGameplayEffectSpec`）是实例——这和 `UClass` / `UObject` 的关系一样自然。但 GE 比普通 UObject 多了一层关键约束：**Spec 创建后不可再引用 CDO 的动态数据**。
 
-### Spec 模式的代价
+如果不做双层结构，用同一个 UObject 实例施加给多个目标会互相覆盖 Modifier 数值。用 Clone 替代 Spec 则每次施加都要深拷贝整个 CDO（包括所有 GE Component），开销远大于一个轻量 Spec。
 
-"冻结"带来隔离性，但有代价：
-- 分配和复制 Spec 有内存开销
-- 冻结时刻的属性快照可能与实际应用时不同（这是设计意图：AttributeBased 通常需要冻结源值）
-- SetByCaller 无法被模板化，每次都必须传值
+Spec 的"冻结"语义同时解决了两个问题：隔离性（施加给 A 的 Spec 不会影响施加给 B 的），和可预测性（AttributeBased 的源属性快照冻结在 Spec 创建时刻，不会因后续属性变化而漂移）。
 
-### GameplayEffectComponent 的演进
+### 10.2 为什么 ModOp 是 5 种而非 3 种？
 
-从 UE 4.x 到 5.3+，GE 的配置越来越组件化。基类不应承担所有功能，组合优于继承。
+如果只看"增减属性"的需求，Add 和 Multiply 两种就够了。但实际游戏数值会遇到这些场景：
+
+- **AddBase 和 AddFinal 的区别**：Buff 加 50 攻击力（AddBase，受百分比加成影响）和 Buff 加 50 攻击力（AddFinal，不受任何加成影响）是不同的数值语义。`AddFinal` 在聚合链最末端执行，绕过所有百分比。
+- **MultiplyAdditive 和 MultiplyCompound 的区别**：两个 +20% 的 Buff，`MultiplyAdditive` 叠加结果 = +40%（加法叠加），`MultiplyCompound` 结果 = +44%（乘法叠加，1.2 × 1.2）。前者适合"累加式增长"，后者适合"复合式衰减"。
+- **DivideAdditive** 是乘法取倒数：除以 1.2 等效于乘以 0.833，适合"减伤"场景——多个减伤以倒数形式叠加，避免 100% 减伤的数学困境。
+
+5 种 ModOp 的设计不是为了分类而分类——它让数值策划能用纯配置表达复杂的叠加逻辑，不需要每次都写自定义 MMC。
+
+### 10.3 Spec"冻结"的真正代价是什么？
+
+Spec 的便利性有代价，但真正的痛点不在内存开销（轻量结构），而是在"冻结时机不可变"：
+
+- AttributeBased 在 Spec 创建时快照源属性，如果施加前源属性变化了（如先算 AttackSpec 再算 BuffSpec，Attack 值在创建 Buff 的 Spec 之后才结算），快照值就是旧的。虽然有 `SnapshottedSourceAttributes` 参数可以配置是否冻结，但默认行为需要设计师理解这个时序。
+- SetByCaller 必须在创建 Spec 时通过 Tag 注入，无法延迟到施加前再传。这意味着调用方必须在创建 Spec 前就知道所有运行时参数。
+
+这和 GAS 的整体哲学一致——把复杂性交给框架，把灵活性交给配置，但配置的正确性依赖开发者对时序的理解。理解了"冻结时刻"这一概念，90% 的 Spec 相关问题都能避免。
 
 ---
 
-## 5.11 总结
+## 十一、总结
 
 | 概念 | 一句话 |
 |------|--------|
-| Duration Policy | Instant — 直写属性；Duration — 定时自动移除；Infinite — 手动移除 |
-| Modifier | Attribute + ModOp + Magnitude，支持 4 种运算、4 种数值来源 |
+| Duration Policy | Instant — 直写属性；HasDuration — 定时自动移除；Infinite — 手动移除 |
+| Modifier | Attribute + ModOp + Magnitude，支持 5 种运算（AddBase/…/AddFinal）、4 种数值来源 |
 | Tags | Application/Removal/Ongoing 三道关卡，控制施加/持续/移除 |
 | Stacking | None / AggBySrc / AggByTgt 三种策略，控制多次施加行为 |
 | GE Component | 插件化功能模块，替代基类字段膨胀 |
 | Spec | 冻结的运行时实例，携带 Context + Level + SetByCaller |
 | Context | 来源身份链：Instigator → EffectCauser → SourceObject |
 
-> **系列导航**
-> 
-> | 阶段 | 篇章 | 内容 | 状态 |
-> |------|------|------|------|
-> | 🟢 基础 | 01 | GAS 总览与核心架构 | 📝 |
-> | | 02 | ASC — 核心调度器 | 📝 |
-> | | 03 | GameplayTags — 通用语言 | 📝 |
-> | | 04 | AttributeSet — 属性定义与复制 | 📝 |
-> | 🔵 核心 | **05** | **GameplayEffect — 效果与计算 (上)** | ✅ |
-> | | 06 | GameplayEffect — 效果与计算 (下) | 📝 |
-> | | 07 | GameplayAbility — 技能激活与核心框架 (上) | 📝 |
-> | | 08 | GameplayAbility — Task/输入/预测 (下) | 📝 |
-> | | 09 | GameplayCue — 表现层触发机制 | 📝 |
-> | 🔴 高级 | 10 | Prediction — 预测与回滚 | 📝 |
-> | | 11 | GE Components — 组件化架构演进 | 📝 |
-> | | 12 | Network & Serial — 网络序列化 | 📝 |
-> | | 13 | Targeting — 瞄准系统 | 📝 |
-> | | 14 | Debug & Optimization — 调试与优化 | 📝 |
-> | | 15 | 终篇回顾 — 全景复习 | 📝 |
+**上一篇**：[04 | AttributeSet：属性定义、回调链与网络复制](../04-AttributeSet/04-AttributeSet文章.md)
+
+**下一篇**：[06 | GameplayEffect — 执行流程与计算链路](../06-GameplayEffect/06-GameplayEffect文章.md) — 从 `ApplyGameplayEffectSpecToSelf` 出发，追踪 Instant 直写与 Duration 注册两条路径的完整调用链。
+
+---
+
+*本文基于 UE 5.8 源码分析。系列文章会继续按模块拆解，从基础到高级，从 API 到设计哲学。*

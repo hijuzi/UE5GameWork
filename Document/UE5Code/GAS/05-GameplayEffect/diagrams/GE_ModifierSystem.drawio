@@ -1,2 +1,237 @@
-<?xml version='1.0' encoding='utf-8'?>
-<mxGraphModel dx="0" dy="0" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageWidth="1200" pageHeight="900"><root><mxCell id="0" /><mxCell id="1" parent="0" /><mxCell id="t2" value="GameplayEffect Modifier Calculation System" style="text;html=1;fontSize=16;fontStyle=1;align=center;fillColor=#6c8ebf;fontColor=#ffffff;" vertex="1" parent="1"><mxGeometry x="350" y="10" width="500" height="30" as="geometry" /></mxCell><mxCell id="mag" value="FGameplayEffectModifierMagnitude" style="swimlane;html=1;startSize=24;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;align=center;" vertex="1" parent="1"><mxGeometry x="50" y="70" width="280" height="40" as="geometry" /></mxCell><mxCell id="mg1" value="(1) ScalableFloat&#10;Fixed Value / CurveTable" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="40" y="160" width="160" height="50" as="geometry" /></mxCell><mxCell id="mg2" value="(2) AttributeBased&#10;Based on Attribute" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="230" y="160" width="160" height="50" as="geometry" /></mxCell><mxCell id="mg3" value="(3) CustomCalculationClass&#10;Custom MMC" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="420" y="160" width="170" height="50" as="geometry" /></mxCell><mxCell id="mg4" value="(4) SetByCaller&#10;Passed at Runtime" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="620" y="160" width="160" height="50" as="geometry" /></mxCell><mxCell id="em1" value="Type=ScalableFloat" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#6c8ebf;endFill=1;" edge="1" parent="1" source="mag" target="mg1"><mxGeometry relative="1" as="geometry" /></mxCell><mxCell id="em2" value="Type=AttributeBased" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#6c8ebf;endFill=1;" edge="1" parent="1" source="mag" target="mg2"><mxGeometry relative="1" as="geometry" /></mxCell><mxCell id="em3" value="Type=CustomCalcClass" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#6c8ebf;endFill=1;" edge="1" parent="1" source="mag" target="mg3"><mxGeometry relative="1" as="geometry" /></mxCell><mxCell id="em4" value="Type=SetByCaller" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#6c8ebf;endFill=1;" edge="1" parent="1" source="mag" target="mg4"><mxGeometry relative="1" as="geometry" /></mxCell><mxCell id="op" value="EGameplayModOp" style="swimlane;html=1;startSize=24;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;align=center;" vertex="1" parent="1"><mxGeometry x="50" y="270" width="200" height="40" as="geometry" /></mxCell><mxCell id="op1" value="Additive (+)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="50" y="340" width="130" height="40" as="geometry" /></mxCell><mxCell id="op2" value="Multiplicitive (*)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="200" y="340" width="130" height="40" as="geometry" /></mxCell><mxCell id="op3" value="Division (/)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="350" y="340" width="130" height="40" as="geometry" /></mxCell><mxCell id="op4" value="Override (=)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="500" y="340" width="130" height="40" as="geometry" /></mxCell><mxCell id="e_op_op1" value="" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#6c8ebf;endFill=1;" edge="1" parent="1" source="op" target="op1"><mxGeometry relative="1" as="geometry" /></mxCell><mxCell id="e_op_op2" value="" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#6c8ebf;endFill=1;" edge="1" parent="1" source="op" target="op2"><mxGeometry relative="1" as="geometry" /></mxCell><mxCell id="e_op_op3" value="" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#6c8ebf;endFill=1;" edge="1" parent="1" source="op" target="op3"><mxGeometry relative="1" as="geometry" /></mxCell><mxCell id="e_op_op4" value="" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#6c8ebf;endFill=1;" edge="1" parent="1" source="op" target="op4"><mxGeometry relative="1" as="geometry" /></mxCell><mxCell id="pipe" value="Calculation Pipeline" style="swimlane;html=1;startSize=20;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="50" y="430" width="200" height="30" as="geometry" /></mxCell><mxCell id="s1" value="Step 1&#10;Calculate Magnitude" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=center;" vertex="1" parent="1"><mxGeometry x="50" y="490" width="130" height="50" as="geometry" /></mxCell><mxCell id="s2" value="Step 2&#10;StaticExecModOnBaseValue&#10;(BaseValue, ModOp, Magnitude)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;align=center;" vertex="1" parent="1"><mxGeometry x="220" y="490" width="180" height="50" as="geometry" /></mxCell><mxCell id="s3" value="Step 3&#10;Dirty -&gt; EvaluateWithBase&#10;-&gt; CurrentValue" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;align=center;" vertex="1" parent="1"><mxGeometry x="440" y="490" width="150" height="50" as="geometry" /></mxCell><mxCell id="s4" value="Step 4&#10;SetNumericValueChecked&#10;-&gt; Broadcast Change" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;align=center;" vertex="1" parent="1"><mxGeometry x="630" y="490" width="160" height="50" as="geometry" /></mxCell><mxCell id="es1" value="Magnitude" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#82b366;endFill=1;" edge="1" parent="1" source="s1" target="s2"><mxGeometry relative="1" as="geometry" /></mxCell><mxCell id="es2" value="NewBase" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#82b366;endFill=1;" edge="1" parent="1" source="s2" target="s3"><mxGeometry relative="1" as="geometry" /></mxCell><mxCell id="es3" value="CurrentValue" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#82b366;endFill=1;" edge="1" parent="1" source="s3" target="s4"><mxGeometry relative="1" as="geometry" /></mxCell><mxCell id="ab" value="AttributeBased Formula" style="swimlane;html=1;startSize=20;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;align=center;" vertex="1" parent="1"><mxGeometry x="50" y="600" width="230" height="30" as="geometry" /></mxCell><mxCell id="ab1" value="Magnitude = (BackingAttribute + PreAdd) * Coefficient + PostAdd" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;align=center;" vertex="1" parent="1"><mxGeometry x="50" y="660" width="350" height="40" as="geometry" /></mxCell><mxCell id="abd1" value="BackingAttribute&#10;(captured attribute)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=center;" vertex="1" parent="1"><mxGeometry x="50" y="730" width="150" height="40" as="geometry" /></mxCell><mxCell id="abd2" value="PreMultiplyAdditiveValue&#10;(PreAdd)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=center;" vertex="1" parent="1"><mxGeometry x="220" y="730" width="150" height="40" as="geometry" /></mxCell><mxCell id="abd3" value="Coefficient" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=center;" vertex="1" parent="1"><mxGeometry x="390" y="730" width="100" height="40" as="geometry" /></mxCell><mxCell id="abd4" value="PostMultiplyAdditiveValue&#10;(PostAdd)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=center;" vertex="1" parent="1"><mxGeometry x="510" y="730" width="150" height="40" as="geometry" /></mxCell><mxCell id="ea_abd1" value="" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#b85450;endFill=1;" edge="1" parent="1" source="abd1" target="ab1"><mxGeometry relative="1" as="geometry" /></mxCell><mxCell id="ea_abd2" value="" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#b85450;endFill=1;" edge="1" parent="1" source="abd2" target="ab1"><mxGeometry relative="1" as="geometry" /></mxCell><mxCell id="ea_abd3" value="" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#b85450;endFill=1;" edge="1" parent="1" source="abd3" target="ab1"><mxGeometry relative="1" as="geometry" /></mxCell><mxCell id="ea_abd4" value="" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#b85450;endFill=1;" edge="1" parent="1" source="abd4" target="ab1"><mxGeometry relative="1" as="geometry" /></mxCell></root></mxGraphModel>
+<mxGraphModel page="1" pageWidth="1600" pageHeight="920" gridSize="10">
+<root>
+<mxCell id="0"/><mxCell id="1" parent="0"/>
+
+<mxCell id="t" value="GameplayEffect Modifier 体系 —— Magnitude × ModOp × 聚合 Pipeline" style="text;html=1;fontSize=22;fontStyle=1;fontColor=#1a1a2e;align=center;" vertex="1" parent="1">
+  <mxGeometry x="200" y="10" width="1200" height="36" as="geometry"/>
+</mxCell>
+
+<!-- Outer container: FGameplayModifierInfo -->
+<mxCell id="outer" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#b0e3e6;strokeWidth=2;dashed=1;arcSize=10;" vertex="1" parent="1">
+  <mxGeometry x="40" y="60" width="1520" height="290" as="geometry"/>
+</mxCell>
+<mxCell id="outlab" value="&lt;b&gt;FGameplayModifierInfo&lt;/b&gt; — GE 中 Modifiers 数组的每个元素" style="text;html=1;fontSize=14;fontColor=#0e8088;fontStyle=1;align=center;" vertex="1" parent="1">
+  <mxGeometry x="350" y="63" width="900" height="22" as="geometry"/>
+</mxCell>
+
+<!-- ===== Left: Magnitude 来源 ===== -->
+<mxCell id="magbox" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#6c8ebf;strokeWidth=1;arcSize=10;dashed=1;" vertex="1" parent="1">
+  <mxGeometry x="60" y="100" width="520" height="230" as="geometry"/>
+</mxCell>
+<mxCell id="maglab" value="&lt;b&gt;Magnitude 计算来源&lt;/b&gt; — EGameplayEffectMagnitude" style="text;html=1;fontSize=12;fontColor=#6c8ebf;fontStyle=1;align=left;" vertex="1" parent="1">
+  <mxGeometry x="80" y="105" width="480" height="20" as="geometry"/>
+</mxCell>
+
+<mxCell id="m1" value="&lt;b style=&quot;font-size:13px;&quot;&gt;1. ScalableFloat&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555;&quot;&gt;FScalableFloat (DataTable 曲线)&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;固定值或引用 DataTable 计算&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=1;arcSize=10;fontSize=12;verticalAlign=top;spacingTop=10;" vertex="1" parent="1">
+  <mxGeometry x="80" y="135" width="230" height="80" as="geometry"/>
+</mxCell>
+<mxCell id="m2" value="&lt;b style=&quot;font-size:13px;&quot;&gt;2. AttributeBased&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555;&quot;&gt;FAttributeBasedFloat&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;从 Attribute 取值 × Coefficient&lt;br&gt;+ Pre / Post Multiply Additive&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=1;arcSize=10;fontSize=12;verticalAlign=top;spacingTop=10;" vertex="1" parent="1">
+  <mxGeometry x="330" y="135" width="230" height="80" as="geometry"/>
+</mxCell>
+<mxCell id="m3" value="&lt;b style=&quot;font-size:13px;&quot;&gt;3. CustomCalculationClass&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555;&quot;&gt;TSubclassOf&amp;lt;UGameplayModMagnitudeCalculation&amp;gt;&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;蓝图/C++ 自由计算&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=1;arcSize=10;fontSize=12;verticalAlign=top;spacingTop=10;" vertex="1" parent="1">
+  <mxGeometry x="80" y="230" width="230" height="80" as="geometry"/>
+</mxCell>
+<mxCell id="m4" value="&lt;b style=&quot;font-size:13px;&quot;&gt;4. SetByCaller&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555;&quot;&gt;FSetByCallerFloat&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;GA 提交 Spec 时动态传值&lt;br&gt;DataTag (FGameplayTag) / DataName (FName)&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=1;arcSize=10;fontSize=12;verticalAlign=top;spacingTop=10;" vertex="1" parent="1">
+  <mxGeometry x="330" y="230" width="230" height="80" as="geometry"/>
+</mxCell>
+
+<!-- Magnitude → ModifierInfo arrow -->
+<mxCell id="e_m" value="计算 Magnitude →" style="endArrow=blockThin;endFill=1;strokeWidth=2;strokeColor=#6c8ebf;fontSize=11;fontColor=#6c8ebf;fontStyle=1;labelBackgroundColor=#FFF;" edge="1" parent="1">
+  <mxGeometry relative="1" as="geometry">
+    <mxPoint x="595" y="215" as="sourcePoint"/>
+    <mxPoint x="700" y="215" as="targetPoint"/>
+  </mxGeometry>
+</mxCell>
+
+<!-- Center: ModifierInfo 聚合点 -->
+<mxCell id="mi" value="&lt;b&gt;FGameplay&lt;br&gt;ModifierInfo&lt;/b&gt;&lt;br&gt;• Attribute&lt;br&gt;• ModifierOp&lt;br&gt;• ModifierMagnitude&lt;br&gt;• SourceTags&lt;br&gt;• TargetTags&lt;br&gt;• EvaluationChannelSettings" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#0e8088;strokeWidth=2;arcSize=10;fontSize=11;verticalAlign=top;spacingTop=10;" vertex="1" parent="1">
+  <mxGeometry x="710" y="130" width="140" height="170" as="geometry"/>
+</mxCell>
+
+<!-- ModifierInfo → ModOp arrow -->
+<mxCell id="e_o" value="→ 运算" style="endArrow=blockThin;endFill=1;strokeWidth=2;strokeColor=#82b366;fontSize=11;fontColor=#82b366;fontStyle=1;labelBackgroundColor=#FFF;" edge="1" parent="1">
+  <mxGeometry relative="1" as="geometry">
+    <mxPoint x="860" y="215" as="sourcePoint"/>
+    <mxPoint x="960" y="215" as="targetPoint"/>
+  </mxGeometry>
+</mxCell>
+<!-- ===== Right: ModOp 五种运算 ===== -->
+<mxCell id="opbox" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#82b366;strokeWidth=1;arcSize=10;dashed=1;" vertex="1" parent="1">
+  <mxGeometry x="980" y="100" width="560" height="230" as="geometry"/>
+</mxCell>
+<mxCell id="oplab" value="&lt;b&gt;EGameplayModOp&lt;/b&gt; — Base 阶段 (0~2) &amp;nbsp;| &amp;nbsp; Final 阶段 (4~5)" style="text;html=1;fontSize=12;fontColor=#82b366;fontStyle=1;align=left;" vertex="1" parent="1">
+  <mxGeometry x="1000" y="105" width="520" height="20" as="geometry"/>
+</mxCell>
+
+<!-- Row 1: Base Stage ops (AddBase=0, MultiplyAdditive=1, DivideAdditive=2) -->
+<mxCell id="o1" value="&lt;b&gt;① AddBase (0)&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;BaseValue += Magnitude&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555;&quot;&gt;伤害30, Lv3→90 累加到Base&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=1;arcSize=10;fontSize=12;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
+  <mxGeometry x="990" y="135" width="175" height="75" as="geometry"/>
+</mxCell>
+<mxCell id="o2" value="&lt;b&gt;② MultiplyAdditive (1)&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;Σ 连乘后 × Base&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555;&quot;&gt;50%+50%=1.5+1.5=2.0倍率&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=1;arcSize=10;fontSize=12;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
+  <mxGeometry x="1180" y="135" width="175" height="75" as="geometry"/>
+</mxCell>
+<mxCell id="o3" value="&lt;b&gt;③ DivideAdditive (2)&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;÷ (1 + Σ Divide)&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555;&quot;&gt;2个÷2→÷(1+2)=÷3折减&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=1;arcSize=10;fontSize=12;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
+  <mxGeometry x="1370" y="135" width="155" height="75" as="geometry"/>
+</mxCell>
+
+<!-- Row 2: Final Stage ops (MultiplyCompound=4, AddFinal=5) -->
+<!-- Note: value 3 was Override, now deprecated -->
+<mxCell id="o4" value="&lt;b&gt;④ MultiplyCompound (4)&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;Π 连续叠乘&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555;&quot;&gt;1.5×1.5=2.25 (复合叠加)&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=1;arcSize=10;fontSize=12;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
+  <mxGeometry x="990" y="225" width="175" height="75" as="geometry"/>
+</mxCell>
+<mxCell id="o5" value="&lt;b&gt;⑤ AddFinal (5)&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;Σ 求和后加入&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555;&quot;&gt;最终+10 (穿透/固伤)&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=1;arcSize=10;fontSize=12;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
+  <mxGeometry x="1180" y="225" width="175" height="75" as="geometry"/>
+</mxCell>
+
+<!-- Deprecation note -->
+<mxCell id="odep" value="&lt;font style=&quot;font-size:10px;color:#999;&quot;&gt;注：enum 值 3 (Override) 已 Deprecated&lt;br&gt;Max = 6&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;strokeWidth=1;arcSize=10;fontSize=10;verticalAlign=middle;" vertex="1" parent="1">
+  <mxGeometry x="1370" y="225" width="155" height="75" as="geometry"/>
+</mxCell>
+
+<!-- ===== Aggregation Formula (from source: EvaluateWithBase) ===== -->
+<mxCell id="aggbox" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#d79b00;strokeWidth=2;arcSize=10;" vertex="1" parent="1">
+  <mxGeometry x="40" y="370" width="1520" height="175" as="geometry"/>
+</mxCell>
+<mxCell id="agglab" value="&lt;b&gt;FAggregator::EvaluateWithBase&lt;/b&gt; — 按 ModOp 类型分组聚合（非顺序迭代）" style="text;html=1;fontSize=13;fontColor=#d79b00;fontStyle=1;align=center;" vertex="1" parent="1">
+  <mxGeometry x="350" y="375" width="900" height="20" as="geometry"/>
+</mxCell>
+
+<mxCell id="agg1" value="&lt;b&gt;Step 1&lt;/b&gt;&lt;br&gt;BaseValue&lt;br&gt;Snapshot&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555;&quot;&gt;读取 Backing Attr. 值&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d79b00;strokeWidth=1;arcSize=10;fontSize=11;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
+  <mxGeometry x="55" y="405" width="180" height="90" as="geometry"/>
+</mxCell>
+<mxCell id="ea1" value="" style="endArrow=blockThin;endFill=1;strokeWidth=2;strokeColor=#d79b00;" edge="1" parent="1">
+  <mxGeometry relative="1" as="geometry"><mxPoint x="240" y="450" as="sourcePoint"/><mxPoint x="280" y="450" as="targetPoint"/></mxGeometry>
+</mxCell>
+
+<mxCell id="agg2" value="&lt;b&gt;Step 2: Base 阶段&lt;/b&gt;&lt;br&gt;(BaseValue + ΣAddBase)&lt;br&gt;× ΠMultiplyAdditive&lt;br&gt;÷ (1 + ΣDivideAdditive)&#xa;&lt;font style=&quot;font-size:10px;color:#555;&quot;&gt;同类 Aggregator Channel 先各自聚合&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d79b00;strokeWidth=1;arcSize=10;fontSize=11;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
+  <mxGeometry x="285" y="405" width="320" height="90" as="geometry"/>
+</mxCell>
+<mxCell id="ea2" value="" style="endArrow=blockThin;endFill=1;strokeWidth=2;strokeColor=#d79b00;" edge="1" parent="1">
+  <mxGeometry relative="1" as="geometry"><mxPoint x="610" y="450" as="sourcePoint"/><mxPoint x="660" y="450" as="targetPoint"/></mxGeometry>
+</mxCell>
+
+<mxCell id="agg3" value="&lt;b&gt;Step 3: Final 阶段&lt;/b&gt;&lt;br&gt;× ΠMultiplyCompound&lt;br&gt;+ ΣAddFinal&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555;&quot;&gt;在 Base 阶段结果上二次运算&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d79b00;strokeWidth=1;arcSize=10;fontSize=11;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
+  <mxGeometry x="665" y="405" width="260" height="90" as="geometry"/>
+</mxCell>
+<mxCell id="ea3" value="" style="endArrow=blockThin;endFill=1;strokeWidth=2;strokeColor=#d79b00;" edge="1" parent="1">
+  <mxGeometry relative="1" as="geometry"><mxPoint x="930" y="450" as="sourcePoint"/><mxPoint x="980" y="450" as="targetPoint"/></mxGeometry>
+</mxCell>
+
+<mxCell id="agg4" value="&lt;b&gt;Step 4&lt;/b&gt;&lt;br&gt;FinalValue&lt;br&gt;写入 FAggregator&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555;&quot;&gt;SetAttribute() 最终生效&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;strokeWidth=2;arcSize=10;fontSize=11;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
+  <mxGeometry x="985" y="405" width="200" height="90" as="geometry"/>
+</mxCell>
+
+<mxCell id="formula" value="&lt;b style=&quot;font-size:13px;color:#d79b00;&quot;&gt;核心公式：&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:12px;&quot;&gt;FinalValue = ((BaseValue + ΣAddBase)&lt;br&gt;× ΠMultiplyAdditive ÷ (1 + ΣDivideAdditive)&lt;br&gt;× ΠMultiplyCompound) + ΣAddFinal&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d79b00;strokeWidth=1;arcSize=10;fontSize=12;fontStyle=0;verticalAlign=top;spacingTop=6;" vertex="1" parent="1">
+  <mxGeometry x="1210" y="405" width="330" height="90" as="geometry"/>
+</mxCell>
+
+<!-- ===== Mapping Table ===== -->
+<mxCell id="tbbox" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#cccccc;strokeWidth=1;arcSize=10;" vertex="1" parent="1">
+  <mxGeometry x="40" y="565" width="1520" height="210" as="geometry"/>
+</mxCell>
+<mxCell id="tblab" value="&lt;b&gt;EGameplayModOp → 典型场景映射&lt;/b&gt;" style="text;html=1;fontSize=12;fontColor=#333333;fontStyle=1;align=center;" vertex="1" parent="1">
+  <mxGeometry x="500" y="570" width="600" height="20" as="geometry"/>
+</mxCell>
+
+<mxCell id="th1" value="&lt;b&gt;Enum&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e0e0e0;strokeColor=#cccccc;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+  <mxGeometry x="70" y="600" width="150" height="26" as="geometry"/>
+</mxCell>
+<mxCell id="th2" value="&lt;b&gt;阶段 / 聚合公式&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e0e0e0;strokeColor=#cccccc;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+  <mxGeometry x="220" y="600" width="200" height="26" as="geometry"/>
+</mxCell>
+<mxCell id="th3" value="&lt;b&gt;典型场景&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e0e0e0;strokeColor=#cccccc;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+  <mxGeometry x="420" y="600" width="180" height="26" as="geometry"/>
+</mxCell>
+<mxCell id="th4" value="&lt;b&gt;GE 示例&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e0e0e0;strokeColor=#cccccc;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+  <mxGeometry x="600" y="600" width="180" height="26" as="geometry"/>
+</mxCell>
+<mxCell id="th5" value="&lt;b&gt;注意事项&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e0e0e0;strokeColor=#cccccc;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+  <mxGeometry x="780" y="600" width="750" height="26" as="geometry"/>
+</mxCell>
+
+<mxCell id="r1c1" value="AddBase = 0" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#cccccc;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+  <mxGeometry x="70" y="626" width="150" height="28" as="geometry"/>
+</mxCell>
+<mxCell id="r1c2" value="Base: Σ 求和 → +" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8f8f8;strokeColor=#cccccc;fontSize=11;" vertex="1" parent="1">
+  <mxGeometry x="220" y="626" width="200" height="28" as="geometry"/>
+</mxCell>
+<mxCell id="r1c3" value="伤害/治疗/属性加值" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8f8f8;strokeColor=#cccccc;fontSize=11;" vertex="1" parent="1">
+  <mxGeometry x="420" y="626" width="180" height="28" as="geometry"/>
+</mxCell>
+<mxCell id="r1c4" value="GE_Damage, GE_Heal" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8f8f8;strokeColor=#cccccc;fontSize=11;" vertex="1" parent="1">
+  <mxGeometry x="600" y="626" width="180" height="28" as="geometry"/>
+</mxCell>
+<mxCell id="r1c5" value="ScalableFloat / AttributeBased (Atk×0.3 + Lv×5)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8f8f8;strokeColor=#cccccc;fontSize=11;" vertex="1" parent="1">
+  <mxGeometry x="780" y="626" width="750" height="28" as="geometry"/>
+</mxCell>
+
+<mxCell id="r2c1" value="MultiplyAdditive = 1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#cccccc;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+  <mxGeometry x="70" y="654" width="150" height="28" as="geometry"/>
+</mxCell>
+<mxCell id="r2c2" value="Base: Π 连乘 → ×" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8f8f8;strokeColor=#cccccc;fontSize=11;" vertex="1" parent="1">
+  <mxGeometry x="220" y="654" width="200" height="28" as="geometry"/>
+</mxCell>
+<mxCell id="r2c3" value="百分比加成/减速" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8f8f8;strokeColor=#cccccc;fontSize=11;" vertex="1" parent="1">
+  <mxGeometry x="420" y="654" width="180" height="28" as="geometry"/>
+</mxCell>
+<mxCell id="r2c4" value="GE_AttackSpeedBuff" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8f8f8;strokeColor=#cccccc;fontSize=11;" vertex="1" parent="1">
+  <mxGeometry x="600" y="654" width="180" height="28" as="geometry"/>
+</mxCell>
+<mxCell id="r2c5" value="多个 MultiplyAdditive 连乘：1.5+1.5=2.0 (非累加)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8f8f8;strokeColor=#cccccc;fontSize=11;" vertex="1" parent="1">
+  <mxGeometry x="780" y="654" width="750" height="28" as="geometry"/>
+</mxCell>
+
+<mxCell id="r3c1" value="DivideAdditive = 2" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#cccccc;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+  <mxGeometry x="70" y="682" width="150" height="28" as="geometry"/>
+</mxCell>
+<mxCell id="r3c2" value="Base: ÷ (1 + Σ)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8f8f8;strokeColor=#cccccc;fontSize=11;" vertex="1" parent="1">
+  <mxGeometry x="220" y="682" width="200" height="28" as="geometry"/>
+</mxCell>
+<mxCell id="r3c3" value="伤害减免/CD缩减" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8f8f8;strokeColor=#cccccc;fontSize=11;" vertex="1" parent="1">
+  <mxGeometry x="420" y="682" width="180" height="28" as="geometry"/>
+</mxCell>
+<mxCell id="r3c4" value="GE_DamageReduction" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8f8f8;strokeColor=#cccccc;fontSize=11;" vertex="1" parent="1">
+  <mxGeometry x="600" y="682" width="180" height="28" as="geometry"/>
+</mxCell>
+<mxCell id="r3c5" value="非直接 BaseValue / N，而是÷(1+N)；可防止负值/除零" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8f8f8;strokeColor=#cccccc;fontSize=11;" vertex="1" parent="1">
+  <mxGeometry x="780" y="682" width="750" height="28" as="geometry"/>
+</mxCell>
+
+<mxCell id="r4c1" value="MultiplyCompound = 4" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#cccccc;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+  <mxGeometry x="70" y="710" width="150" height="28" as="geometry"/>
+</mxCell>
+<mxCell id="r4c2" value="Final: Π 叠乘 → ×" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8f8f8;strokeColor=#cccccc;fontSize=11;" vertex="1" parent="1">
+  <mxGeometry x="220" y="710" width="200" height="28" as="geometry"/>
+</mxCell>
+<mxCell id="r4c3" value="多来源最终倍率" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8f8f8;strokeColor=#cccccc;fontSize=11;" vertex="1" parent="1">
+  <mxGeometry x="420" y="710" width="180" height="28" as="geometry"/>
+</mxCell>
+<mxCell id="r4c4" value="GE_FinalDamageMultiplier" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8f8f8;strokeColor=#cccccc;fontSize=11;" vertex="1" parent="1">
+  <mxGeometry x="600" y="710" width="180" height="28" as="geometry"/>
+</mxCell>
+<mxCell id="r4c5" value="与 MultiplyAdditive 区别：在 Final 阶段运算，不参与 Base 阶段连乘" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8f8f8;strokeColor=#cccccc;fontSize=11;" vertex="1" parent="1">
+  <mxGeometry x="780" y="710" width="750" height="28" as="geometry"/>
+</mxCell>
+
+<mxCell id="r5c1" value="AddFinal = 5" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#cccccc;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+  <mxGeometry x="70" y="738" width="150" height="28" as="geometry"/>
+</mxCell>
+<mxCell id="r5c2" value="Final: Σ 求和 → +" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8f8f8;strokeColor=#cccccc;fontSize=11;" vertex="1" parent="1">
+  <mxGeometry x="220" y="738" width="200" height="28" as="geometry"/>
+</mxCell>
+<mxCell id="r5c3" value="固定穿透/最终修正" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8f8f8;strokeColor=#cccccc;fontSize=11;" vertex="1" parent="1">
+  <mxGeometry x="420" y="738" width="180" height="28" as="geometry"/>
+</mxCell>
+<mxCell id="r5c4" value="GE_TrueDamage" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8f8f8;strokeColor=#cccccc;fontSize=11;" vertex="1" parent="1">
+  <mxGeometry x="600" y="738" width="180" height="28" as="geometry"/>
+</mxCell>
+<mxCell id="r5c5" value="在所有乘除法之后加算，不受倍率影响（类似 Lol 真实伤害）" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8f8f8;strokeColor=#cccccc;fontSize=11;" vertex="1" parent="1">
+  <mxGeometry x="780" y="738" width="750" height="28" as="geometry"/>
+</mxCell>
+
+<!-- ===== Practice Notes ===== -->
+<mxCell id="note" value="&lt;b&gt;实践关键点&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px;&quot;&gt;1. &lt;b&gt;同类型先聚合&lt;/b&gt;：多个 AddBase 先 Σ 求和再参与运算，非数组顺序逐个执行&lt;br&gt;2. &lt;b&gt;Period 触发更新&lt;/b&gt;：GE 有 Period &gt; 0 时，每个 Period 触发 Aggregator 重新计算 (EvaluateWithBase)&lt;br&gt;3. &lt;b&gt;SetByCaller&lt;/b&gt; 需要 GA 创建 Spec 时调用 SetSetByCallerMagnitude() 传值，值在 Spec 创建时冻结&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF9C4;strokeColor=#F57F17;strokeWidth=1;arcSize=10;fontSize=12;verticalAlign=top;spacingTop=10;" vertex="1" parent="1">
+  <mxGeometry x="40" y="790" width="1520" height="85" as="geometry"/>
+</mxCell>
+
+</root></mxGraphModel>

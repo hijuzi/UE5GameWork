@@ -1,64 +1,160 @@
-<mxGraphModel dx="1200" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="1500" math="0" shadow="0">
-  <root>
-    <mxCell id="0"/>
-    <mxCell id="1" parent="0"/>
-    <!-- Title -->
-    <mxCell id="t0" value="AttributeSet Pipeline — 一次 GE 瞬时修改 Health 的完整时序（含行号）&#xa;五、完整时序串联：外部入口 → L0 → L1 → L2(脏链) → L3 → 返回回调" style="text;fontSize=15;fontStyle=1;align=center;fontColor=#333333;" vertex="1" parent="1"><mxGeometry x="150" y="8" width="800" height="44" as="geometry"/></mxCell>
-    <!-- 外部入口 -->
-    <mxCell id="ext" value="外部入口：TryActivateAbility → ApplyGameplayEffectToTarget → ExecuteActiveEffectsFrom (GE.cpp:3223)" style="rounded=1;fillColor=#E3F2FD;strokeColor=#0D47A1;strokeWidth=2;fontSize=12;fontStyle=1" vertex="1" parent="1"><mxGeometry x="240" y="58" width="620" height="44" as="geometry"/></mxCell>
-    <!-- ============ L0 容器（浅蓝边框） ============ -->
-    <mxCell id="c_l0" value="L0 · GE 执行层" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#EAF2FB;strokeColor=#A8C6EE;strokeWidth=2;verticalAlign=top;fontSize=13;fontStyle=1;fontColor=#1565C0;" vertex="1" parent="1"><mxGeometry x="210" y="110" width="680" height="200" as="geometry"/></mxCell>
-    <mxCell id="l0_1" value="[L0] InternalExecuteMod (GE.cpp:4152)" style="rounded=1;fillColor=#BBDEFB;strokeColor=#1565C0;fontSize=12;fontStyle=1" vertex="1" parent="c_l0"><mxGeometry x="30" y="36" width="620" height="40" as="geometry"/></mxCell>
-    <mxCell id="cb1" value="2.3.1 PreGameplayEffectExecute (GE.cpp:4174)&#xa;return true → 继续  |  return false → 拒绝此 Modifier" style="rounded=1;fillColor=#FFF9C4;strokeColor=#F57F17;strokeWidth=2;fontSize=11;fontStyle=3" vertex="1" parent="c_l0"><mxGeometry x="30" y="86" width="620" height="46" as="geometry"/></mxCell>
-    <mxCell id="l0_2" value="ApplyModToAttribute (GE.cpp:4177)" style="rounded=1;fillColor=#BBDEFB;strokeColor=#1565C0;fontSize=12;fontStyle=1" vertex="1" parent="c_l0"><mxGeometry x="30" y="142" width="620" height="40" as="geometry"/></mxCell>
-    <!-- ============ L1 容器（浅绿边框） ============ -->
-    <mxCell id="c_l1" value="L1 · BaseValue 写入层" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#EFF8EF;strokeColor=#A8D5A8;strokeWidth=2;verticalAlign=top;fontSize=13;fontStyle=1;fontColor=#2E7D32;" vertex="1" parent="1"><mxGeometry x="210" y="320" width="680" height="200" as="geometry"/></mxCell>
-    <mxCell id="l1_1" value="[L1] SetAttributeBaseValue (GE.cpp:4048)" style="rounded=1;fillColor=#C8E6C9;strokeColor=#2E7D32;fontSize=12;fontStyle=1" vertex="1" parent="c_l1"><mxGeometry x="30" y="36" width="620" height="40" as="geometry"/></mxCell>
-    <mxCell id="cb3" value="2.3.3 PreAttributeBaseChange (GE.cpp:4063)&#xa;【Virtual · 唯一可 Clamp BaseValue 的地方】" style="rounded=1;fillColor=#FFF9C4;strokeColor=#F57F17;strokeWidth=2;fontSize=11;fontStyle=3" vertex="1" parent="c_l1"><mxGeometry x="30" y="86" width="620" height="46" as="geometry"/></mxCell>
-    <mxCell id="l1_2" value="Aggregator-&gt;SetBaseValue (GE.cpp:4093)" style="rounded=1;fillColor=#C8E6C9;strokeColor=#2E7D32;fontSize=12;fontStyle=1" vertex="1" parent="c_l1"><mxGeometry x="30" y="142" width="620" height="40" as="geometry"/></mxCell>
-    <!-- ============ L2 容器（浅青边框） ============ -->
-    <mxCell id="c_l2" value="L2 · Aggregator 评估层（脏链 · 同步递归）" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#EAF6F4;strokeColor=#A0CFC7;strokeWidth=2;verticalAlign=top;fontSize=13;fontStyle=1;fontColor=#00695C;" vertex="1" parent="1"><mxGeometry x="210" y="530" width="680" height="390" as="geometry"/></mxCell>
-    <mxCell id="l2_1" value="[L2] FAggregator::SetBaseValue (Agg.cpp:438)" style="rounded=1;fillColor=#B2DFDB;strokeColor=#00695C;fontSize=11;fontStyle=1" vertex="1" parent="c_l2"><mxGeometry x="30" y="36" width="620" height="38" as="geometry"/></mxCell>
-    <mxCell id="l2_2" value="BroadcastOnDirty (Agg.cpp:443 → :585)" style="rounded=1;fillColor=#B2DFDB;strokeColor=#00695C;fontSize=11;fontStyle=0" vertex="1" parent="c_l2"><mxGeometry x="30" y="84" width="620" height="38" as="geometry"/></mxCell>
-    <mxCell id="l2_3" value="OnDirty.Broadcast (Agg.cpp:629)" style="rounded=1;fillColor=#B2DFDB;strokeColor=#00695C;fontSize=11;fontStyle=0" vertex="1" parent="c_l2"><mxGeometry x="30" y="132" width="620" height="38" as="geometry"/></mxCell>
-    <mxCell id="l2_4" value="ASC::OnAttributeAggregatorDirty (ASC.cpp:2189)" style="rounded=1;fillColor=#B2DFDB;strokeColor=#00695C;fontSize=11;fontStyle=0" vertex="1" parent="c_l2"><mxGeometry x="30" y="180" width="620" height="38" as="geometry"/></mxCell>
-    <mxCell id="l2_5" value="容器::OnAttributeAggregatorDirty (GE.cpp:3509)" style="rounded=1;fillColor=#B2DFDB;strokeColor=#00695C;fontSize=11;fontStyle=1" vertex="1" parent="c_l2"><mxGeometry x="30" y="228" width="620" height="38" as="geometry"/></mxCell>
-    <mxCell id="cli" value="[仅客户端] ReverseEvaluate 反推 Base (GE.cpp:3548)&#xa;由最终值反推 BaseValue" style="rounded=1;fillColor=#E0F2F1;strokeColor=#00695C;dashed=1;fontSize=10;fontStyle=2" vertex="1" parent="c_l2"><mxGeometry x="30" y="276" width="620" height="42" as="geometry"/></mxCell>
-    <mxCell id="l2_6" value="Evaluate → EvaluateWithBase (Agg.cpp:76 → :98)" style="rounded=1;fillColor=#B2DFDB;strokeColor=#00695C;fontSize=11;fontStyle=1" vertex="1" parent="c_l2"><mxGeometry x="30" y="328" width="620" height="40" as="geometry"/></mxCell>
-    <!-- ============ L3 容器（浅紫边框） ============ -->
-    <mxCell id="c_l3" value="L3 · CurrentValue 落盘层（收银台：算好的数字，终于写进属性内存）" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F7F0FA;strokeColor=#CFA8E0;strokeWidth=2;verticalAlign=top;fontSize=13;fontStyle=1;fontColor=#6A1B9A;" vertex="1" parent="1"><mxGeometry x="210" y="930" width="680" height="360" as="geometry"/></mxCell>
-    <mxCell id="l3_1" value="[L3] InternalUpdateNumericalAttribute (GE.cpp:3567 → :4007)&#xa;容器把算好的最终值，转交给 ASC" style="rounded=1;fillColor=#E1BEE7;strokeColor=#6A1B9A;fontSize=11;fontStyle=1" vertex="1" parent="c_l3"><mxGeometry x="30" y="36" width="620" height="48" as="geometry"/></mxCell>
-    <mxCell id="l3_2" value="SetNumericAttribute_Internal (ASC.cpp:480)&#xa;ASC 找到 AttributeSet 里对应的属性" style="rounded=1;fillColor=#E1BEE7;strokeColor=#6A1B9A;fontSize=11;fontStyle=0" vertex="1" parent="c_l3"><mxGeometry x="30" y="94" width="620" height="48" as="geometry"/></mxCell>
-    <mxCell id="l3_3" value="SetNumericValueChecked (AttributeSet.cpp:72)&#xa;【落盘】数值终于真正写进属性内存" style="rounded=1;fillColor=#CE93D8;strokeColor=#4A148C;fontSize=11;fontStyle=1;fontColor=#FFFFFF" vertex="1" parent="c_l3"><mxGeometry x="30" y="152" width="620" height="48" as="geometry"/></mxCell>
-    <mxCell id="cb5" value="2.3.5 PreAttributeChange — 写入前最后一道闸门&#xa;【Virtual · 还能拦一道：可 Clamp CurrentValue】" style="rounded=1;fillColor=#FFF9C4;strokeColor=#F57F17;strokeWidth=2;fontSize=11;fontStyle=3" vertex="1" parent="c_l3"><mxGeometry x="30" y="210" width="620" height="46" as="geometry"/></mxCell>
-    <mxCell id="cb6" value="2.3.6 PostAttributeChange — 写入后观察最终值&#xa;【Virtual · 只能看不能改：值已落盘】" style="rounded=1;fillColor=#FFF9C4;strokeColor=#F57F17;strokeWidth=2;fontSize=11;fontStyle=3" vertex="1" parent="c_l3"><mxGeometry x="30" y="266" width="620" height="46" as="geometry"/></mxCell>
-    <mxCell id="l3_note" value="白话版：L3 = 收银台。L2 算好的数字传到这，才真正被写进属性。写之前 2.3.5 还能拦一道（Clamp），写之后 2.3.6 只能看不能改。" style="rounded=1;fillColor=#FFFFFF;strokeColor=#CFA8E0;strokeWidth=1;fontSize=11;fontStyle=2;fontColor=#6A1B9A;" vertex="1" parent="c_l3"><mxGeometry x="30" y="322" width="620" height="30" as="geometry"/></mxCell>
-    <!-- ============ 返回回调区（浅橙边框） ============ -->
-    <mxCell id="c_ret" value="返回后 · 回调收尾（L1 → L0）" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FDF7EC;strokeColor=#E0C48A;strokeWidth=2;verticalAlign=top;fontSize=13;fontStyle=1;fontColor=#B26A00;" vertex="1" parent="1"><mxGeometry x="210" y="1300" width="680" height="170" as="geometry"/></mxCell>
-    <mxCell id="cb4" value="2.3.4 PostAttributeBaseChange (GE.cpp:4101)&#xa;等 dirty 链全部返回后才执行 → 看到的一定是最终 BaseValue" style="rounded=1;fillColor=#FFF9C4;strokeColor=#F57F17;strokeWidth=2;fontSize=11;fontStyle=3" vertex="1" parent="c_ret"><mxGeometry x="30" y="36" width="620" height="44" as="geometry"/></mxCell>
-    <mxCell id="l0_3" value="TotalMagnitude += Magnitude (GE.cpp:4185)" style="rounded=1;fillColor=#BBDEFB;strokeColor=#1565C0;fontSize=11;fontStyle=0" vertex="1" parent="c_ret"><mxGeometry x="30" y="90" width="620" height="38" as="geometry"/></mxCell>
-    <mxCell id="cb2" value="2.3.2 PostGameplayEffectExecute (GE.cpp:4190)&#xa;【Virtual · 结算、死亡判定 · cross-attribute logic】" style="rounded=1;fillColor=#FFF9C4;strokeColor=#F57F17;strokeWidth=2;fontSize=11;fontStyle=3" vertex="1" parent="c_ret"><mxGeometry x="30" y="138" width="620" height="44" as="geometry"/></mxCell>
-    <!-- ===== 连线（第一批） ===== -->
-    <mxCell id="a_ext_01" style="endArrow=block;endFill=1;strokeColor=#0D47A1;strokeWidth=2;" edge="1" parent="1" source="ext" target="l0_1"><mxGeometry relative="1" as="geometry"/></mxCell>
-    <mxCell id="a_01_cb1" style="endArrow=block;endFill=1;strokeColor=#F57F17;strokeWidth=2;" edge="1" parent="1" source="l0_1" target="cb1"><mxGeometry relative="1" as="geometry"/></mxCell>
-    <mxCell id="a_cb1_02" style="endArrow=block;endFill=1;strokeColor=#1565C0;strokeWidth=1;" edge="1" parent="1" source="cb1" target="l0_2"><mxGeometry relative="1" as="geometry"/></mxCell>
-    <mxCell id="a_02_11" style="endArrow=block;endFill=1;strokeColor=#2E7D32;strokeWidth=2;" edge="1" parent="1" source="l0_2" target="l1_1"><mxGeometry relative="1" as="geometry"/></mxCell>
-    <mxCell id="a_11_cb3" style="endArrow=block;endFill=1;strokeColor=#F57F17;strokeWidth=2;" edge="1" parent="1" source="l1_1" target="cb3"><mxGeometry relative="1" as="geometry"/></mxCell>
-    <mxCell id="a_cb3_12" style="endArrow=block;endFill=1;strokeColor=#2E7D32;strokeWidth=1;" edge="1" parent="1" source="cb3" target="l1_2"><mxGeometry relative="1" as="geometry"/></mxCell>
-    <mxCell id="a_12_21" value="进入脏链 · 同步递归" style="endArrow=block;endFill=1;strokeColor=#00695C;dashed=1;strokeWidth=2;fontSize=10;fontStyle=2;labelBackgroundColor=#EAF6F4;" edge="1" parent="1" source="l1_2" target="l2_1"><mxGeometry relative="1" as="geometry"/></mxCell>
-    <mxCell id="a_21_22" style="endArrow=block;endFill=1;strokeColor=#00695C;strokeWidth=1;" edge="1" parent="1" source="l2_1" target="l2_2"><mxGeometry relative="1" as="geometry"/></mxCell>
-    <mxCell id="a_22_23" style="endArrow=block;endFill=1;strokeColor=#00695C;strokeWidth=1;" edge="1" parent="1" source="l2_2" target="l2_3"><mxGeometry relative="1" as="geometry"/></mxCell>
-    <mxCell id="a_23_24" style="endArrow=block;endFill=1;strokeColor=#00695C;strokeWidth=1;" edge="1" parent="1" source="l2_3" target="l2_4"><mxGeometry relative="1" as="geometry"/></mxCell>
-    <mxCell id="a_24_25" style="endArrow=block;endFill=1;strokeColor=#00695C;strokeWidth=1;" edge="1" parent="1" source="l2_4" target="l2_5"><mxGeometry relative="1" as="geometry"/></mxCell>
-    <mxCell id="a_25_cli" style="endArrow=block;endFill=1;strokeColor=#00695C;dashed=1;strokeWidth=1;" edge="1" parent="1" source="l2_5" target="cli"><mxGeometry relative="1" as="geometry"/></mxCell>
-    <mxCell id="a_cli_26" style="endArrow=block;endFill=1;strokeColor=#00695C;strokeWidth=2;" edge="1" parent="1" source="cli" target="l2_6"><mxGeometry relative="1" as="geometry"/></mxCell>
-    <mxCell id="a_26_31" style="endArrow=block;endFill=1;strokeColor=#6A1B9A;strokeWidth=2;" edge="1" parent="1" source="l2_6" target="l3_1"><mxGeometry relative="1" as="geometry"/></mxCell>
-    <mxCell id="a_31_32" style="endArrow=block;endFill=1;strokeColor=#6A1B9A;strokeWidth=1;" edge="1" parent="1" source="l3_1" target="l3_2"><mxGeometry relative="1" as="geometry"/></mxCell>
-    <mxCell id="a_32_33" style="endArrow=block;endFill=1;strokeColor=#6A1B9A;strokeWidth=1;" edge="1" parent="1" source="l3_2" target="l3_3"><mxGeometry relative="1" as="geometry"/></mxCell>
-    <mxCell id="a_33_cb5" style="endArrow=block;endFill=1;strokeColor=#F57F17;strokeWidth=2;" edge="1" parent="1" source="l3_3" target="cb5"><mxGeometry relative="1" as="geometry"/></mxCell>
-    <mxCell id="a_cb5_cb6" value="写入动作" style="endArrow=block;endFill=1;strokeColor=#F57F17;strokeWidth=1;fontSize=10;fontStyle=2;labelBackgroundColor=#FFF9C4;" edge="1" parent="1" source="cb5" target="cb6"><mxGeometry relative="1" as="geometry"/></mxCell>
-    <mxCell id="a_cb6_cb4" value="dirty 链全部返回后" style="endArrow=block;endFill=1;strokeColor=#F57F17;dashed=1;strokeWidth=1;fontSize=10;fontStyle=2;labelBackgroundColor=#FDF7EC;" edge="1" parent="1" source="cb6" target="cb4"><mxGeometry relative="1" as="geometry"/></mxCell>
-    <mxCell id="a_cb4_03" style="endArrow=block;endFill=1;strokeColor=#1565C0;strokeWidth=1;" edge="1" parent="1" source="cb4" target="l0_3"><mxGeometry relative="1" as="geometry"/></mxCell>
-    <mxCell id="a_03_cb2" style="endArrow=block;endFill=1;strokeColor=#F57F17;strokeWidth=2;" edge="1" parent="1" source="l0_3" target="cb2"><mxGeometry relative="1" as="geometry"/></mxCell>
-  </root>
-</mxGraphModel>
+<mxfile host="65bd71144e">
+    <diagram id="OXdUUvVR8irjptWVMn6f" name="第 1 页">
+        <mxGraphModel dx="295" dy="457" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="1500" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="t0" value="AttributeSet Pipeline — 一次 GE 瞬时修改 Health 的完整时序（含行号）&#10;五、完整时序串联：外部入口 → L0 → L1 → L2(脏链) → L3 → 返回回调" style="text;fontSize=15;fontStyle=1;align=center;fontColor=#333333;" parent="1" vertex="1">
+                    <mxGeometry x="150" y="8" width="800" height="44" as="geometry"/>
+                </mxCell>
+                <mxCell id="ext" value="外部入口：TryActivateAbility → ApplyGameplayEffectToTarget → ExecuteActiveEffectsFrom (GE.cpp:3223)" style="rounded=1;fillColor=#E3F2FD;strokeColor=#0D47A1;strokeWidth=2;fontSize=12;fontStyle=1" parent="1" vertex="1">
+                    <mxGeometry x="240" y="58" width="620" height="44" as="geometry"/>
+                </mxCell>
+                <mxCell id="c_l0" value="L0 · GE 执行层" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#EAF2FB;strokeColor=#A8C6EE;strokeWidth=2;verticalAlign=top;fontSize=13;fontStyle=1;fontColor=#1565C0;" parent="1" vertex="1">
+                    <mxGeometry x="210" y="110" width="680" height="200" as="geometry"/>
+                </mxCell>
+                <mxCell id="l0_1" value="[L0] InternalExecuteMod (GE.cpp:4152)" style="rounded=1;fillColor=#BBDEFB;strokeColor=#1565C0;fontSize=12;fontStyle=1" parent="c_l0" vertex="1">
+                    <mxGeometry x="30" y="36" width="620" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="cb1" value="4.1 PreGameplayEffectExecute (GE.cpp:4174)&#10;return true → 继续  |  return false → 拒绝此 Modifier" style="rounded=1;fillColor=#FFF9C4;strokeColor=#F57F17;strokeWidth=2;fontSize=11;fontStyle=3" parent="c_l0" vertex="1">
+                    <mxGeometry x="30" y="86" width="620" height="46" as="geometry"/>
+                </mxCell>
+                <mxCell id="l0_2" value="ApplyModToAttribute (GE.cpp:4177)" style="rounded=1;fillColor=#BBDEFB;strokeColor=#1565C0;fontSize=12;fontStyle=1" parent="c_l0" vertex="1">
+                    <mxGeometry x="30" y="142" width="620" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="c_l1" value="L1 · BaseValue 写入层" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#EFF8EF;strokeColor=#A8D5A8;strokeWidth=2;verticalAlign=top;fontSize=13;fontStyle=1;fontColor=#2E7D32;" parent="1" vertex="1">
+                    <mxGeometry x="210" y="320" width="680" height="200" as="geometry"/>
+                </mxCell>
+                <mxCell id="l1_1" value="[L1] SetAttributeBaseValue (GE.cpp:4048)" style="rounded=1;fillColor=#C8E6C9;strokeColor=#2E7D32;fontSize=12;fontStyle=1" parent="c_l1" vertex="1">
+                    <mxGeometry x="30" y="36" width="620" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="cb3" value="4.3 PreAttributeBaseChange (GE.cpp:4063)&#10;【Virtual · 唯一可 Clamp BaseValue 的地方】" style="rounded=1;fillColor=#FFF9C4;strokeColor=#F57F17;strokeWidth=2;fontSize=11;fontStyle=3" parent="c_l1" vertex="1">
+                    <mxGeometry x="30" y="86" width="620" height="46" as="geometry"/>
+                </mxCell>
+                <mxCell id="l1_2" value="Aggregator-&gt;SetBaseValue (GE.cpp:4093)" style="rounded=1;fillColor=#C8E6C9;strokeColor=#2E7D32;fontSize=12;fontStyle=1" parent="c_l1" vertex="1">
+                    <mxGeometry x="30" y="142" width="620" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="c_l2" value="L2 · Aggregator 评估层（脏链 · 同步递归）" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#EAF6F4;strokeColor=#A0CFC7;strokeWidth=2;verticalAlign=top;fontSize=13;fontStyle=1;fontColor=#00695C;" parent="1" vertex="1">
+                    <mxGeometry x="210" y="530" width="680" height="390" as="geometry"/>
+                </mxCell>
+                <mxCell id="l2_1" value="[L2] FAggregator::SetBaseValue (Agg.cpp:438)" style="rounded=1;fillColor=#B2DFDB;strokeColor=#00695C;fontSize=11;fontStyle=1" parent="c_l2" vertex="1">
+                    <mxGeometry x="30" y="36" width="620" height="38" as="geometry"/>
+                </mxCell>
+                <mxCell id="l2_2" value="BroadcastOnDirty (Agg.cpp:443 → :585)" style="rounded=1;fillColor=#B2DFDB;strokeColor=#00695C;fontSize=11;fontStyle=0" parent="c_l2" vertex="1">
+                    <mxGeometry x="30" y="84" width="620" height="38" as="geometry"/>
+                </mxCell>
+                <mxCell id="l2_3" value="OnDirty.Broadcast (Agg.cpp:629)" style="rounded=1;fillColor=#B2DFDB;strokeColor=#00695C;fontSize=11;fontStyle=0" parent="c_l2" vertex="1">
+                    <mxGeometry x="30" y="132" width="620" height="38" as="geometry"/>
+                </mxCell>
+                <mxCell id="l2_4" value="ASC::OnAttributeAggregatorDirty (ASC.cpp:2189)" style="rounded=1;fillColor=#B2DFDB;strokeColor=#00695C;fontSize=11;fontStyle=0" parent="c_l2" vertex="1">
+                    <mxGeometry x="30" y="180" width="620" height="38" as="geometry"/>
+                </mxCell>
+                <mxCell id="l2_5" value="容器::OnAttributeAggregatorDirty (GE.cpp:3509)" style="rounded=1;fillColor=#B2DFDB;strokeColor=#00695C;fontSize=11;fontStyle=1" parent="c_l2" vertex="1">
+                    <mxGeometry x="30" y="228" width="620" height="38" as="geometry"/>
+                </mxCell>
+                <mxCell id="cli" value="[仅客户端] ReverseEvaluate 反推 Base (GE.cpp:3548)&#10;由最终值反推 BaseValue" style="rounded=1;fillColor=#E0F2F1;strokeColor=#00695C;dashed=1;fontSize=10;fontStyle=2" parent="c_l2" vertex="1">
+                    <mxGeometry x="30" y="276" width="620" height="42" as="geometry"/>
+                </mxCell>
+                <mxCell id="l2_6" value="Evaluate → EvaluateWithBase (Agg.cpp:76 → :98)" style="rounded=1;fillColor=#B2DFDB;strokeColor=#00695C;fontSize=11;fontStyle=1" parent="c_l2" vertex="1">
+                    <mxGeometry x="30" y="328" width="620" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="c_l3" value="L3 · CurrentValue 落盘层（收银台：算好的数字，终于写进属性内存）" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F7F0FA;strokeColor=#CFA8E0;strokeWidth=2;verticalAlign=top;fontSize=13;fontStyle=1;fontColor=#6A1B9A;" parent="1" vertex="1">
+                    <mxGeometry x="210" y="930" width="680" height="360" as="geometry"/>
+                </mxCell>
+                <mxCell id="l3_1" value="[L3] InternalUpdateNumericalAttribute (GE.cpp:3567 → :4007)&#10;容器把算好的最终值，转交给 ASC" style="rounded=1;fillColor=#E1BEE7;strokeColor=#6A1B9A;fontSize=11;fontStyle=1" parent="c_l3" vertex="1">
+                    <mxGeometry x="30" y="36" width="620" height="48" as="geometry"/>
+                </mxCell>
+                <mxCell id="l3_2" value="SetNumericAttribute_Internal (ASC.cpp:480)&#10;ASC 找到 AttributeSet 里对应的属性" style="rounded=1;fillColor=#E1BEE7;strokeColor=#6A1B9A;fontSize=11;fontStyle=0" parent="c_l3" vertex="1">
+                    <mxGeometry x="30" y="94" width="620" height="48" as="geometry"/>
+                </mxCell>
+                <mxCell id="l3_3" value="SetNumericValueChecked (AttributeSet.cpp:72)&#10;【落盘】数值终于真正写进属性内存" style="rounded=1;fillColor=#CE93D8;strokeColor=#4A148C;fontSize=11;fontStyle=1;fontColor=#FFFFFF" parent="c_l3" vertex="1">
+                    <mxGeometry x="30" y="152" width="620" height="48" as="geometry"/>
+                </mxCell>
+                <mxCell id="cb5" value="4.5 PreAttributeChange — 写入前最后一道闸门&#10;【Virtual · 还能拦一道：可 Clamp CurrentValue】" style="rounded=1;fillColor=#FFF9C4;strokeColor=#F57F17;strokeWidth=2;fontSize=11;fontStyle=3" parent="c_l3" vertex="1">
+                    <mxGeometry x="30" y="210" width="620" height="46" as="geometry"/>
+                </mxCell>
+                <mxCell id="cb6" value="4.6 PostAttributeChange — 写入后观察最终值&#10;【Virtual · 只能看不能改：值已落盘】" style="rounded=1;fillColor=#FFF9C4;strokeColor=#F57F17;strokeWidth=2;fontSize=11;fontStyle=3" parent="c_l3" vertex="1">
+                    <mxGeometry x="30" y="266" width="620" height="46" as="geometry"/>
+                </mxCell>
+                <mxCell id="l3_note" value="白话版：L3 = 收银台。L2 算好的数字传到这，才真正被写进属性。写之前 2.3.5 还能拦一道（Clamp），写之后 2.3.6 只能看不能改。" style="rounded=1;fillColor=#FFFFFF;strokeColor=#CFA8E0;strokeWidth=1;fontSize=11;fontStyle=2;fontColor=#6A1B9A;" parent="c_l3" vertex="1">
+                    <mxGeometry x="30" y="322" width="620" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="c_ret" value="返回后 · 回调收尾（L1 → L0）" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FDF7EC;strokeColor=#E0C48A;strokeWidth=2;verticalAlign=top;fontSize=13;fontStyle=1;fontColor=#B26A00;" parent="1" vertex="1">
+                    <mxGeometry x="210" y="1300" width="680" height="170" as="geometry"/>
+                </mxCell>
+                <mxCell id="cb4" value="4.4 PostAttributeBaseChange (GE.cpp:4101)&#10;等 dirty 链全部返回后才执行 → 看到的一定是最终 BaseValue" style="rounded=1;fillColor=#FFF9C4;strokeColor=#F57F17;strokeWidth=2;fontSize=11;fontStyle=3" parent="c_ret" vertex="1">
+                    <mxGeometry x="30" y="36" width="620" height="44" as="geometry"/>
+                </mxCell>
+                <mxCell id="l0_3" value="TotalMagnitude += Magnitude (GE.cpp:4185)" style="rounded=1;fillColor=#BBDEFB;strokeColor=#1565C0;fontSize=11;fontStyle=0" parent="c_ret" vertex="1">
+                    <mxGeometry x="30" y="90" width="620" height="38" as="geometry"/>
+                </mxCell>
+                <mxCell id="cb2" value="4.2 PostGameplayEffectExecute (GE.cpp:4190)&#10;【Virtual · 结算、死亡判定 · cross-attribute logic】" style="rounded=1;fillColor=#FFF9C4;strokeColor=#F57F17;strokeWidth=2;fontSize=11;fontStyle=3" parent="c_ret" vertex="1">
+                    <mxGeometry x="30" y="138" width="620" height="44" as="geometry"/>
+                </mxCell>
+                <mxCell id="a_ext_01" style="endArrow=block;endFill=1;strokeColor=#0D47A1;strokeWidth=2;" parent="1" source="ext" target="l0_1" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="a_01_cb1" style="endArrow=block;endFill=1;strokeColor=#F57F17;strokeWidth=2;" parent="1" source="l0_1" target="cb1" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="a_cb1_02" style="endArrow=block;endFill=1;strokeColor=#1565C0;strokeWidth=1;" parent="1" source="cb1" target="l0_2" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="a_02_11" style="endArrow=block;endFill=1;strokeColor=#2E7D32;strokeWidth=2;" parent="1" source="l0_2" target="l1_1" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="a_11_cb3" style="endArrow=block;endFill=1;strokeColor=#F57F17;strokeWidth=2;" parent="1" source="l1_1" target="cb3" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="a_cb3_12" style="endArrow=block;endFill=1;strokeColor=#2E7D32;strokeWidth=1;" parent="1" source="cb3" target="l1_2" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="a_12_21" value="进入脏链 · 同步递归" style="endArrow=block;endFill=1;strokeColor=#00695C;dashed=1;strokeWidth=2;fontSize=10;fontStyle=2;labelBackgroundColor=#EAF6F4;" parent="1" source="l1_2" target="l2_1" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="a_21_22" style="endArrow=block;endFill=1;strokeColor=#00695C;strokeWidth=1;" parent="1" source="l2_1" target="l2_2" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="a_22_23" style="endArrow=block;endFill=1;strokeColor=#00695C;strokeWidth=1;" parent="1" source="l2_2" target="l2_3" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="a_23_24" style="endArrow=block;endFill=1;strokeColor=#00695C;strokeWidth=1;" parent="1" source="l2_3" target="l2_4" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="a_24_25" style="endArrow=block;endFill=1;strokeColor=#00695C;strokeWidth=1;" parent="1" source="l2_4" target="l2_5" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="a_25_cli" style="endArrow=block;endFill=1;strokeColor=#00695C;dashed=1;strokeWidth=1;" parent="1" source="l2_5" target="cli" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="a_cli_26" style="endArrow=block;endFill=1;strokeColor=#00695C;strokeWidth=2;" parent="1" source="cli" target="l2_6" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="a_26_31" style="endArrow=block;endFill=1;strokeColor=#6A1B9A;strokeWidth=2;" parent="1" source="l2_6" target="l3_1" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="a_31_32" style="endArrow=block;endFill=1;strokeColor=#6A1B9A;strokeWidth=1;" parent="1" source="l3_1" target="l3_2" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="a_32_33" style="endArrow=block;endFill=1;strokeColor=#6A1B9A;strokeWidth=1;" parent="1" source="l3_2" target="l3_3" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="a_33_cb5" style="endArrow=block;endFill=1;strokeColor=#F57F17;strokeWidth=2;" parent="1" source="l3_3" target="cb5" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="a_cb5_cb6" value="写入动作" style="endArrow=block;endFill=1;strokeColor=#F57F17;strokeWidth=1;fontSize=10;fontStyle=2;labelBackgroundColor=#FFF9C4;" parent="1" source="cb5" target="cb6" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="a_cb6_cb4" value="dirty 链全部返回后" style="endArrow=block;endFill=1;strokeColor=#F57F17;dashed=1;strokeWidth=1;fontSize=10;fontStyle=2;labelBackgroundColor=#FDF7EC;" parent="1" source="cb6" target="cb4" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="a_cb4_03" style="endArrow=block;endFill=1;strokeColor=#1565C0;strokeWidth=1;" parent="1" source="cb4" target="l0_3" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="a_03_cb2" style="endArrow=block;endFill=1;strokeColor=#F57F17;strokeWidth=2;" parent="1" source="l0_3" target="cb2" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
