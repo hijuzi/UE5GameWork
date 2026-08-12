@@ -38,9 +38,9 @@
 
 ---
 
-## 6.1 问题驱动：施加一个 GE 到底发生了什么？
+## 一、问题驱动：施加一个 GE 到底发生了什么？
 
-你可能以为 `ApplyGameplayEffectSpecToSelf` 就是"算一下数值然后写进去"，但实际上这背后有十几步检查、两条完全不同的执行路径、多个回调触发点、以及网络预测的分支处理。
+你可能以为 `ApplyGameplayEffectSpecToSelf` 就是"算一下数值然后写进去"，它隐藏了十几步检查、两条完全不同的执行路径、多个回调触发点、以及网络预测的分支处理。
 
 ```cpp
 // 用户视角：一行调用
@@ -61,12 +61,14 @@ ASC->ApplyGameplayEffectSpecToSelf(*Spec.Data);
 
 ---
 
-## 6.2 完整调用链全景图
+## 二、完整调用链全景图
+
+> 下图为文本版快速索引（适合搜索/跳转），完整的视觉流程图见下方大图。
 
 ```
 ApplyGameplayEffectSpecToSelf(Spec, PredictionKey)
     │
-    ├─ ① Guard Checks
+    ├─ **[1]** Guard Checks
     │   ├─ Spec.Def == nullptr? → return
     │   ├─ HasNetworkAuthorityToApplyGameplayEffect? → return
     │   ├─ PredictionKey 安全校验 (Period 不允许预测)
@@ -74,7 +76,7 @@ ApplyGameplayEffectSpecToSelf(Spec, PredictionKey)
     │   ├─ Spec.Def->CanApply() → TagRequirements + GE Components 检查
     │   └─ Modifiers[i].Attribute.IsValid()
     │
-    ├─ ② 路径分叉
+    ├─ **[2]** 路径分叉
     │   │
     │   ├─ [Duration / Infinite]
     │   │   └─ ActiveGameplayEffects.ApplyGameplayEffectSpec()
@@ -88,7 +90,7 @@ ApplyGameplayEffectSpecToSelf(Spec, PredictionKey)
     │       └─ ExecuteGameplayEffect(*OurCopyOfSpec, PredictionKey)
     │           └─ ActiveGameplayEffects.ExecuteActiveEffectsFrom()
     │               │
-    │               ├─ ③ Modifiers 执行 (for each ModIdx)
+    │               ├─ **[3]** Modifiers 执行 (for each ModIdx)
     │               │   ├─ SourceTags / TargetTags 检查
     │               │   ├─ GetModifierMagnitude(ModIdx)
     │               │   └─ InternalExecuteMod()
@@ -98,30 +100,31 @@ ApplyGameplayEffectSpecToSelf(Spec, PredictionKey)
     │               │       │       └─ Aggregator::SetBaseValue → Dirty → ...
     │               │       └─ PostGameplayEffectExecute()   ← Virtual
     │               │
-    │               ├─ ④ Executions 执行 (for each ExecDef)
+    │               ├─ **[4]** Executions 执行 (for each ExecDef)
     │               │   └─ ExecCDO->Execute(ExecutionParams, ExecutionOutput)
     │               │       └─ for each OutputModifier:
-    │               │           └─ InternalExecuteMod()  (同 ③)
+    │               │           └─ InternalExecuteMod()  (同 [3])
     │               │
-    │               └─ ⑤ GameplayCue Execute
+    │               └─ **[5]** GameplayCue Execute
     │
-    ├─ ⑥ OnApplied (GE Component system)
+    ├─ **[6]** OnApplied (GE Component system)
     │
-    ├─ ⑦ Callbacks
+    ├─ **[7]** Callbacks
     │   ├─ OnGameplayEffectAppliedToSelf(InstigatorASC, *Spec, Handle)
     │   └─ OnGameplayEffectAppliedToTarget(this, *Spec, Handle)
     │
-    └─ ⑧ Return Handle (InstantExecutedHandle / ActiveGE Handle)
+    └─ **[8]** Return Handle (InstantExecutedHandle / ActiveGE Handle)
 ```
+
+![完整调用链](diagrams/GE_ApplyFlow.png)
+*ApplyGameplayEffectSpecToSelf 完整调用链流程图*
 
 ---
 
-## 6.3 源码追踪：逐阶段分析
-
-### 6.3.1 Guard Checks：能不能施加？
+## 三、Guard Checks：能不能施加？
 
 ```cpp
-// AbilitySystemComponent.cpp ~1009-1062
+// AbilitySystemComponent.cpp ~923-984
 FActiveGameplayEffectHandle UAbilitySystemComponent::ApplyGameplayEffectSpecToSelf(
     const FGameplayEffectSpec &Spec, FPredictionKey PredictionKey)
 {
@@ -169,10 +172,12 @@ FActiveGameplayEffectHandle UAbilitySystemComponent::ApplyGameplayEffectSpecToSe
 - **CanApply 是 GE Components 的入口**：`TargetTagRequirementsGameplayEffectComponent` 等组件在此被调用。
 - **Application Queries** 是 GAS 框架暴露的扩展点，可以让外部逻辑控制 GE 是否可施加。
 
-### 6.3.2 路径分叉：Instant vs Duration
+## 四、Instant 执行链路
+
+### 4.1 路径分叉：Instant vs Duration
 
 ```cpp
-// AbilitySystemComponent.cpp ~1078-1161
+// AbilitySystemComponent.cpp ~1001-1084
 if (Spec.Def->DurationPolicy != EGameplayEffectDurationType::Instant
     || bTreatAsInfiniteDuration)
 {
@@ -212,7 +217,9 @@ if (Spec.Def->DurationPolicy == EGameplayEffectDurationType::Instant)
 | 是否有 Period | 不能 | 能 |
 | 预测处理 | 客户端伪造成 Infinite 持续 | 正常同步 |
 
-#### Instant 的预测特殊处理
+> **CaptureAttributeDataFromTarget** 在 DurationPolicies 分叉之后的 Instant 分支内执行。它从 Source（Instigator）和 Target 的 ASC 快照属性值，供后续 `ModifierMagnitude` 计算和 `ExecutionCalculation` 捕获使用。Duration GE 的属性捕获发生在 `CreateActiveGE` 阶段，逻辑类似但时机不同。
+
+### 4.2 Instant 的预测特殊处理
 
 ```cpp
 // 客户端：Instant GE 被当作 Infinite Duration 处理
@@ -222,14 +229,14 @@ bool bTreatAsInfiniteDuration =
     && Spec.Def->DurationPolicy == EGameplayEffectDurationType::Instant;
 ```
 
-客户端预测的 Instant GE 会被转换为"Infinite Duration"形式临时存储，等 Server 确认后清理。这意味着客户端上这个"假 Infinite"**不会**被 Period 定期执行，因为它没有 Period。
+客户端预测的 Instant GE 会被转换为"Infinite Duration"形式临时存储，等 Server 确认后清理。所以客户端上这个"假 Infinite"**不会**被 Period 定期执行——它本来就没有 Period。
 
 ---
 
-## 6.4 ExecuteActiveEffectsFrom：执行核心
+### 4.3 ExecuteActiveEffectsFrom：执行核心
 
 ```cpp
-// GameplayEffect.cpp ~3210
+// GameplayEffect.cpp ~3168
 void FActiveGameplayEffectsContainer::ExecuteActiveEffectsFrom(
     FGameplayEffectSpec &Spec, FPredictionKey PredictionKey)
 {
@@ -288,15 +295,19 @@ void FActiveGameplayEffectsContainer::ExecuteActiveEffectsFrom(
 }
 ```
 
-**执行顺序非常明确**：先执行所有 Modifiers，再执行 Executions。如果你在 Execution 中捕获了被 Modifiers 修改后的属性值，那么捕获到的是**已经修改过的值** — 因为 Modifiers 在 Executions 之前执行。
+**执行顺序**：Modifiers 在先，Executions 在后。
 
-### 6.4.1 InternalExecuteMod：单个 Modifier 执行
+这个顺序有实际影响：在 Execution 里捕获被 Modifier 改过的属性，拿到的是修改后的值——因为 Modifiers 跑在 Executions 前面。
+
+### 4.4 InternalExecuteMod：单个 Modifier 执行
 
 ```cpp
-// GameplayEffect.cpp ~4090
+// GameplayEffect.cpp ~4048
 bool FActiveGameplayEffectsContainer::InternalExecuteMod(
     FGameplayEffectSpec& Spec, FGameplayModifierEvaluatedData& ModEvalData)
 {
+    bool bExecuted = false;
+
     UAttributeSet* AttributeSet = Owner->GetAttributeSubobject(
         ModEvalData.Attribute.GetAttributeSetClass());
     
@@ -304,17 +315,17 @@ bool FActiveGameplayEffectsContainer::InternalExecuteMod(
     {
         FGameplayEffectModCallbackData ExecuteData(Spec, ModEvalData, *Owner);
 
-        // ① PreGameplayEffectExecute — Virtual，可返回 false 阻止此 Modifier
+        // **[1]** PreGameplayEffectExecute — Virtual，可返回 false 阻止此 Modifier
         if (AttributeSet->PreGameplayEffectExecute(ExecuteData))
         {
-            // ② 直接写 BaseValue
+            // **[2]** 直接写 BaseValue
             ApplyModToAttribute(
                 ModEvalData.Attribute, 
                 ModEvalData.ModifierOp, 
                 ModEvalData.Magnitude, 
                 &ExecuteData);
             
-            // ③ PostGameplayEffectExecute — 跨属性联动
+            // **[3]** PostGameplayEffectExecute — 跨属性联动
             AttributeSet->PostGameplayEffectExecute(ExecuteData);
         }
     }
@@ -350,10 +361,10 @@ void UMyAttributeSet::PostGameplayEffectExecute(FGameplayEffectModCallbackData &
 }
 ```
 
-### 6.4.2 ApplyModToAttribute：直写 BaseValue
+### 4.5 ApplyModToAttribute：直写 BaseValue
 
 ```cpp
-// GameplayEffect.cpp ~4155
+// GameplayEffect.cpp ~4114
 void FActiveGameplayEffectsContainer::ApplyModToAttribute(
     const FGameplayAttribute &Attribute, 
     EGameplayModOp::Type ModifierOp, 
@@ -387,14 +398,14 @@ float FAggregator::StaticExecModOnBaseValue(float BaseValue, EGameplayModOp::Typ
 
 ---
 
-## 6.5 Duration GE 的 Aggregator 路径
+## 五、Duration GE 与 Aggregator
 
 Instant GE 通过 `ExecuteActiveEffectsFrom` 直写属性。Duration GE 则走了完全不同的路径：
 
-### 6.5.1 ApplyGameplayEffectSpec：注册到容器
+### 5.1 ApplyGameplayEffectSpec：注册到容器
 
 ```cpp
-// GameplayEffect.cpp ~4171
+// GameplayEffect.cpp ~4130
 FActiveGameplayEffect* FActiveGameplayEffectsContainer::ApplyGameplayEffectSpec(
     const FGameplayEffectSpec& Spec, FPredictionKey& InPredictionKey, 
     bool& bFoundExistingStackableGE)
@@ -436,7 +447,7 @@ FActiveGameplayEffect* FActiveGameplayEffectsContainer::ApplyGameplayEffectSpec(
 }
 ```
 
-### 6.5.2 Aggregator 的工作方式
+### 5.2 Aggregator 的工作方式
 
 ```
 BaseValue  --------+
@@ -454,6 +465,7 @@ BaseValue  --------+
 Duration GE 不直接写 `BaseValue`，而是把 Mod 注册到 Aggregator：
 
 ```cpp
+// 简化版本，实际还涉及 ModChannel 分通道计算
 // GameplayEffectAggregator.cpp
 float FAggregator::EvaluateWithBase(float InlineBaseValue, 
     const FAggregatorEvaluateParameters& Parameters)
@@ -473,15 +485,15 @@ float FAggregator::EvaluateWithBase(float InlineBaseValue,
 
 BaseValue 不变，但 CurrentValue 通过 `EvaluateWithBase` 动态计算。
 
-当 BaseValue 改变（或 Mod 增删）时，Aggregator 变 Dirt → 触发 `InternalUpdateNumericalAttribute` → 写 CurrentValue → 触发属性变化回调。这个链路在[第 04 篇]中已详细分析。
+当 BaseValue 改变（或 Mod 增删）时，Aggregator 变 Dirt → 触发 `InternalUpdateNumericalAttribute` → 写 CurrentValue → 触发属性变化回调。这个链路在[第 04 篇](../04-AttributeSet/04-AttributeSet文章.md)中已详细分析。
 
 ---
 
-## 6.6 Execution Calculation：自定义计算
+## 六、Execution Calculation：自定义计算
 
 当普通的 Modifier 计算不够用时，使用 `UGameplayEffectExecutionCalculation`。
 
-### 6.6.1 与 Modifier 的区别
+### 6.1 与 Modifier 的区别
 
 | | Modifier | Execution Calculation |
 |---|---|---|
@@ -491,7 +503,7 @@ BaseValue 不变，但 CurrentValue 通过 `EvaluateWithBase` 动态计算。
 | 网络 | 自动同步 | 只在 Server 执行 |
 | 典型场景 | 固定值伤害、Buff | 复杂伤害公式、属性联动 |
 
-### 6.6.2 编写 ExecutionCalculation
+**编写 ExecutionCalculation**
 
 ```cpp
 UCLASS()
@@ -539,12 +551,12 @@ public:
 };
 ```
 
-### 6.6.3 Capture 的时机与 Source/Target
+**Capture 的时机与 Source/Target**
 
 `RelevantAttributesToCapture` 在构函数中声明。框架在 GE 执行前自动 Snapshot 这些属性值（取决于 `SnapshotPolicy`）：
 
-- **Snapshot**：在 GE Spec 创建时捕获 → 后续使用冻结值
-- **Not Snapshot**：在每次 evaluation 时捕获 → 动态计算
+- **Snapshot**：在 GE Spec 创建时捕获 → 后续使用冻结值（Instant GE 等价于此模式）
+- **Not Snapshot**：在每次 evaluation 时捕获 → 动态计算（Duration GE 常用此模式，每次周期执行时重新读取当前属性值）
 
 `AttributeSource` 决定从谁身上取：
 
@@ -555,11 +567,11 @@ public:
 
 ---
 
-## 6.7 Period 周期执行
+## 七、Period 周期执行
 
 Periodic GE 的工作方式是将 `ExecuteActiveEffectsFrom` 定时重复执行。
 
-### 6.7.1 注册 Period Timer
+**注册 Period Timer**
 
 ```cpp
 // GameplayEffect.cpp, ApplyGameplayEffectSpec 内
@@ -573,11 +585,12 @@ if (ActiveEffect.Spec.GetPeriod() > UGameplayEffect::NO_PERIOD)
 }
 ```
 
-### 6.7.2 周期执行函数
+**周期执行函数**
 
 ```cpp
-// GameplayEffect.cpp ~4762
-void FActiveGameplayEffectsContainer::InternalExecutePeriodicGameplayEffect(
+// GameplayEffect.cpp ~3330
+// 实际通过 FActiveGameplayEffectHandle 定位，此处简化为直接引用对象
+void FActiveGameplayEffectsContainer::ExecutePeriodicGameplayEffect(
     FActiveGameplayEffect& ActiveEffect)
 {
     if (!ActiveEffect.bIsInhibited)
@@ -599,21 +612,24 @@ void FActiveGameplayEffectsContainer::InternalExecutePeriodicGameplayEffect(
 **关键点**：
 - Period 执行和 Instant 执行走完全相同的 `ExecuteActiveEffectsFrom` 路径
 - 每次执行前清空 `ModifiedAttributes`，只保留最近一次周期的修改记录
-- `bIsInhibited = true` 时（OngoingTagRequirements 不满足），周期执行跳过
+- `bIsInhibited = true` 时（即 Duration GE 的持续条件 Tags 不满足），周期执行跳过
 
-### 6.7.3 Period 与 Stacking 的组合
+**Period 与 Stacking 的组合**
 
 如果 GE 有 `Stacking` 且 `Period` 存在：
 
 1. Period 执行时读取 `Spec.GetStackCount()` — 层数
 2. ExecutionCalculation 中可以通过 `ExecutionParams.GetOwningSpec().GetStackCount()` 获取当前层数
-3. 层数变化时不需要重新创建 Timer — 同一 FActiveGameplayEffect 的层数增加时，Damage 增大即可
+3. 层数变化时不需要重新创建 Timer — 同一个 Timer 每次执行时读取当前 `StackCount`<br>
+   **示例**：GE 配置 `Damage = StackCount × 10`，`Period = 1s`。1 层时每秒 10 点伤害，叠到 3 层后同一 Timer 下次执行自动变为 3×10=30 点
 
 ---
 
-## 6.8 网络同步策略
+## 八、网络同步、GameplayCue 与移除
 
-### 6.8.1 同步什么
+### 8.1 网络同步策略
+
+**同步什么**
 
 | 同步内容 | 机制 |
 |----------|------|
@@ -622,7 +638,7 @@ void FActiveGameplayEffectsContainer::InternalExecutePeriodicGameplayEffect(
 | CurrentValue | **不同步** — 客户端用本地 Aggregator 计算 |
 | GE Tags (GrantedTags) | 通过 GameplayTag 系统同步 |
 
-### 6.8.2 客户端收到 BaseValue 后
+**客户端收到 BaseValue 后**
 
 ```cpp
 // 客户端 OnRep → SetBaseAttributeValueFromReplication
@@ -634,9 +650,9 @@ void UAbilitySystemComponent::SetBaseAttributeValueFromReplication(
 }
 ```
 
-客户端**不存**所有 GE 的完整 Mod 数据，只存 BaseValue。`EvaluateWithBase` 时客户端本地 Aggregator 算出 CurrentValue。这意味着**客户端无法区分 CurrentValue 是由哪些 GE 贡献的**，但这对游戏逻辑来说是够用的（客户端只需要最终值）。
+客户端**不存**所有 GE 的完整 Mod 数据，只存 BaseValue。`EvaluateWithBase` 时客户端本地 Aggregator 算出 CurrentValue。换句话说，**客户端无法区分 CurrentValue 是由哪些 GE 贡献的**。不过对游戏逻辑来说够了——客户端只需要最终值。
 
-### 6.8.3 预测的特殊处理
+**预测的特殊处理**
 
 ```cpp
 // 客户端预测 Instant GE：
@@ -656,11 +672,11 @@ void UAbilitySystemComponent::RejectedGameplayEffect(FActiveGameplayEffectHandle
 
 ---
 
-## 6.9 GameplayCue 触发时机
+### 8.2 GameplayCue 触发时机
 
 GameplayCue 是 GAS 的可视化反馈系统（将在后续文章详述），这里只讲它在 GE 中的触发时机。
 
-### 6.9.1 触发方式
+**触发方式**
 
 | GE 类型 | GC 类型 | 触发时机 |
 |---------|---------|----------|
@@ -668,7 +684,7 @@ GameplayCue 是 GAS 的可视化反馈系统（将在后续文章详述），这
 | Duration | `OnActive` + `WhileActive` | 施加时触发；持续期间可以持续触发 |
 | Duration 移除 | `Removed` | GE 移除时触发 |
 
-### 6.9.2 源码中的触发逻辑
+**源码中的触发逻辑**
 
 ```cpp
 // Instant GE -> Execute GameplayCue
@@ -688,7 +704,7 @@ if (bInvokeGameplayCueApplied)
 }
 ```
 
-### 6.9.3 抑制规则
+**抑制规则**
 
 - `bRequireModifierSuccessToTriggerCues = true`：必须有 Modifier 成功执行才触发
 - `bSuppressStackingCues`：叠加时不重复触发
@@ -696,9 +712,9 @@ if (bInvokeGameplayCueApplied)
 
 ---
 
-## 6.10 GE 的移除
+### 8.3 GE 的移除
 
-### Duration 过期自动移除
+**Duration 过期自动移除**
 
 ```cpp
 void UAbilitySystemComponent::CheckDurationExpired(FActiveGameplayEffectHandle Handle)
@@ -712,7 +728,7 @@ void UAbilitySystemComponent::CheckDurationExpired(FActiveGameplayEffectHandle H
 }
 ```
 
-### 手动移除
+**手动移除**
 
 ```cpp
 ASC->RemoveActiveGameplayEffect(Handle, StacksToRemove);  // 按层移除
@@ -721,28 +737,24 @@ ASC->RemoveActiveGameplayEffectBySourceEffect(GE_Class);     // 按 GE 类型移
 
 ---
 
-## 6.11 设计思考
+## 九、设计思考
 
-### 为什么 Instant 不用 Aggregator？
+### 9.1 为什么 Instant 不用 Aggregator？
 
-Instant GE = 一次性计算 = 不需要撤销。伤害劈下来那一刻，Health 直接减少，不需要记住是谁造成的。Duration Buff 的 AttackPower +20 则需要在 Buff 过期时撤销效果，这就是 Aggregator 的价值。
+Instant GE = 一次性计算 = 不需要撤销。伤害劈下来那一刻，Health 直接减少，不需要记住是谁造成的。Duration Buff 的 AttackPower +20 需要在 Buff 过期时撤销——Aggregator 解决的就是这个撤销问题。
 
-### ExecutionCalculation 在 Server 执行
+### 9.2 ExecutionCalculation 在 Server 执行
 
-这意味着：
-1. 客户端无法运行自定义伤害公式，伤害公式对客户端不透明
-2. 客户端的预测 GE 必须用简单 Modifier，不能用 ExecutionCalculation（或用简化版本）
-3. 需要 ExecutionCalculation 的 GE，客户端只能等 Server 回复
+因为 ExecutionCalculation 只在 Server 运行：
+1. 客户端无法执行自定义伤害公式，公式对客户端不透明
+2. 客户端的预测 GE 只能走简单 Modifier，不能挂 ExecutionCalculation（或者挂一个简化版本）
+3. 依赖 ExecutionCalculation 的 GE，客户端只能等 Server 回复
 
-### Modifier 先于 Execution
+### 9.3 Modifier 先于 Execution
 
-如果你同时使用了 Modifiers 和 Executions：
-- Modifiers 先执行，修改 BaseValue
-- Execution 随后执行，如果它捕获了被 Modifier 修改的属性，则捕获到的是修改后的值
+如果同时用了 Modifiers 和 Executions，记住 Modifiers 先跑、Executions 后跑。Execution 捕获到的属性值可能是已经被 Modifier 改过的。一个容易踩的坑：别让 Modifier 和 Execution 同时操作同一个属性，除非你明确知道这个执行顺序带来的影响。
 
-这是一个容易踩的坑：别让 Modifier 和 Execution 同时操作同一个属性，除非你明确知道这个执行顺序的语义。
-
-### Period 的"重复 Instant"本质
+### 9.4 Period 的"重复 Instant"本质
 
 Period GE 不是"每 N 秒维持一个效果"，它是**每 N 秒执行一次 Instant**。每次执行都走 `ExecuteActiveEffectsFrom`，每次都会触发 `PreGameplayEffectExecute / PostGameplayEffectExecute`。
 - 每秒 100 点伤害 = 每秒执行一次 -100 Health 的 Additive Mod
@@ -750,7 +762,7 @@ Period GE 不是"每 N 秒维持一个效果"，它是**每 N 秒执行一次 In
 
 ---
 
-## 6.12 总结
+## 十、总结
 
 | 流程节点 | 职责 |
 |----------|------|
@@ -764,7 +776,7 @@ Period GE 不是"每 N 秒维持一个效果"，它是**每 N 秒执行一次 In
 | Period | Timer → 重复 ExecuteActiveEffectsFrom |
 | 网络同步 | Server 同步 BaseValue，客户端本地 Aggregator 计算 CurrentValue |
 
-### 两条路径对比速查表
+**两条路径对比速查表**
 
 | | Instant | Duration / Infinite |
 |---|---|---|

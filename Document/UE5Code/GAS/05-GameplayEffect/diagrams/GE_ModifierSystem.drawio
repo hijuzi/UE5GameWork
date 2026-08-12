@@ -59,32 +59,32 @@
 <mxCell id="opbox" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#82b366;strokeWidth=1;arcSize=10;dashed=1;" vertex="1" parent="1">
   <mxGeometry x="980" y="100" width="560" height="230" as="geometry"/>
 </mxCell>
-<mxCell id="oplab" value="&lt;b&gt;EGameplayModOp&lt;/b&gt; — Base 阶段 (0~2) &amp;nbsp;| &amp;nbsp; Final 阶段 (4~5)" style="text;html=1;fontSize=12;fontColor=#82b366;fontStyle=1;align=left;" vertex="1" parent="1">
+<mxCell id="oplab" value="&lt;b&gt;EGameplayModOp&lt;/b&gt; — 五种运算类型（按公式中的运算顺序排列）" style="text;html=1;fontSize=12;fontColor=#82b366;fontStyle=1;align=left;" vertex="1" parent="1">
   <mxGeometry x="1000" y="105" width="520" height="20" as="geometry"/>
 </mxCell>
 
 <!-- Row 1: Base Stage ops (AddBase=0, MultiplyAdditive=1, DivideAdditive=2) -->
-<mxCell id="o1" value="&lt;b&gt;① AddBase (0)&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;BaseValue += Magnitude&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555;&quot;&gt;伤害30, Lv3→90 累加到Base&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=1;arcSize=10;fontSize=12;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
+<mxCell id="o1" value="&lt;b&gt;① AddBase (0)&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;SumMods (Bias=0) 直接累加&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555;&quot;&gt;括号内：InlineBaseValue + ΣMag&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=1;arcSize=10;fontSize=12;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
   <mxGeometry x="990" y="135" width="175" height="75" as="geometry"/>
 </mxCell>
-<mxCell id="o2" value="&lt;b&gt;② MultiplyAdditive (1)&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;Σ 连乘后 × Base&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555;&quot;&gt;50%+50%=1.5+1.5=2.0倍率&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=1;arcSize=10;fontSize=12;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
+<mxCell id="o2" value="&lt;b&gt;② MultiplyAdditive (1)&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;SumMods (Bias=1.0) 增量叠加&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555;&quot;&gt;1+(1.5-1)+(1.5-1)=2.0倍率&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=1;arcSize=10;fontSize=12;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
   <mxGeometry x="1180" y="135" width="175" height="75" as="geometry"/>
 </mxCell>
-<mxCell id="o3" value="&lt;b&gt;③ DivideAdditive (2)&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;÷ (1 + Σ Divide)&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555;&quot;&gt;2个÷2→÷(1+2)=÷3折减&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=1;arcSize=10;fontSize=12;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
+<mxCell id="o3" value="&lt;b&gt;③ DivideAdditive (2)&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;SumMods (Bias=1.0) 作分母&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555;&quot;&gt;1+(2-1)=2 → 等效减伤50%&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=1;arcSize=10;fontSize=12;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
   <mxGeometry x="1370" y="135" width="155" height="75" as="geometry"/>
 </mxCell>
 
 <!-- Row 2: Final Stage ops (MultiplyCompound=4, AddFinal=5) -->
 <!-- Note: value 3 was Override, now deprecated -->
-<mxCell id="o4" value="&lt;b&gt;④ MultiplyCompound (4)&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;Π 连续叠乘&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555;&quot;&gt;1.5×1.5=2.25 (复合叠加)&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=1;arcSize=10;fontSize=12;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
+<mxCell id="o4" value="&lt;b&gt;④ MultiplyCompound (4)&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;MultiplyMods 真正连乘&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555;&quot;&gt;不走 SumMods！1.5×1.5=2.25&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=1;arcSize=10;fontSize=12;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
   <mxGeometry x="990" y="225" width="175" height="75" as="geometry"/>
 </mxCell>
-<mxCell id="o5" value="&lt;b&gt;⑤ AddFinal (5)&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;Σ 求和后加入&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555;&quot;&gt;最终+10 (穿透/固伤)&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=1;arcSize=10;fontSize=12;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
+<mxCell id="o5" value="&lt;b&gt;⑤ AddFinal (5)&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;SumMods (Bias=0) 括号外加&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555;&quot;&gt;不受任何乘法影响&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=1;arcSize=10;fontSize=12;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
   <mxGeometry x="1180" y="225" width="175" height="75" as="geometry"/>
 </mxCell>
 
 <!-- Deprecation note -->
-<mxCell id="odep" value="&lt;font style=&quot;font-size:10px;color:#999;&quot;&gt;注：enum 值 3 (Override) 已 Deprecated&lt;br&gt;Max = 6&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;strokeWidth=1;arcSize=10;fontSize=10;verticalAlign=middle;" vertex="1" parent="1">
+<mxCell id="odep" value="&lt;font style=&quot;font-size:10px;color:#999;&quot;&gt;Override = 3&lt;br&gt;直接 return，短路绕过全部公式&lt;br&gt;（已不推荐使用）&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;strokeWidth=1;arcSize=10;fontSize=10;verticalAlign=middle;" vertex="1" parent="1">
   <mxGeometry x="1370" y="225" width="155" height="75" as="geometry"/>
 </mxCell>
 
@@ -92,37 +92,37 @@
 <mxCell id="aggbox" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#d79b00;strokeWidth=2;arcSize=10;" vertex="1" parent="1">
   <mxGeometry x="40" y="370" width="1520" height="175" as="geometry"/>
 </mxCell>
-<mxCell id="agglab" value="&lt;b&gt;FAggregator::EvaluateWithBase&lt;/b&gt; — 按 ModOp 类型分组聚合（非顺序迭代）" style="text;html=1;fontSize=13;fontColor=#d79b00;fontStyle=1;align=center;" vertex="1" parent="1">
+<mxCell id="agglab" value="&lt;b&gt;FAggregatorModChannel::EvaluateWithBase&lt;/b&gt; — 一份公式，按 ModOp 类型分组聚合（源码 GameplayEffectAggregator.cpp:76-99）" style="text;html=1;fontSize=13;fontColor=#d79b00;fontStyle=1;align=center;" vertex="1" parent="1">
   <mxGeometry x="350" y="375" width="900" height="20" as="geometry"/>
 </mxCell>
 
-<mxCell id="agg1" value="&lt;b&gt;Step 1&lt;/b&gt;&lt;br&gt;BaseValue&lt;br&gt;Snapshot&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555;&quot;&gt;读取 Backing Attr. 值&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d79b00;strokeWidth=1;arcSize=10;fontSize=11;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
-  <mxGeometry x="55" y="405" width="180" height="90" as="geometry"/>
+<mxCell id="agg1" value="&lt;b&gt;传入参数&lt;/b&gt;&lt;br&gt;InlineBaseValue&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555;&quot;&gt;调用方传入的基准值&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#888;&quot;&gt;（首 Channel 通常来自&lt;br&gt;FAttributeData::BaseValue，&lt;br&gt;即面板属性值）&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d79b00;strokeWidth=1;arcSize=10;fontSize=11;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
+  <mxGeometry x="55" y="405" width="180" height="100" as="geometry"/>
 </mxCell>
 <mxCell id="ea1" value="" style="endArrow=blockThin;endFill=1;strokeWidth=2;strokeColor=#d79b00;" edge="1" parent="1">
   <mxGeometry relative="1" as="geometry"><mxPoint x="240" y="450" as="sourcePoint"/><mxPoint x="280" y="450" as="targetPoint"/></mxGeometry>
 </mxCell>
 
-<mxCell id="agg2" value="&lt;b&gt;Step 2: Base 阶段&lt;/b&gt;&lt;br&gt;(BaseValue + ΣAddBase)&lt;br&gt;× ΠMultiplyAdditive&lt;br&gt;÷ (1 + ΣDivideAdditive)&#xa;&lt;font style=&quot;font-size:10px;color:#555;&quot;&gt;同类 Aggregator Channel 先各自聚合&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d79b00;strokeWidth=1;arcSize=10;fontSize=11;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
+<mxCell id="agg2" value="&lt;b&gt;公式前半（括号内）&lt;/b&gt;&lt;br&gt;(InlineBaseValue + ΣAddBase)&lt;br&gt;× ΣMultiplyAdditive&lt;br&gt;÷ ΣDivideAdditive&#xa;&lt;font style=&quot;font-size:10px;color:#555;&quot;&gt;&lt;font color=&quot;#82b366&quot;&gt;Σ&lt;/font&gt; = SumMods 聚合（每类型独立叠加）&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d79b00;strokeWidth=1;arcSize=10;fontSize=11;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
   <mxGeometry x="285" y="405" width="320" height="90" as="geometry"/>
 </mxCell>
 <mxCell id="ea2" value="" style="endArrow=blockThin;endFill=1;strokeWidth=2;strokeColor=#d79b00;" edge="1" parent="1">
   <mxGeometry relative="1" as="geometry"><mxPoint x="610" y="450" as="sourcePoint"/><mxPoint x="660" y="450" as="targetPoint"/></mxGeometry>
 </mxCell>
 
-<mxCell id="agg3" value="&lt;b&gt;Step 3: Final 阶段&lt;/b&gt;&lt;br&gt;× ΠMultiplyCompound&lt;br&gt;+ ΣAddFinal&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555;&quot;&gt;在 Base 阶段结果上二次运算&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d79b00;strokeWidth=1;arcSize=10;fontSize=11;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
-  <mxGeometry x="665" y="405" width="260" height="90" as="geometry"/>
+<mxCell id="agg3" value="&lt;b&gt;公式后半（括号外）&lt;/b&gt;&lt;br&gt;× ΠMultiplyCompound&lt;br&gt;+ ΣAddFinal&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555;&quot;&gt;&lt;font color=&quot;#b85450;&quot;&gt;Π&lt;/font&gt; = MultiplyMods 真正连乘（不走 SumMods！）&lt;br&gt;&lt;font color=&quot;#82b366&quot;&gt;Σ&lt;/font&gt; = SumMods 聚合&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d79b00;strokeWidth=1;arcSize=10;fontSize=11;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
+  <mxGeometry x="665" y="405" width="260" height="100" as="geometry"/>
 </mxCell>
 <mxCell id="ea3" value="" style="endArrow=blockThin;endFill=1;strokeWidth=2;strokeColor=#d79b00;" edge="1" parent="1">
   <mxGeometry relative="1" as="geometry"><mxPoint x="930" y="450" as="sourcePoint"/><mxPoint x="980" y="450" as="targetPoint"/></mxGeometry>
 </mxCell>
 
-<mxCell id="agg4" value="&lt;b&gt;Step 4&lt;/b&gt;&lt;br&gt;FinalValue&lt;br&gt;写入 FAggregator&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555;&quot;&gt;SetAttribute() 最终生效&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;strokeWidth=2;arcSize=10;fontSize=11;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
+<mxCell id="agg4" value="&lt;b&gt;输出&lt;/b&gt;&lt;br&gt;FinalValue&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555;&quot;&gt;作为该 Attribute 的&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555;&quot;&gt;CurrentValue 返回&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;strokeWidth=2;arcSize=10;fontSize=11;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
   <mxGeometry x="985" y="405" width="200" height="90" as="geometry"/>
 </mxCell>
 
-<mxCell id="formula" value="&lt;b style=&quot;font-size:13px;color:#d79b00;&quot;&gt;核心公式：&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:12px;&quot;&gt;FinalValue = ((BaseValue + ΣAddBase)&lt;br&gt;× ΠMultiplyAdditive ÷ (1 + ΣDivideAdditive)&lt;br&gt;× ΠMultiplyCompound) + ΣAddFinal&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d79b00;strokeWidth=1;arcSize=10;fontSize=12;fontStyle=0;verticalAlign=top;spacingTop=6;" vertex="1" parent="1">
-  <mxGeometry x="1210" y="405" width="330" height="90" as="geometry"/>
+<mxCell id="formula" value="&lt;b style=&quot;font-size:13px;color:#d79b00;&quot;&gt;唯一公式（源码 L98）：&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:12px;&quot;&gt;FinalValue =&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:12px;&quot;&gt;((InlineBaseValue + ΣAddBase)&lt;br&gt;× ΣMultiplyAdditive&lt;br&gt;÷ ΣDivideAdditive&lt;br&gt;× ΠMultiplyCompound)&lt;br&gt;+ ΣAddFinal&lt;/font&gt;&#xa;&lt;font style=&quot;font-size:10px;color:#888;&quot;&gt;&lt;font color=&quot;#82b366&quot;&gt;Σ&lt;/font&gt; = SumMods 聚合&lt;br&gt;&lt;font color=&quot;#b85450&quot;&gt;Π&lt;/font&gt; = MultiplyMods 连乘&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d79b00;strokeWidth=1;arcSize=10;fontSize=12;fontStyle=0;verticalAlign=top;spacingTop=6;" vertex="1" parent="1">
+  <mxGeometry x="1210" y="405" width="330" height="120" as="geometry"/>
 </mxCell>
 
 <!-- ===== Mapping Table ===== -->
@@ -136,7 +136,7 @@
 <mxCell id="th1" value="&lt;b&gt;Enum&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e0e0e0;strokeColor=#cccccc;fontSize=11;fontStyle=1;" vertex="1" parent="1">
   <mxGeometry x="70" y="600" width="150" height="26" as="geometry"/>
 </mxCell>
-<mxCell id="th2" value="&lt;b&gt;阶段 / 聚合公式&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e0e0e0;strokeColor=#cccccc;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+<mxCell id="th2" value="&lt;b&gt;聚合方式 / 公式位置&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e0e0e0;strokeColor=#cccccc;fontSize=11;fontStyle=1;" vertex="1" parent="1">
   <mxGeometry x="220" y="600" width="200" height="26" as="geometry"/>
 </mxCell>
 <mxCell id="th3" value="&lt;b&gt;典型场景&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e0e0e0;strokeColor=#cccccc;fontSize=11;fontStyle=1;" vertex="1" parent="1">
@@ -152,7 +152,7 @@
 <mxCell id="r1c1" value="AddBase = 0" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#cccccc;fontSize=11;fontStyle=1;" vertex="1" parent="1">
   <mxGeometry x="70" y="626" width="150" height="28" as="geometry"/>
 </mxCell>
-<mxCell id="r1c2" value="Base: Σ 求和 → +" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8f8f8;strokeColor=#cccccc;fontSize=11;" vertex="1" parent="1">
+<mxCell id="r1c2" value="SumMods(Bias=0) 直接求和 → +（括号内）" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8f8f8;strokeColor=#cccccc;fontSize=11;" vertex="1" parent="1">
   <mxGeometry x="220" y="626" width="200" height="28" as="geometry"/>
 </mxCell>
 <mxCell id="r1c3" value="伤害/治疗/属性加值" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8f8f8;strokeColor=#cccccc;fontSize=11;" vertex="1" parent="1">
@@ -168,7 +168,7 @@
 <mxCell id="r2c1" value="MultiplyAdditive = 1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#cccccc;fontSize=11;fontStyle=1;" vertex="1" parent="1">
   <mxGeometry x="70" y="654" width="150" height="28" as="geometry"/>
 </mxCell>
-<mxCell id="r2c2" value="Base: Π 连乘 → ×" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8f8f8;strokeColor=#cccccc;fontSize=11;" vertex="1" parent="1">
+<mxCell id="r2c2" value="SumMods(Bias=1) 增量叠加 → ×" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8f8f8;strokeColor=#cccccc;fontSize=11;" vertex="1" parent="1">
   <mxGeometry x="220" y="654" width="200" height="28" as="geometry"/>
 </mxCell>
 <mxCell id="r2c3" value="百分比加成/减速" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8f8f8;strokeColor=#cccccc;fontSize=11;" vertex="1" parent="1">
@@ -177,14 +177,14 @@
 <mxCell id="r2c4" value="GE_AttackSpeedBuff" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8f8f8;strokeColor=#cccccc;fontSize=11;" vertex="1" parent="1">
   <mxGeometry x="600" y="654" width="180" height="28" as="geometry"/>
 </mxCell>
-<mxCell id="r2c5" value="多个 MultiplyAdditive 连乘：1.5+1.5=2.0 (非累加)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8f8f8;strokeColor=#cccccc;fontSize=11;" vertex="1" parent="1">
+<mxCell id="r2c5" value="SumMods 以 Bias=1.0 为基准，增量叠加：1+(1.5-1)+(1.5-1)=2.0（非直接连乘）" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8f8f8;strokeColor=#cccccc;fontSize=11;" vertex="1" parent="1">
   <mxGeometry x="780" y="654" width="750" height="28" as="geometry"/>
 </mxCell>
 
 <mxCell id="r3c1" value="DivideAdditive = 2" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#cccccc;fontSize=11;fontStyle=1;" vertex="1" parent="1">
   <mxGeometry x="70" y="682" width="150" height="28" as="geometry"/>
 </mxCell>
-<mxCell id="r3c2" value="Base: ÷ (1 + Σ)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8f8f8;strokeColor=#cccccc;fontSize=11;" vertex="1" parent="1">
+<mxCell id="r3c2" value="SumMods(Bias=1.0) 作分母 → ÷（括号内）" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8f8f8;strokeColor=#cccccc;fontSize=11;" vertex="1" parent="1">
   <mxGeometry x="220" y="682" width="200" height="28" as="geometry"/>
 </mxCell>
 <mxCell id="r3c3" value="伤害减免/CD缩减" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8f8f8;strokeColor=#cccccc;fontSize=11;" vertex="1" parent="1">
@@ -193,14 +193,14 @@
 <mxCell id="r3c4" value="GE_DamageReduction" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8f8f8;strokeColor=#cccccc;fontSize=11;" vertex="1" parent="1">
   <mxGeometry x="600" y="682" width="180" height="28" as="geometry"/>
 </mxCell>
-<mxCell id="r3c5" value="非直接 BaseValue / N，而是÷(1+N)；可防止负值/除零" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8f8f8;strokeColor=#cccccc;fontSize=11;" vertex="1" parent="1">
+<mxCell id="r3c5" value="SumMods(Bias=1.0) 作分母，1+(2-1)=2 → 等效减伤50%，收益递减永不免疫" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8f8f8;strokeColor=#cccccc;fontSize=11;" vertex="1" parent="1">
   <mxGeometry x="780" y="682" width="750" height="28" as="geometry"/>
 </mxCell>
 
 <mxCell id="r4c1" value="MultiplyCompound = 4" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#cccccc;fontSize=11;fontStyle=1;" vertex="1" parent="1">
   <mxGeometry x="70" y="710" width="150" height="28" as="geometry"/>
 </mxCell>
-<mxCell id="r4c2" value="Final: Π 叠乘 → ×" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8f8f8;strokeColor=#cccccc;fontSize=11;" vertex="1" parent="1">
+<mxCell id="r4c2" value="MultiplyMods 真正连乘 → ×" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8f8f8;strokeColor=#cccccc;fontSize=11;" vertex="1" parent="1">
   <mxGeometry x="220" y="710" width="200" height="28" as="geometry"/>
 </mxCell>
 <mxCell id="r4c3" value="多来源最终倍率" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8f8f8;strokeColor=#cccccc;fontSize=11;" vertex="1" parent="1">
@@ -209,14 +209,14 @@
 <mxCell id="r4c4" value="GE_FinalDamageMultiplier" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8f8f8;strokeColor=#cccccc;fontSize=11;" vertex="1" parent="1">
   <mxGeometry x="600" y="710" width="180" height="28" as="geometry"/>
 </mxCell>
-<mxCell id="r4c5" value="与 MultiplyAdditive 区别：在 Final 阶段运算，不参与 Base 阶段连乘" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8f8f8;strokeColor=#cccccc;fontSize=11;" vertex="1" parent="1">
+<mxCell id="r4c5" value="不走 SumMods！用 MultiplyMods 连乘。与 MultiplyAdditive 本质区别：叠加(Bias=1) vs 连乘(真Π)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8f8f8;strokeColor=#cccccc;fontSize=11;" vertex="1" parent="1">
   <mxGeometry x="780" y="710" width="750" height="28" as="geometry"/>
 </mxCell>
 
 <mxCell id="r5c1" value="AddFinal = 5" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#cccccc;fontSize=11;fontStyle=1;" vertex="1" parent="1">
   <mxGeometry x="70" y="738" width="150" height="28" as="geometry"/>
 </mxCell>
-<mxCell id="r5c2" value="Final: Σ 求和 → +" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8f8f8;strokeColor=#cccccc;fontSize=11;" vertex="1" parent="1">
+<mxCell id="r5c2" value="SumMods(Bias=0) 直接求和 → +（括号外）" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8f8f8;strokeColor=#cccccc;fontSize=11;" vertex="1" parent="1">
   <mxGeometry x="220" y="738" width="200" height="28" as="geometry"/>
 </mxCell>
 <mxCell id="r5c3" value="固定穿透/最终修正" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8f8f8;strokeColor=#cccccc;fontSize=11;" vertex="1" parent="1">
@@ -230,7 +230,7 @@
 </mxCell>
 
 <!-- ===== Practice Notes ===== -->
-<mxCell id="note" value="&lt;b&gt;实践关键点&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px;&quot;&gt;1. &lt;b&gt;同类型先聚合&lt;/b&gt;：多个 AddBase 先 Σ 求和再参与运算，非数组顺序逐个执行&lt;br&gt;2. &lt;b&gt;Period 触发更新&lt;/b&gt;：GE 有 Period &gt; 0 时，每个 Period 触发 Aggregator 重新计算 (EvaluateWithBase)&lt;br&gt;3. &lt;b&gt;SetByCaller&lt;/b&gt; 需要 GA 创建 Spec 时调用 SetSetByCallerMagnitude() 传值，值在 Spec 创建时冻结&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF9C4;strokeColor=#F57F17;strokeWidth=1;arcSize=10;fontSize=12;verticalAlign=top;spacingTop=10;" vertex="1" parent="1">
+<mxCell id="note" value="&lt;b&gt;实践关键点&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px;&quot;&gt;1. &lt;b&gt;同类型先聚合&lt;/b&gt;：所有同 ModOp 的 Magnitude 先 SumMods 叠加（或 MultiplyMods 连乘），再代入公式（非数组顺序逐个执行）&lt;br&gt;2. &lt;b&gt;InlineBaseValue ≠ FAttributeData::BaseValue&lt;/b&gt;：InlineBaseValue 是 EvaluateWithBase 的传入参数，首 Channel 通常来自面板属性值；Multi-Channel 时上一 Channel 输出即为下一 Channel 的 InlineBaseValue&lt;br&gt;3. &lt;b&gt;Period 触发重新计算&lt;/b&gt;：GE 有 Period &gt; 0 时，每个 Period 触发 Aggregator 重新 EvaluateWithBase，使持续效果动态反映当前属性值&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF9C4;strokeColor=#F57F17;strokeWidth=1;arcSize=10;fontSize=12;verticalAlign=top;spacingTop=10;" vertex="1" parent="1">
   <mxGeometry x="40" y="790" width="1520" height="85" as="geometry"/>
 </mxCell>
 

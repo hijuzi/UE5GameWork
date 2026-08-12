@@ -4,7 +4,7 @@
 
 > **系列**: 《Inside GAS》— UE5 GameplayAbilitySystem 源码深度分析  
 > **难度**: 🔵 核心 → 🔴 源码  
-> **字数**: ~4000  
+> **字数**: ~5200  
 > **前置**: 04-AttributeSet  
 > **源码路径**: `Engine/Plugins/Runtime/GameplayAbilities/Source/GameplayAbilities/Public/GameplayEffect.h`
 
@@ -41,7 +41,7 @@
 如果你写过任何游戏逻辑，大概率做过这样的事：
 
 ```cpp
-// 简单粗暴 —— 直接在代码里加减
+// 简单粗暴：直接在代码里加减
 void ApplyDamage(AActor* Target, float Amount) {
     Target->Health -= Amount;
     if (Target->Health <= 0) Target->Die();
@@ -149,7 +149,7 @@ Instant GE 施加 → ExecuteActiveEffectsFrom → SetAttributeBaseValue → 结
 - **不能** 被 Stack
 - 常用于伤害、治疗、一次性效果
 
-### 3.2 HasDuration（编辑器显示为 "Duration"）
+### 3.2 HasDuration
 
 HasDuration GE 创建 `FActiveGameplayEffect`，将 Modifier 注册为 AggregatorMod（不改动属性的 BaseValue）。效果持续指定的秒数，到期自动移除。
 
@@ -196,7 +196,7 @@ UPROPERTY(EditDefaultsOnly, Category=Duration)
 FGameplayEffectModifierMagnitude MaxDurationMagnitude;
 ```
 
-注意 `DurationMagnitude` 是一个 `FGameplayEffectModifierMagnitude`（见 4.2），这意味着持续时间本身也可以用 **ScalableFloat / AttributeBased / SetByCaller** 来动态计算。SetByCaller 的 Duration 在实际项目中很常见——比如"眩晕时间 = 技能等级 * 0.5 秒"。
+注意 `DurationMagnitude` 是一个 `FGameplayEffectModifierMagnitude`（见 4.2），这意味着持续时间本身也可以用 **ScalableFloat / AttributeBased / SetByCaller** 来动态计算。SetByCaller 的 Duration 在实际项目中很常见。比如"眩晕时间 = 技能等级 * 0.5 秒"。
 
 另外，**Period（周期）配置**也在 `UGameplayEffect` 上（`Category=Period`）：
 
@@ -232,48 +232,245 @@ struct FGameplayModifierInfo
 
 *图：GE Modifier 体系 —— ModifierOp 五种运算 + ModifierMagnitude 四种来源 + Aggregator 聚合链路*
 
-### 4.1 ModifierOp：五种运算（新版枚举）
+### 4.1 ModifierOp：五种运算原理
+
+先看枚举定义（`GameplayEffectTypes.h:127-148`）：
 
 ```cpp
-// GameplayEffectTypes.h — EGameplayModOp
 namespace EGameplayModOp
 {
     enum Type
     {
-        AddBase = 0,           // 加法（Base 阶段）：BaseValue += Value
-        MultiplyAdditive = 1,  // 乘法（Base 阶段）：×
-        DivideAdditive = 2,    // 除法（Base 阶段）：÷
-        MultiplyCompound = 3,  // 复合乘法（Final 阶段）：×
-        AddFinal = 4,          // 最终加法（Final 阶段）：+
+        AddBase = 0,           // 基值加减
+        MultiplyAdditive = 1,  // 百分比叠加（加法式）
+        DivideAdditive = 2,    // 百分比叠加（倒数式）
+        MultiplyCompound = 4,  // 百分比连乘
+        AddFinal = 5,          // 最终加减
         Max
     };
 }
 ```
 
-**聚合公式**（Aggregator 计算 `CurrentValue` 的唯一公式）：
+引擎注释中直接写了聚合公式的最终形态——但一次性看懂它不现实。下面我们从"没有任何 Modifier"开始，**逐步加入每种运算**，每次只看变了什么。
+
+---
+
+#### Step 0：没有 Modifier → 值就是 BaseValue
 
 ```
-FinalValue = ((BaseValue + ΣAddBase) × ΣMultiplyAdditive ÷ ΣDivideAdditive × ΣMultiplyCompound) + ΣAddFinal
+CurrentValue = BaseValue
 ```
 
-- `AddBase / MultiplyAdditive / DivideAdditive`：作用于 **BaseValue 聚合阶段**，多个 GE 先各自运算后求和/连续运算
-- `MultiplyCompound / AddFinal`：作用于 **Final 阶段**，对聚合后的值做二次运算
-- 注意 `DivideAdditive` 不是字面"除以 Magnitude"，而是将 Magnitude 归一化为倒数因子：`BaseStageResult ÷ (1 + ΣDivideAdditive)`。这意味着 Magnitude=1 时等效 ½，Magnitude=2 时等效 ⅓，适合做伤害减免（数个大越大减免效果越弱，不会到 100%）
+什么 GE 都没施加。攻击力 100，就是 100。
 
-| ModOp | 含义 | 公式阶段 | 典型用途 |
-|-------|------|----------|----------|
-| AddBase | 加法 | Base | 伤害、治疗 |
-| MultiplyAdditive | 乘法 | Base | 百分比加成 / 减速 |
-| DivideAdditive | 除法 | Base | 伤害减免（按 1+N 累加） |
-| MultiplyCompound | 复合乘法 | Final | 多来源叠加的最终倍率 |
-| AddFinal | 最终加法 | Final | 最终修正值（如固定穿透） |
+> 对应的 `EvaluateWithBase` 行为（`GameplayEffectAggregator.cpp:98`）：如果所有 Modifier 的 SumMods 返回 Bias（Additive=0, Multiplicitive=1, Division=1, CompoundMultiply=1, FinalAdd=0），公式退化为 `((Base+0)×1÷1×1)+0 = BaseValue`。
+
+---
+
+#### Step 1：加入 AddBase → 在 BaseValue 上直接加减
+
+```
+CurrentValue = BaseValue + ΣAddBase
+```
+
+源码 `GameplayEffectAggregator.cpp:86`：
+
+```cpp
+float Additive = SumMods(Mods[EGameplayModOp::Additive],
+    GameplayEffectUtilities::GetModifierBiasByModifierOp(EGameplayModOp::Additive), Parameters);
+```
+
+AddBase 的 Bias = **0.0**，`SumMods` 的作用等价于：**所有 AddBase Modifier 的值直接累加**。
+
+| Mod 1 | Mod 2 | Additive 结果 | CurrentValue (Base=100) |
+|-------|-------|--------------|-------------------------|
+| +30 | — | 30 | 100 + 30 = **130** |
+| +30 | -10 | 20 | 100 + 20 = **120** |
+
+> **为什么 Bias=0？** `SumMods` 内部的逻辑是 `Bias + Σ(Mag - Bias)`。Bias=0 时退化为 `0 + Σ(Mag - 0) = ΣMag`——就是普通求和。
+
+---
+
+#### Step 2：加入 MultiplyAdditive → 百分比叠加
+
+```
+CurrentValue = (BaseValue + ΣAddBase) × ΣMultiplyAdditive
+```
+
+源码 `GameplayEffectAggregator.cpp:87`：
+
+```cpp
+float Multiplicitive = SumMods(Mods[EGameplayModOp::Multiplicitive],
+    GameplayEffectUtilities::GetModifierBiasByModifierOp(EGameplayModOp::Multiplicitive), Parameters);
+```
+
+MultiplyAdditive 的 Bias = **1.0**。这是整个公式里最关键的设计——**为什么不能直接 1.5 + 1.5 = 3.0？**
+
+因为两个 +50% 的 Buff **不应该等于 +200%**。正确的叠加语义是"50% + 50% = 100%"，即最终 ×2.0：
+
+| 场景 | 错误方式 (直接加) | 正确方式 (Bias=1.0) |
+|------|------------------|---------------------|
+| 两个 1.5 Mod | 1.5 + 1.5 = 3.0（+200%）❌ | 1.0 + (1.5-1) + (1.5-1) = **2.0**（+100%）✅ |
+| 三个 1.3 Mod | 1.3 + 1.3 + 1.3 = 3.9 ❌ | 1.0 + 0.3 + 0.3 + 0.3 = **1.9**（+90%）✅ |
+
+Bias=1.0 的本质：**以 1.0（原始倍数）作为起点，每个 Mod 只贡献它的"增量"(Mag - 1.0)**。这样多个 +50% 叠加 = 0.5 + 0.5 = 100% 增幅，而不是 200%。
+
+---
+
+#### Step 3：加入 DivideAdditive → 倒数叠加（减伤专用）
+
+```
+CurrentValue = (BaseValue + ΣAddBase) × ΣMultiplyAdditive ÷ ΣDivideAdditive
+```
+
+源码 `GameplayEffectAggregator.cpp:88`：
+
+```cpp
+float Division = SumMods(Mods[EGameplayModOp::Division],
+    GameplayEffectUtilities::GetModifierBiasByModifierOp(EGameplayModOp::Division), Parameters);
+```
+
+DivideAdditive 的 Bias **也是 1.0**，叠加方式与 MultiplyAdditive 完全相同——但放在公式的**分母**上。
+
+**典型场景：减伤。** 假设两个减伤 Mod，值分别为 2 和 1（Magnitude 越大减伤越强）：
+
+| 减伤来源 | Magnitude | Division 聚合 | 等效减伤 |
+|----------|-----------|--------------|----------|
+| 护甲 | 2 | 1 + (2-1) = 2.0 | 1 - 1/2 = **50%** |
+| 护甲 + 抗性 | 2, 1 | 1 + 1.0 + 0.0 = 2.0 | 1 - 1/2 = **50%** |
+| 堆满三件 | 2, 2, 2 | 1 + 1.0 + 1.0 + 1.0 = 4.0 | 1 - 1/4 = **75%** |
+| 堆满四件 | 2, 2, 2, 2 | 5.0 | 1 - 1/5 = **80%** |
+
+核心设计意图：**减伤收益递减，永远达不到 100%**。不管堆多少件减伤装备，`Division` 分母只会越来越大但不会无穷大，所以 `1/Division` 永远是正数——绝不会出现"完全免疫"的数学漏洞。
+
+> 源码安全守卫（`GameplayEffectAggregator.cpp:92-96`）：如果 `Division` 为 0，强制重置为 1.0，防止除零崩溃。
+
+---
+
+#### Step 4：加入 MultiplyCompound → 连乘（不是叠加！）
+
+```
+CurrentValue = (BaseValue + ΣAddBase) × ΣMultiplyAdditive ÷ ΣDivideAdditive × ΠMultiplyCompound
+```
+
+⚠️ **MultiplyCompound 不走 SumMods！** 源码用的是 `MultiplyMods` 函数（`GameplayEffectAggregator.cpp:90`），把每个 Mod 的值**连乘**：
+
+```cpp
+float CompoundMultiply = UE::AbilitySystem::Private::MultiplyMods(Mods[EGameplayModOp::MultiplyCompound]);
+```
+
+| 场景 | 运算 | 结果 |
+|------|------|------|
+| 两个 1.5 Compound Mod | 1.5 × 1.5 | **2.25**（+125%） |
+| 三个 1.2 Compound Mod | 1.2 × 1.2 × 1.2 | **1.728**（+72.8%） |
+
+**MultiplyAdditive vs MultiplyCompound 选哪个？**
+
+| | MultiplyAdditive (叠加) | MultiplyCompound (连乘) |
+|------|-------|------|
+| 计算方法 | SumMods (Bias=1, 以增量为单位加) | MultiplyMods (直接乘) |
+| 两个 1.5 | 2.0（+100%） | 2.25（+125%） |
+| 适用场景 | 同类 Buff 累加 — 多个力量 Buff 互不独立 | 异构倍率叠加 — 暴击×属性克制×距离修正，各自独立 |
+| 极端值安全性 | 稳健（叠加是加法） | 需要关注（连乘可能膨胀） |
+
+一句话选择：**同类来源的百分比加成用 MultiplyAdditive，不同机制的最终倍率用 MultiplyCompound。**
+
+---
+
+#### Step 5：加入 AddFinal → 最终补刀
+
+```
+CurrentValue = (BaseValue + ΣAddBase) × ΣMultiplyAdditive ÷ ΣDivideAdditive × ΠMultiplyCompound + ΣAddFinal
+```
+
+源码 `GameplayEffectAggregator.cpp:89`：
+
+```cpp
+float FinalAdd = SumMods(Mods[EGameplayModOp::AddFinal],
+    GameplayEffectUtilities::GetModifierBiasByModifierOp(EGameplayModOp::AddFinal), Parameters);
+```
+
+Bias=0，与 AddBase 一样是简单累加。**关键区别在于位置**：
+
+| 属性 | AddBase | AddFinal |
+|------|---------|----------|
+| 在公式中的位置 | **括号内**：先加，再被后续乘法放大 | **括号外**：所有乘法结束后再加 |
+| 物理含义 | "增加基础值"（受百分比 Buff 影响） | "增加最终值"（不受任何乘法影响） |
+| 典型用例 | 力量药水 +20 攻（Buff 后实际可能 +30） | 神圣伤害 +5（永远是 +5） |
+
+---
+
+#### 公式全貌 + 源码锚点
+
+**唯一公式**（`GameplayEffectAggregator.cpp:98`）：
+
+```
+FinalValue = ((BaseValue + Additive) * Multiplicitive / Division * CompoundMultiply) + FinalAdd
+```
+
+| 分量 | 源码行 | 聚合函数 | Bias |
+|------|--------|----------|------|
+| `Additive` | L86 | `SumMods(Mods[Additive])` | 0.0（直接求和） |
+| `Multiplicitive` | L87 | `SumMods(Mods[Multiplicitive])` | 1.0（增量叠加） |
+| `Division` | L88 | `SumMods(Mods[Division])` | 1.0（增量叠加） |
+| `FinalAdd` | L89 | `SumMods(Mods[AddFinal])` | 0.0（直接求和） |
+| `CompoundMultiply` | L90 | **`MultiplyMods`**（非 SumMods） | —（连乘） |
+| `Override` | L78-84 | **直接 return** | —（短路绕过全部公式） |
+
+> **枚举名对照**：Aggregator 内部仍使用旧版枚举名 `Additive` / `Multiplicitive` / `Division`，分别对应用户面的 `AddBase` / `MultiplyAdditive` / `DivideAdditive`。枚举值相同（0/1/2），只是命名不同。以下源码摘录中保持原名以与引擎一致。
+
+---
+
+#### 综合实例：一个完整的属性计算
+
+假设角色 **BaseAttack = 100**，同时身上有下列效果：
+
+| 效果 | ModOp | 值 | 说明 |
+|------|-------|-----|------|
+| 装备长剑 | AddBase | +20 | 基础攻击力加成 |
+| 装备短剑 | AddBase | +10 | 另一个基础加成 |
+| 力量 Buff | MultiplyAdditive | 1.5 | 攻击力 +50% |
+| 怒气 Buff | MultiplyAdditive | 1.3 | 攻击力 +30% |
+| 护甲减伤 | DivideAdditive | 2.0 | 减伤 50%（除以 2） |
+| 暴击倍率 | MultiplyCompound | 1.5 | 暴击 150% |
+| 神圣伤害 | AddFinal | +5 | 固定神圣伤害 |
+
+**逐步计算**：
+
+```
+Step 1: Additive = 20 + 10 = 30                              (Bias=0, 直接加)
+Step 2: Multiplicitive = 1 + (1.5-1) + (1.3-1) = 1.8        (Bias=1, 增量叠加: +50%+30%=+80%)
+Step 3: Division = 1 + (2.0-1) = 2.0                         (Bias=1, 除数=2 → 减伤50%)
+Step 4: CompoundMultiply = 1.5                               (连乘, 只有一个)
+Step 5: FinalAdd = 5
+
+代入公式:
+FinalValue = ((100 + 30) × 1.8 ÷ 2.0 × 1.5) + 5
+           = (130 × 1.8 ÷ 2.0 × 1.5) + 5
+           = (234 ÷ 2.0 × 1.5) + 5
+           = (117 × 1.5) + 5
+           = 175.5 + 5
+           = 180.5
+```
+
+**验证每个 ModOp 的角色**：
+
+| 效果 | 对最终值的贡献 |
+|------|---------------|
+| 长剑 +20 | 被后续 ×1.8 放大，实际贡献 20×1.8÷2.0×1.5 = **+27** |
+| 力量 Buff ×1.5 | 与怒气 Buff 叠加为 ×1.8（+80%），不是 ×1.95 |
+| 护甲 ÷2.0 | 将 234 减半为 117 |
+| 暴击 ×1.5 | 连乘（只有它自己是 1.5） |
+| 神圣伤害 +5 | **不受任何乘法影响**，就是 +5 |
+
+> **Multi-Channel 级联补充**：如果 Modifier 配置了不同的 `EGameplayModEvaluationChannel`，每个 Channel 会**独立执行一次完整公式**，上一个 Channel 的输出作为下一个 Channel 的 `InlineBaseValue`（`GameplayEffectAggregator.cpp:250-261`）。比如 Channel 0 算完 = 120 → Channel 1 以 120 为 BaseValue 再算一遍。这是高级数值设计场景（如分阶段计算护甲穿透），项目不刻意使用多 Channel 时，所有 Mod 默认集中在同一个 Channel，按上述公式一次算完。
 
 Modifier 的数值来源有 4 种：ScalableFloat 最简单、AttributeBased 最灵活、SetByCaller 最动态、Custom 最开放。如果项目只用固定数值，看完第一种即可跳过。
 
 ### 4.2 ModifierMagnitude：数值从哪里来
 
 ```cpp
-// GameplayEffectTypes.h（实际位于 GameplayEffect.h 内）
+// GameplayEffect.h
 USTRUCT(BlueprintType)
 struct FGameplayEffectModifierMagnitude
 {
@@ -420,15 +617,37 @@ FGameplayEffectQuery     GrantedApplicationImmunityQuery;// 免疫匹配查询�
 FGameplayEffectQuery     RemoveGameplayEffectQuery;     // 施加时按查询移除 GE
 ```
 
+GE 的标签字段按语义可分为四组：
+
+**（a）GE 身份标签**
+
 | Tag 字段 | 作用 |
 |----------|------|
 | GameplayEffectAssetTag | 标记 GE 自身类型。`GE.Damage.Fire`, `GE.Buff.Speed` |
+
+**（b）目标授予标签**
+
+| Tag 字段 | 作用 |
+|----------|------|
 | GrantedTags | 施加时**授予目标** GameplayTag。`State.Stunned` 会添加到目标 ASC |
 | GrantedBlockedAbilityTags | 施加时授予目标"阻止激活"的 Tag，目标无法激活对应 GA |
-| RemoveGameplayEffectsWithTags | 施加时**移除目标已有**的匹配 GE。低等级 Buff 被高等级替换 |
+
+**（c）条件关卡**
+
+| Tag 字段 | 作用 |
+|----------|------|
+| ApplicationTagRequirements | 施加条件。目标必须满足条件才能施加，检查失败 → GE 不会施加 |
 | OngoingTagRequirements | 持续条件。目标必须 **一直有** RequireTags 且 **没有** IgnoreTags，否则 GE 失效 |
-| GrantedApplicationImmunityTags | 施加时授予目标免疫：带这些 Tag 的 GE 无法施加到目标 |
+| RemovalTagRequirements | 移除条件。只有当目标 Tag 满足条件时，此 GE 才能被移除 |
+
+**（d）免疫与清理**
+
+| Tag 字段 | 作用 |
+|----------|------|
+| RemoveGameplayEffectsWithTags | 施加时**移除目标已有**的匹配 GE。低等级 Buff 被高等级替换 |
 | RemoveGameplayEffectQuery | 施加时按 `FGameplayEffectQuery` 条件移除目标上匹配的 GE（比 Tag 更灵活） |
+| GrantedApplicationImmunityTags | 施加时授予目标免疫：带这些 Tag 的 GE 无法施加到目标 |
+| GrantedApplicationImmunityQuery | 免疫满足查询条件的 GE |
 
 > **字段类型注意**：`InheritableGameplayEffectTags` 等三个是 **`FInheritedTagContainer`**（父级 GE 的标签可以被子级继承），不是普通的 `FGameplayTagContainer`。`Ongoing/Application/Removal` 三个是 `FGameplayTagRequirements`（RequireTags + IgnoreTags 双容器）。
 
@@ -539,7 +758,7 @@ enum class EGameplayEffectStackingExpirationPolicy : uint8
 - **DurationRefreshPolicy**：在**施加新层**时触发（主动叠加），决定新层与已有层的 Duration 关系；
 - **ExpirationPolicy**：在**已有层到期**时触发（被动过期），决定过期时的 Stack 行为。
 
-`RemoveSingleStackAndRefreshDuration` 是最精细的策略：单层到期仅减少一层，其余层重新计时。与 `NeverRefresh` 的区别在于——前者逐层到期时保持剩余层有效，后者各层独立计时但到期时整体行为由 ExpirationPolicy 决定。
+`RemoveSingleStackAndRefreshDuration` 是最精细的策略：单层到期仅减少一层，其余层重新计时。与 `NeverRefresh` 的区别在于：前者逐层到期时保持剩余层有效，后者各层独立计时但到期时整体行为由 ExpirationPolicy 决定。
 
 | 聚合类型 | 适用场景 | 设计原因 |
 |----------|---------|---------|
@@ -579,7 +798,7 @@ TArray<TObjectPtr<UGameplayEffectComponent>> GEComponents;   // 注意：字段�
 | `TargetTagRequirementsGameplayEffectComponent` | 施加/移除/持续 Tag 条件 | `Application/Removal/OngoingTagRequirements` (5.3) |
 | `TargetTagsGameplayEffectComponent` | 目标 Tag 授予与阻止 | `InheritableOwnedTagsContainer` (5.3) |
 
-> **注意**：内置组件中 **没有 `GameplayCuesGameplayEffectComponent`**——GameplayCue 的触发不通过 GE Component 配置，而是由 `UGameplayEffect::GameplayCues`（`TArray<FGameplayEffectCue>`，含 `GameplayCueTags`、`MagnitudeAttribute`、`MinLevel/MaxLevel`）驱动，且受 `bRequireModifierSuccessToTriggerCues` 开关约束。
+> **注意**：内置组件中 **没有 `GameplayCuesGameplayEffectComponent`**。GameplayCue 的触发不通过 GE Component 配置，而是由 `UGameplayEffect::GameplayCues`（`TArray<FGameplayEffectCue>`，含 `GameplayCueTags`、`MagnitudeAttribute`、`MinLevel/MaxLevel`）驱动，且受 `bRequireModifierSuccessToTriggerCues` 开关约束。
 
 ### 7.2 设计优势
 
@@ -736,7 +955,7 @@ Spec 的"冻结"语义同时解决了两个问题：隔离性（施加给 A 的 
 
 Spec 的便利性有代价，但真正的痛点不在内存开销（轻量结构），而是在"冻结时机不可变"：
 
-- AttributeBased 在 Spec 创建时快照源属性，如果施加前源属性变化了（如先算 AttackSpec 再算 BuffSpec，Attack 值在创建 Buff 的 Spec 之后才结算），快照值就是旧的。虽然有 `SnapshottedSourceAttributes` 参数可以配置是否冻结，但默认行为需要设计师理解这个时序。
+- AttributeBased 在 Spec 创建时快照源属性，如果施加前源属性变化了（如先算 AttackSpec 再算 BuffSpec，Attack 值在创建 Buff 的 Spec 之后才结算），快照值就是旧的。`SnapshottedSourceAttributes` 默认为 `true`（冻结），设为 `false` 则每次计算时重新读取源属性当前值——代价是计算时机不可预测，且与 Spec 的"冻结"语义相悖。大多数情况下保持默认即可，但在需要"实时"读取源属性的场景（如光环类 Buff）下可以关闭。
 - SetByCaller 必须在创建 Spec 时通过 Tag 注入，无法延迟到施加前再传。这意味着调用方必须在创建 Spec 前就知道所有运行时参数。
 
 这和 GAS 的整体哲学一致——把复杂性交给框架，把灵活性交给配置，但配置的正确性依赖开发者对时序的理解。理解了"冻结时刻"这一概念，90% 的 Spec 相关问题都能避免。

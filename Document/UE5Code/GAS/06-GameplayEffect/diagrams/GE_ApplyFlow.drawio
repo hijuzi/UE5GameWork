@@ -1,2 +1,298 @@
-<?xml version='1.0' encoding='utf-8'?>
-<mxGraphModel dx="0" dy="0" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageWidth="1400" pageHeight="1600"><root><mxCell id="0" /><mxCell id="1" parent="0" /><mxCell id="t1" value="ApplyGameplayEffectSpecToSelf -- Complete Call Chain" style="text;html=1;fontSize=16;fontStyle=1;align=center;fillColor=#6c8ebf;fontColor=#ffffff;" vertex="1" parent="1"><mxGeometry x="350" y="10" width="600" height="30" as="geometry" /></mxCell><mxCell id="p1" value="Phase 1: Guard Checks" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;fontStyle=1;align=center;" vertex="1" parent="1"><mxGeometry x="40" y="55" width="220" height="30" as="geometry" /></mxCell><mxCell id="g0" value="ApplyGameplayEffectSpecToSelf&#10;(Spec, PredictionKey)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12;fontStyle=1;align=center;" vertex="1" parent="1"><mxGeometry x="40" y="100" width="220" height="45" as="geometry" /></mxCell><mxCell id="g1" value="1. NullDef Check" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;align=center;" vertex="1" parent="1"><mxGeometry x="40" y="165" width="220" height="22" as="geometry" /></mxCell><mxCell id="g2" value="2. Network Authority" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;align=center;" vertex="1" parent="1"><mxGeometry x="40" y="190" width="220" height="22" as="geometry" /></mxCell><mxCell id="g3" value="3. PredictionKey Validation" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;align=center;" vertex="1" parent="1"><mxGeometry x="40" y="215" width="220" height="22" as="geometry" /></mxCell><mxCell id="g4" value="4. Application Queries" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;align=center;" vertex="1" parent="1"><mxGeometry x="40" y="240" width="220" height="22" as="geometry" /></mxCell><mxCell id="g5" value="5. CanApply (TagRequirements)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;align=center;" vertex="1" parent="1"><mxGeometry x="40" y="265" width="220" height="22" as="geometry" /></mxCell><mxCell id="g6" value="6. Attribute Validity" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;align=center;" vertex="1" parent="1"><mxGeometry x="40" y="290" width="220" height="22" as="geometry" /></mxCell><mxCell id="eg0" value="" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#6c8ebf;endFill=1;" edge="1" parent="1" source="g0" target="g1"><mxGeometry relative="1" as="geometry" /></mxCell><mxCell id="eg1" value="OK" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#6c8ebf;endFill=1;" edge="1" parent="1" source="g1" target="g2"><mxGeometry relative="1" as="geometry" /></mxCell><mxCell id="eg2" value="OK" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#6c8ebf;endFill=1;" edge="1" parent="1" source="g2" target="g3"><mxGeometry relative="1" as="geometry" /></mxCell><mxCell id="eg3" value="OK" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#6c8ebf;endFill=1;" edge="1" parent="1" source="g3" target="g4"><mxGeometry relative="1" as="geometry" /></mxCell><mxCell id="eg4" value="OK" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#6c8ebf;endFill=1;" edge="1" parent="1" source="g4" target="g5"><mxGeometry relative="1" as="geometry" /></mxCell><mxCell id="eg5" value="OK" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#6c8ebf;endFill=1;" edge="1" parent="1" source="g5" target="g6"><mxGeometry relative="1" as="geometry" /></mxCell><mxCell id="g9" value="Return Invalid Handle" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12;fontStyle=1;align=center;" vertex="1" parent="1"><mxGeometry x="310" y="230" width="140" height="30" as="geometry" /></mxCell><mxCell id="ef_g1" value="FAIL" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#b85450;endFill=1;" edge="1" parent="1" source="g1" target="g9"><mxGeometry relative="1" as="geometry" /></mxCell><mxCell id="ef_g2" value="FAIL" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#b85450;endFill=1;" edge="1" parent="1" source="g2" target="g9"><mxGeometry relative="1" as="geometry" /></mxCell><mxCell id="ef_g3" value="FAIL" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#b85450;endFill=1;" edge="1" parent="1" source="g3" target="g9"><mxGeometry relative="1" as="geometry" /></mxCell><mxCell id="ef_g4" value="FAIL" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#b85450;endFill=1;" edge="1" parent="1" source="g4" target="g9"><mxGeometry relative="1" as="geometry" /></mxCell><mxCell id="ef_g5" value="FAIL" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#b85450;endFill=1;" edge="1" parent="1" source="g5" target="g9"><mxGeometry relative="1" as="geometry" /></mxCell><mxCell id="p2" value="Phase 2: Capture &amp; DurationPolicy Fork" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;fontStyle=1;align=center;" vertex="1" parent="1"><mxGeometry x="40" y="330" width="280" height="30" as="geometry" /></mxCell><mxCell id="cap" value="CaptureAttributeDataFromTarget&#10;+ GlobalPreGameplayEffectSpecApply" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;align=center;" vertex="1" parent="1"><mxGeometry x="40" y="370" width="280" height="40" as="geometry" /></mxCell><mxCell id="dchk" value="DurationPolicy == Instant?" style="rhombus;whiteSpace=wrap;html=1;fontSize=11;fillColor=#ffe6cc;strokeColor=#d79b00;align=center;" vertex="1" parent="1"><mxGeometry x="60" y="430" width="200" height="50" as="geometry" /></mxCell><mxCell id="eg_ok" value="OK -&gt; Capture" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#6c8ebf;endFill=1;" edge="1" parent="1" source="g6" target="cap"><mxGeometry relative="1" as="geometry" /></mxCell><mxCell id="eg_cap" value="" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#6c8ebf;endFill=1;" edge="1" parent="1" source="cap" target="dchk"><mxGeometry relative="1" as="geometry" /></mxCell><mxCell id="p3a" value="Phase 3A: Duration / Infinite Path (Aggregator)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=13;fontStyle=1;align=center;" vertex="1" parent="1"><mxGeometry x="360" y="350" width="360" height="30" as="geometry" /></mxCell><mxCell id="da1" value="ApplyGameplayEffectSpec&#10;FindStackableActiveGE()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=center;" vertex="1" parent="1"><mxGeometry x="380" y="395" width="320" height="40" as="geometry" /></mxCell><mxCell id="da2" value="Create FActiveGameplayEffect&#10;Register to ActiveGameplayEffects" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=center;" vertex="1" parent="1"><mxGeometry x="380" y="440" width="320" height="40" as="geometry" /></mxCell><mxCell id="da3" value="per-Modifier:&#10;Aggregator::FindOrCreate&#10;Aggregator::AddMod()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=center;" vertex="1" parent="1"><mxGeometry x="380" y="495" width="320" height="40" as="geometry" /></mxCell><mxCell id="da4" value="Aggregator::SetBaseValue&#10;Dirty -&gt; EvaluateWithBase&#10;InternalUpdateNumericalAttr" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=center;" vertex="1" parent="1"><mxGeometry x="380" y="550" width="320" height="40" as="geometry" /></mxCell><mxCell id="da5" value="SetTimer:&#10;DurationExpiry / Period" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=center;" vertex="1" parent="1"><mxGeometry x="380" y="610" width="320" height="40" as="geometry" /></mxCell><mxCell id="eda0" value="Duration/Infinite" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#82b366;endFill=1;" edge="1" parent="1" source="dchk" target="da1"><mxGeometry relative="1" as="geometry" /></mxCell><mxCell id="eda1" value="" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#82b366;endFill=1;" edge="1" parent="1" source="da1" target="da2"><mxGeometry relative="1" as="geometry" /></mxCell><mxCell id="eda2" value="" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#82b366;endFill=1;" edge="1" parent="1" source="da2" target="da3"><mxGeometry relative="1" as="geometry" /></mxCell><mxCell id="eda3" value="" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#82b366;endFill=1;" edge="1" parent="1" source="da3" target="da4"><mxGeometry relative="1" as="geometry" /></mxCell><mxCell id="eda4" value="" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#82b366;endFill=1;" edge="1" parent="1" source="da4" target="da5"><mxGeometry relative="1" as="geometry" /></mxCell><mxCell id="p3b" value="Phase 3B: Instant Path (Direct Execute)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=13;fontStyle=1;align=center;" vertex="1" parent="1"><mxGeometry x="40" y="520" width="300" height="30" as="geometry" /></mxCell><mxCell id="inst1" value="ExecuteGameplayEffect&#10;(holds Spec copy)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;align=center;" vertex="1" parent="1"><mxGeometry x="40" y="560" width="280" height="40" as="geometry" /></mxCell><mxCell id="inst2" value="ExecuteActiveEffectsFrom(Spec)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;align=center;" vertex="1" parent="1"><mxGeometry x="40" y="600" width="280" height="40" as="geometry" /></mxCell><mxCell id="inst2a" value="Step 1: Modifiers&#10;CalculateModifierMagnitudes&#10;for each Modifier:&#10;InternalExecuteMod()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;align=center;" vertex="1" parent="1"><mxGeometry x="40" y="645" width="280" height="40" as="geometry" /></mxCell><mxCell id="inst2b" value="Step 2: Executions&#10;for each ExecDef:&#10;ExecCDO.Execute()&#10;InternalExecuteMod()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;align=center;" vertex="1" parent="1"><mxGeometry x="40" y="710" width="280" height="40" as="geometry" /></mxCell><mxCell id="ei0" value="Instant" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#b85450;endFill=1;" edge="1" parent="1" source="dchk" target="inst1"><mxGeometry relative="1" as="geometry" /></mxCell><mxCell id="ei1" value="" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#b85450;endFill=1;" edge="1" parent="1" source="inst1" target="inst2"><mxGeometry relative="1" as="geometry" /></mxCell><mxCell id="ei2" value="" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#b85450;endFill=1;" edge="1" parent="1" source="inst2" target="inst2a"><mxGeometry relative="1" as="geometry" /></mxCell><mxCell id="ei3" value="" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#b85450;endFill=1;" edge="1" parent="1" source="inst2a" target="inst2b"><mxGeometry relative="1" as="geometry" /></mxCell><mxCell id="imod" value="InternalExecuteMod (per Modifier)&#10;---------------------------------&#10;1. PreGameplayEffectExecute (Virtual)&#10;2. ApplyModToAttribute&#10;   -&gt; StaticExecModOnBaseValue&#10;   -&gt; SetAttributeBaseValue&#10;3. PostGameplayEffectExecute (Virtual)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;align=left;spacingLeft=8;" vertex="1" parent="1"><mxGeometry x="380" y="640" width="320" height="120" as="geometry" /></mxCell><mxCell id="ei_imod1" value="Modifiers path" style="endArrow=block;html=1;strokeWidth=1;strokeColor=#666666;endFill=1;dashed=1;" edge="1" parent="1" source="inst2a" target="imod"><mxGeometry relative="1" as="geometry" /></mxCell><mxCell id="ei_imod2" value="Executions path" style="endArrow=block;html=1;strokeWidth=1;strokeColor=#666666;endFill=1;dashed=1;" edge="1" parent="1" source="inst2b" target="imod"><mxGeometry relative="1" as="geometry" /></mxCell><mxCell id="p4" value="Phase 4: Post-Apply Events" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;fontStyle=1;align=center;" vertex="1" parent="1"><mxGeometry x="40" y="790" width="240" height="30" as="geometry" /></mxCell><mxCell id="pa1" value="OnApplied&#10;(GE Component System)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;align=center;" vertex="1" parent="1"><mxGeometry x="80" y="830" width="260" height="35" as="geometry" /></mxCell><mxCell id="pa2" value="GameplayCue Invoke&#10;Instant -&gt; Executed&#10;Duration -&gt; Added+WhileActive" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;align=center;" vertex="1" parent="1"><mxGeometry x="80" y="870" width="260" height="35" as="geometry" /></mxCell><mxCell id="pa3" value="OnGameplayEffectAppliedToSelf&#10;(Instigator ASC Callback)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;align=center;" vertex="1" parent="1"><mxGeometry x="80" y="920" width="260" height="35" as="geometry" /></mxCell><mxCell id="pa4" value="OnGameplayEffectAppliedToTarget&#10;(Target ASC Callback)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;align=center;" vertex="1" parent="1"><mxGeometry x="80" y="970" width="260" height="35" as="geometry" /></mxCell><mxCell id="epa_dur" value="Duration path" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#82b366;endFill=1;" edge="1" parent="1" source="da4" target="pa1"><mxGeometry relative="1" as="geometry" /></mxCell><mxCell id="epa_inst" value="Instant path" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#b85450;endFill=1;" edge="1" parent="1" source="inst2b" target="pa1"><mxGeometry relative="1" as="geometry" /></mxCell><mxCell id="epa1" value="" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#6c8ebf;endFill=1;" edge="1" parent="1" source="pa1" target="pa2"><mxGeometry relative="1" as="geometry" /></mxCell><mxCell id="epa2" value="" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#6c8ebf;endFill=1;" edge="1" parent="1" source="pa2" target="pa3"><mxGeometry relative="1" as="geometry" /></mxCell><mxCell id="epa3" value="" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#6c8ebf;endFill=1;" edge="1" parent="1" source="pa3" target="pa4"><mxGeometry relative="1" as="geometry" /></mxCell><mxCell id="p5" value="Phase 5: Network Replication (Server-&gt;Client)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;fontStyle=1;align=center;" vertex="1" parent="1"><mxGeometry x="400" y="830" width="330" height="30" as="geometry" /></mxCell><mxCell id="n1" value="Server:&#10;MARK_PROPERTY_DIRTY&#10;(UAttributeSet)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=center;" vertex="1" parent="1"><mxGeometry x="420" y="870" width="280" height="40" as="geometry" /></mxCell><mxCell id="n2" value="Client: OnRep&#10;SetBaseAttributeValue&#10;FromReplication" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=center;" vertex="1" parent="1"><mxGeometry x="420" y="920" width="280" height="40" as="geometry" /></mxCell><mxCell id="n3" value="Client:&#10;Aggregator Dirty&#10;InternalUpdateNumericalAttribute" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=center;" vertex="1" parent="1"><mxGeometry x="420" y="970" width="280" height="40" as="geometry" /></mxCell><mxCell id="n4" value="Client:&#10;Broadcast Delegates&#10;(UI Update etc.)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=center;" vertex="1" parent="1"><mxGeometry x="420" y="1020" width="280" height="40" as="geometry" /></mxCell><mxCell id="en_srv" value="Server Only" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#82b366;endFill=1;" edge="1" parent="1" source="imod" target="n1"><mxGeometry relative="1" as="geometry" /></mxCell><mxCell id="en1" value="Replicate" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#82b366;endFill=1;" edge="1" parent="1" source="n1" target="n2"><mxGeometry relative="1" as="geometry" /></mxCell><mxCell id="en2" value="" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#82b366;endFill=1;" edge="1" parent="1" source="n2" target="n3"><mxGeometry relative="1" as="geometry" /></mxCell><mxCell id="en3" value="" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#82b366;endFill=1;" edge="1" parent="1" source="n3" target="n4"><mxGeometry relative="1" as="geometry" /></mxCell><mxCell id="ret" value="Return Handle&#10;(InstantExecuted / ActiveGE)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;fontStyle=1;align=center;" vertex="1" parent="1"><mxGeometry x="250" y="1020" width="200" height="40" as="geometry" /></mxCell><mxCell id="eret" value="" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#6c8ebf;endFill=1;" edge="1" parent="1" source="pa4" target="ret"><mxGeometry relative="1" as="geometry" /></mxCell></root></mxGraphModel>
+<mxfile host="65bd71144e">
+    <diagram id="kWCLHWvUVU3fKpuysOUc" name="第 1 页">
+        <mxGraphModel dx="1135" dy="1428" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="1600" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="t1" value="ApplyGameplayEffectSpecToSelf — Complete Call Chain" style="text;html=1;fontSize=16;fontStyle=1;align=center;fillColor=#6c8ebf;fontColor=#ffffff;" parent="1" vertex="1">
+                    <mxGeometry x="320" y="10" width="600" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="p1" value="Phase 1: Guard Checks" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;fontStyle=1;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="50" y="55" width="260" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="g0" value="ApplyGameplayEffectSpecToSelf&#10;(Spec, PredictionKey)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12;fontStyle=1;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="50" y="100" width="230" height="45" as="geometry"/>
+                </mxCell>
+                <mxCell id="g1" value="1. NullDef Check" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="50" y="170" width="220" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="g2" value="2. Network Authority" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="50" y="225" width="220" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="g3" value="3. PredictionKey Validation" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="50" y="280" width="220" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="g4" value="4. Application Queries" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="50" y="335" width="220" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="g5" value="5. CanApply (TagRequirements)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="50" y="390" width="220" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="g6" value="6. Attribute Validity" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="50" y="445" width="220" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="g9" value="Return Invalid Handle" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12;fontStyle=1;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="400" y="267.5" width="160" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="eg0" value="" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#6c8ebf;endFill=1;" parent="1" source="g0" target="g1" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="eg1" value="OK" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#6c8ebf;endFill=1;" parent="1" source="g1" target="g2" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="eg2" value="OK" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#6c8ebf;endFill=1;" parent="1" source="g2" target="g3" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="eg3" value="OK" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#6c8ebf;endFill=1;" parent="1" source="g3" target="g4" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="eg4" value="OK" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#6c8ebf;endFill=1;" parent="1" source="g4" target="g5" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="eg5" value="OK" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#6c8ebf;endFill=1;" parent="1" source="g5" target="g6" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="ef_g1" value="FAIL" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#b85450;endFill=1;edgeStyle=orthogonalEdgeStyle;exitX=1;exitY=0.5;" parent="1" source="g1" target="g9" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="530" y="185"/>
+                        </Array>
+                        <mxPoint x="500" y="220" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="ef_g2" value="FAIL" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#b85450;endFill=1;edgeStyle=orthogonalEdgeStyle;exitX=1;exitY=0.5;" parent="1" source="g2" target="g9" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="480" y="240"/>
+                        </Array>
+                        <mxPoint x="460" y="240" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="ef_g3" value="FAIL" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#b85450;endFill=1;edgeStyle=orthogonalEdgeStyle;exitX=1;exitY=0.5;" parent="1" source="g3" target="g9" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points"/>
+                        <mxPoint x="330" y="310" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="ef_g4" value="FAIL" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#b85450;endFill=1;edgeStyle=orthogonalEdgeStyle;exitX=1;exitY=0.5;" parent="1" source="g4" target="g9" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="480" y="350"/>
+                        </Array>
+                        <mxPoint x="480" y="350" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="ef_g5" value="FAIL" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#b85450;endFill=1;edgeStyle=orthogonalEdgeStyle;exitX=1;exitY=0.5;" parent="1" source="g5" target="g9" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="530" y="405"/>
+                        </Array>
+                        <mxPoint x="470" y="390" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="p2" value="Phase 2: DurationPolicy Fork" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;fontStyle=1;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="50" y="500" width="280" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="eg_ok" value="OK" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#6c8ebf;endFill=1;" parent="1" source="g6" target="dchk" edge="1">
+                    <mxGeometry x="-0.6" relative="1" as="geometry">
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="dchk" value="DurationPolicy == Instant?" style="rhombus;whiteSpace=wrap;html=1;fontSize=11;fillColor=#ffe6cc;strokeColor=#d79b00;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="550" width="200" height="65" as="geometry"/>
+                </mxCell>
+                <mxCell id="cap" value="CaptureAttributeDataFromTarget&#10;+ GlobalPreGameplayEffectSpecApply" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="50" y="645" width="280" height="45" as="geometry"/>
+                </mxCell>
+                <mxCell id="p3a" value="Phase 3A: Duration / Infinite Path (Aggregator)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=13;fontStyle=1;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="380" y="500" width="360" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="da1" value="ApplyGameplayEffectSpec&#10;FindStackableActiveGE()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="380" y="550" width="320" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="da2" value="Create FActiveGameplayEffect&#10;Register to ActiveGameplayEffects" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="380" y="625" width="320" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="da3" value="per-Modifier:&#10;Aggregator::FindOrCreate&#10;Aggregator::AddMod()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="380" y="700" width="320" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="da4" value="Aggregator::SetBaseValue&#10;Dirty → EvaluateWithBase&#10;InternalUpdateNumericalAttr" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="380" y="780" width="320" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="da5" value="SetTimer:&#10;DurationExpiry / Period" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="380" y="860" width="320" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="eda0" value="Duration/Infinite" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#82b366;endFill=1;edgeStyle=orthogonalEdgeStyle;exitX=1;exitY=0.5;" parent="1" source="dchk" target="da1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="370" y="583"/>
+                            <mxPoint x="370" y="583"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="eda1" value="" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#82b366;endFill=1;" parent="1" source="da1" target="da2" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="eda2" value="" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#82b366;endFill=1;" parent="1" source="da2" target="da3" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="eda3" value="" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#82b366;endFill=1;" parent="1" source="da3" target="da4" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="eda4" value="" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#82b366;endFill=1;" parent="1" source="da4" target="da5" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="p3b" value="Phase 3B: Instant Path (Direct Execute)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=13;fontStyle=1;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="50" y="725" width="280" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="ei0" value="Instant" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#b85450;endFill=1;" parent="1" source="dchk" target="cap" edge="1">
+                    <mxGeometry x="-0.5783" y="-6" relative="1" as="geometry">
+                        <mxPoint x="170" y="640" as="targetPoint"/>
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="ecap_inst" value="" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#b85450;endFill=1;" parent="1" source="cap" target="p3b" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="190" y="720" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="190" y="720"/>
+                            <mxPoint x="190" y="710"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="inst1" value="ExecuteGameplayEffect&#10;(holds Spec copy)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="50" y="780" width="280" height="45" as="geometry"/>
+                </mxCell>
+                <mxCell id="inst2" value="ExecuteActiveEffectsFrom(Spec)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="50" y="850" width="280" height="45" as="geometry"/>
+                </mxCell>
+                <mxCell id="inst2a" value="Step 1: Modifiers&#10;CalculateModifierMagnitudes&#10;for each Modifier:&#10;InternalExecuteMod()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="50" y="920" width="280" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="inst2b" value="Step 2: Executions&#10;for each ExecDef:&#10;ExecCDO.Execute()&#10;InternalExecuteMod()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="50" y="1005" width="280" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="ei1" value="" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#b85450;endFill=1;" parent="1" source="inst1" target="inst2" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="ei2" value="" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#b85450;endFill=1;" parent="1" source="inst2" target="inst2a" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="ei3" value="" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#b85450;endFill=1;" parent="1" source="inst2a" target="inst2b" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="imod" value="InternalExecuteMod (per Modifier)&#10;─────────────────────────────&#10;1. PreGameplayEffectExecute (Virtual)&#10;2. ApplyModToAttribute&#10;   → StaticExecModOnBaseValue&#10;   → SetAttributeBaseValue&#10;3. PostGameplayEffectExecute (Virtual)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;align=left;spacingLeft=8;" parent="1" vertex="1">
+                    <mxGeometry x="420" y="920" width="270" height="145" as="geometry"/>
+                </mxCell>
+                <mxCell id="ei_imod1" value="Modifiers path" style="endArrow=block;html=1;strokeWidth=1;strokeColor=#666666;endFill=1;dashed=1;edgeStyle=orthogonalEdgeStyle;exitX=1;exitY=0.5;entryX=0;entryY=0.25;" parent="1" source="inst2a" target="imod" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="355" y="950"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="ei_imod2" value="Executions path" style="endArrow=block;html=1;strokeWidth=1;strokeColor=#666666;endFill=1;dashed=1;edgeStyle=orthogonalEdgeStyle;exitX=1;exitY=0.5;entryX=0;entryY=0.75;" parent="1" source="inst2b" target="imod" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="355" y="1035"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="p4" value="Phase 4: Post-Apply Events" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;fontStyle=1;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="50" y="1110" width="260" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="pa1" value="OnApplied (GE Component System)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="80" y="1190" width="260" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="pa2" value="GameplayCue Invoke&#10;Instant → Executed&#10;Duration → Added+WhileActive" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="80" y="1255" width="260" height="48" as="geometry"/>
+                </mxCell>
+                <mxCell id="pa3" value="OnGameplayEffectAppliedToSelf&#10;(Instigator ASC Callback)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="80" y="1325" width="260" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="pa4" value="OnGameplayEffectAppliedToTarget&#10;(Target ASC Callback)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="80" y="1385" width="260" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="epa_dur" value="Duration path" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#82b366;endFill=1;edgeStyle=orthogonalEdgeStyle;exitX=0;exitY=1;entryX=0.3;entryY=0;" parent="1" source="da4" target="pa1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="360" y="835"/>
+                            <mxPoint x="360" y="1170"/>
+                            <mxPoint x="158" y="1170"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="epa_inst" value="Instant path" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#b85450;endFill=1;edgeStyle=orthogonalEdgeStyle;exitX=1;exitY=0.5;entryX=0.5;entryY=0;" parent="1" source="inst2b" target="pa1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="340" y="1035"/>
+                            <mxPoint x="340" y="1150"/>
+                            <mxPoint x="210" y="1150"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="epa1" value="" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#6c8ebf;endFill=1;" parent="1" target="pa2" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="210.0000000000001" y="1230" as="sourcePoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="epa2" value="" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#6c8ebf;endFill=1;" parent="1" source="pa2" target="pa3" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="epa3" value="" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#6c8ebf;endFill=1;" parent="1" source="pa3" target="pa4" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="p5" value="Phase 5: Network Replication (Server→Client)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;fontStyle=1;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="380" y="1110" width="350" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="n1" value="Server:&#10;MARK_PROPERTY_DIRTY&#10;(UAttributeSet)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="420" y="1155" width="280" height="45" as="geometry"/>
+                </mxCell>
+                <mxCell id="n2" value="Client: OnRep&#10;SetBaseAttributeValue&#10;FromReplication" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="420" y="1225" width="280" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="n3" value="Client: Aggregator Dirty&#10;InternalUpdateNumericalAttribute" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="420" y="1300" width="280" height="45" as="geometry"/>
+                </mxCell>
+                <mxCell id="n4" value="Client: Broadcast Delegates&#10;(UI Update etc.)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="420" y="1370" width="280" height="45" as="geometry"/>
+                </mxCell>
+                <mxCell id="en_srv" value="Server Only (all GE types)" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#82b366;endFill=1;edgeStyle=orthogonalEdgeStyle;exitX=1;exitY=0.5;entryX=1;entryY=0.5;" parent="1" source="imod" target="n1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="760" y="992"/>
+                            <mxPoint x="760" y="1177"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="n1note" value="Instant / Duration GE 的&#10;属性修改最终都走此路径同步" style="text;html=1;fontSize=9;fontColor=#666666;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="710" y="1140" width="150" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="en1" value="Replicate" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#82b366;endFill=1;" parent="1" source="n1" target="n2" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="en2" value="" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#82b366;endFill=1;" parent="1" source="n2" target="n3" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="en3" value="" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#82b366;endFill=1;" parent="1" source="n3" target="n4" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="ret" value="Return Handle&#10;(InstantExecuted / ActiveGE)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;fontStyle=1;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="100" y="1460" width="220" height="45" as="geometry"/>
+                </mxCell>
+                <mxCell id="eret" value="" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#6c8ebf;endFill=1;" parent="1" source="pa4" target="ret" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="6" value="" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#b85450;endFill=1;" edge="1" parent="1" source="p3b">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="189.76" y="740" as="sourcePoint"/>
+                        <mxPoint x="189.76" y="780" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="189.76" y="770"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
