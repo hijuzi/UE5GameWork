@@ -680,35 +680,59 @@ GameplayCue 是 GAS 的可视化反馈系统（将在后续文章详述），这
 
 | GE 类型 | GC 类型 | 触发时机 |
 |---------|---------|----------|
-| Instant | `Execute` | `ExecuteActiveEffectsFrom` 执行完后立即触发 |
-| Duration | `OnActive` + `WhileActive` | 施加时触发；持续期间可以持续触发 |
+| Instant | `Execute` | `ExecuteActiveEffectsFrom` 执行完 Modifier/Execution 后触发 |
+| Duration / Infinite | `OnActive` + `WhileActive` | 施加时各触发一次；`WhileActive` 表示"效果激活期间 cue 保持激活" |
 | Duration 移除 | `Removed` | GE 移除时触发 |
+
+> **关键纠正**：Instant 的判定发生在 `ApplyGameplayEffectSpecToSelf`（`DurationPolicy == Instant` → `ExecuteGameplayEffect` → `ExecuteActiveEffectsFrom`），而 `ExecuteActiveEffectsFrom` 内部**并不判断** DurationPolicy。因此 Period GE 每次周期执行同样会走这条路径并触发 `Execute` cue（呼应 §9.4）。
 
 **源码中的触发逻辑**
 
+三个触发点分散在 `GameplayEffect.cpp` 的几处：
+
 ```cpp
-// Instant GE -> Execute GameplayCue
-if (Spec.Def->DurationPolicy == EGameplayEffectDurationType::Instant)
+// 1. Instant / Period 执行：ExecuteActiveEffectsFrom 末尾
+bool InvokeGameplayCueExecute = (!bHasModifiersOrExecutions)
+                             || !Spec.Def->bRequireModifierSuccessToTriggerCues;
+if (bHasModifiersOrExecutions && ModifierSuccessfullyExecuted)
 {
-    // ExecuteActiveEffectsFrom 内：
-    if (InvokeGameplayCueExecute)
+    InvokeGameplayCueExecute = true;
+}
+if (GameplayCuesWereManuallyHandled)   // Execution 声明手动处理
+{
+    InvokeGameplayCueExecute = false;
+}
+if (InvokeGameplayCueExecute && SpecToUse.Def->GameplayCues.Num())
+{
+    GetGameplayCueManager()->InvokeGameplayCueExecuted_FromSpec(Owner, SpecToUse, PredictionKey);
+}
+
+// 2. Duration 施加：AddActiveGameplayEffectGrantedTagsAndModifiers
+if (!Owner->bSuppressGameplayCues)
+{
+    Owner->UpdateTagMap(Cue.GameplayCueTags, 1, EGameplayTagReplicationState::None);
+    if (bInvokePredictedEffects)   // 施加时 = (DurationPolicy != Instant)
     {
-        GameplayCueManager->InvokeGameplayCueExecuted_FromSpec(...);
+        Owner->InvokeGameplayCueEvent(Effect.Spec, EGameplayCueEvent::OnActive);
+        Owner->InvokeGameplayCueEvent(Effect.Spec, EGameplayCueEvent::WhileActive);
     }
 }
 
-// Duration GE -> Added + WhileActive
-if (bInvokeGameplayCueApplied)
+// 3. Duration 移除：RemoveActiveGameplayEffectGrantedTagsAndModifiers
+if (bInvokePredictedEffects)
 {
-    GameplayCueManager->InvokeGameplayCueAddedAndWhileActive_FromSpec(...);
+    Owner->InvokeGameplayCueEvent(Effect.Spec, EGameplayCueEvent::Removed);
 }
 ```
 
-**抑制规则**
+真正的分发入口是 `UAbilitySystemComponent::InvokeGameplayCueEvent`（`AbilitySystemComponent.cpp`），它最终调用 `GameplayCueManager->HandleGameplayCues(ActorAvatar, CueTags, EventType, CueParams)`。而 `InvokeGameplayCueExecuted_FromSpec` / `InvokeGameplayCueAddedAndWhileActive_FromSpec` 是 `UGameplayCueManager` 的入口，主要用于网络广播（minimal replication 或 multicast RPC）；本地直接触发走的是 `InvokeGameplayCueEvent`。
 
-- `bRequireModifierSuccessToTriggerCues = true`：必须有 Modifier 成功执行才触发
-- `bSuppressStackingCues`：叠加时不重复触发
-- `GameplayCuesWereManuallyHandled = true`：ExecutionCalculation 手动处理 GC
+**抑制规则（自外向内多层）**
+
+- `bSuppressGameplayCues`（ASC 级）：总开关，为 true 时所有 GC 触发全部跳过
+- `bRequireModifierSuccessToTriggerCues = true`（GE 级，仅影响 `Execute` cue）：有 Modifier/Execution 时必须 `ModifierSuccessfullyExecuted` 才触发；无 Modifier/Execution 时不受此限制
+- `bSuppressStackingCues`（GE 级）：堆叠已存在的 GE 时默认会再触发一次 `Added`+`WhileActive` 刷新 cue，此标志抑制该行为
+- `GameplayCuesWereManuallyHandled`（Execution 级）：ExecutionCalculation 内 `MarkGameplayCuesHandledManually()` 声明后，跳过 `Execute` cue
 
 ---
 

@@ -19,5 +19,6 @@
 | `GameplayEffect.cpp` | `Plugins\Runtime\GameplayAbilities\Source\GameplayAbilities\Private\GameplayEffect.cpp` |
 | `AbilitySystemComponent.cpp` | `Plugins\Runtime\GameplayAbilities\Source\GameplayAbilities\Private\AbilitySystemComponent.cpp` |
 | `GameplayEffectAggregator.cpp` | `Plugins\Runtime\GameplayAbilities\Source\GameplayAbilities\Private\GameplayEffectAggregator.cpp` |
+| `GameplayCueManager.cpp` | `Plugins\Runtime\GameplayAbilities\Source\GameplayAbilities\Private\GameplayCueManager.cpp` |
 
 <!-- 编写/审查文章时，可通过此文件快速定位源码。引擎源码根路径见 source-paths.md -->
