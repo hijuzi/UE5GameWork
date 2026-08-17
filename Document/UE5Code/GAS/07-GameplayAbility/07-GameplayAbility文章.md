@@ -1,13 +1,25 @@
+# 07 | GameplayAbility — 技能激活与核心框架 (上)
+
+> **本篇**：GA 的激活框架 —— Spec / Handle / Instance 三层模型、四维策略枚举、`CanActivateAbility` 检查链、`CommitAbility` 与 `EndAbility` 的源码级拆解
+
+> **系列**: 《Inside GAS》— UE5 GameplayAbilitySystem 源码深度分析  
+> **难度**: 🔵 核心 → 🔴 源码  
+> **字数**: ~6500  
+> **前置**: 06-GameplayEffect  
+> **源码路径**: `Engine/Plugins/Runtime/GameplayAbilities/Source/GameplayAbilities/Public/Abilities/GameplayAbility.h`
+
+---
+
 > **系列导航**
 > 
 > | 阶段 | 篇章 | 内容 | 状态 |
 > |------|------|------|------|
-> | 🟢 基础 | 01 | GAS 总览与核心架构 | 📝 |
-> | | 02 | ASC — 核心调度器 | 📝 |
-> | | 03 | GameplayTags — 通用语言 | 📝 |
-> | | 04 | AttributeSet — 属性定义与复制 | 📝 |
-> | 🔵 核心 | 05 | GameplayEffect — 效果与计算 (上) | 📝 |
-> | | 06 | GameplayEffect — 效果与计算 (下) | 📝 |
+> | 🟢 基础 | 01 | GAS 总览与核心架构 | ✅ |
+> | | 02 | ASC — 核心调度器 | ✅ |
+> | | 03 | GameplayTags — 通用语言 | ✅ |
+> | | 04 | AttributeSet — 属性定义与复制 | ✅ |
+> | 🔵 核心 | 05 | GameplayEffect — 效果与计算 (上) | ✅ |
+> | | 06 | GameplayEffect — 效果与计算 (下) | ✅ |
 > | | **07** | **GameplayAbility — 技能激活与核心框架 (上)** | ✅ |
 > | | 08 | GameplayAbility — Task/输入/预测 (下) | 📝 |
 > | | 09 | GameplayCue — 表现层触发机制 | 📝 |
@@ -20,777 +32,427 @@
 
 ---
 
-# 07 GameplayAbility — 技能激活与核心框架 (上)
+## 一、问题驱动：GE 管属性，那"放技能"这件事谁管？
 
-## 7.1 问题驱动
+前面四篇讲完了 AttributeSet 和 GameplayEffect：属性怎么定义、怎么复制，GE 怎么改属性、怎么算、怎么执行。但一个真实的游戏技能远不止"改属性"——
 
-前面花了六篇把 GameplayEffect 讲透了。GE 是 GAS "数据驱动的效果系统"，它定义了 *什么会发生*。但实战中还有另一半：*谁来做、什么时候做、怎么做*。
+- 它需要一个**可以激活 / 结束的逻辑单元**：放一个火球、开一个护盾、发动一次冲锋；
+- 它需要在**特定条件下才能激活**：冷却转好了吗？蓝够吗？身上有"沉默"Tag 吗？
+- 它在**不同网络环境下执行策略不同**：本地预测执行、还是只在服务器跑？
+- 它激活后要**挂载一堆异步任务**：播动画、等输入释放、等目标确认——这些是下篇的内容。
 
-这就是 GameplayAbility 的领域。
-
-一个典型的 GAS 技能全流程：
-
-```
-玩家按下按键 → ASC 查找对应 Ability → 网络验证 → 实例化 → 
-CanActivate 检查 → Activate（蓝图 C++ 混合）→ 播放动画/等待事件 → 
-提交消耗 → 施加 GE → 结束
-```
-
-中间每一步都值得追问：
-
-1. **按键怎么映射到 Ability？** ASC 如何知道哪个按键对应哪个技能？
-2. **实例化策略**：技能对象什么时刻创建？每个 Actor 一份还是每次激活一份？
-3. **网络执行策略**：哪些技能只在客户端跑？哪些必须在服务器跑？预测怎么工作？
-4. **激活链路**：`TryActivateAbility` → `InternalTryActivateAbility` → `CanActivateAbility` → `PreActivate` → `CallActivateAbility` → `ActivateAbility`，每步做什么？
-5. **提交与消耗**：`CommitAbility` 做了什么？消耗 Cost GE 和 Cooldown GE 是什么时机？
-6. **结束与取消**：谁决定技能结束？客户端和服务器如何同步结束状态？
-7. **Block & Cancel**：一个技能如何阻止另一个技能？标签驱动的互斥是怎么实现的？
-
-本篇（上）聚焦 1-5，下篇聚焦 AbilityTask、输入绑定、瞄准系统和网络预测。
+`UGameplayAbility`（GA）就是承载这一切的容器。本篇只聚焦一件事：**"激活"这条路是怎么走通的**——从你调用 `TryActivateAbility` 开始，一路追到 `ActivateAbility` 蓝图事件被触发，把中间的 Spec、Handle、实例化、策略检查、Commit、End 全部拆开。
 
 ---
 
-## 7.2 核心概念速览
+## 二、概念速览：三层模型是理解 GA 的钥匙
 
-在深入源码之前，快速建立心智模型。
+在深入源码前，先建立三层模型。这是理解 GA 的关键，也是很多新手卡壳的地方。
 
-| 概念 | 角色 | 类比 |
-|------|------|------|
-| **UGameplayAbility** | 技能的逻辑载体，定义[激活 → 执行 → 结束]的行为 | "技能的蓝图" |
-| **FGameplayAbilitySpec** | ASC 中存储的"技能槽位"，持有 Level、InputID、ActiveCount 等运行时状态 | "技能卡牌" |
-| **FGameplayAbilitySpecHandle** | Spec 的轻量句柄，用于在 ASC 内部索引技能 | "卡牌编号" |
-| **InstancingPolicy** | 控制技能对象何时创建、如何共享 | "演员管理" |
-| **NetExecutionPolicy** | 控制技能在网络上的执行位置 | "执行权限" |
-| **AbilityTask** | 在技能生命周期内运行的异步任务（等待、监听、动画） | "协程" |
+| 层 | 类型 | 角色 | 类比 |
+|----|------|------|------|
+| 1 | `FGameplayAbilitySpecHandle` | 轻量句柄，`int32` | 门牌号 |
+| 2 | `FGameplayAbilitySpec` | 技能"档案"，元数据 | 档案柜里的文件夹 |
+| 3 | `UGameplayAbility` 实例 | 真正干活的 C++ 对象 | 拿着档案办事的人 |
 
-关键关系：
+三层关系一句话：**Handle 是索引，Spec 是元数据，Instance 是执行体。**
 
-```
-FGameplayAbilitySpec (槽位)
-  ├── Handle: FGameplayAbilitySpecHandle (索引)
-  ├── Ability: UGameplayAbility* (CDO / CDO的实例)
-  ├── Level / InputID / ActiveCount (运行时状态)
-  └── ReplicatedInstances (网络实例)
+- **Handle**：一个 `int32`，只是"你在 ASC 里引用哪个技能槽位"的门牌号，本身不含任何技能逻辑。
+- **Spec**：挂在 ASC 的 `ActivatableAbilities` 数组里，存 CDO 引用、等级、输入 ID、激活次数等元数据。它是网络复制的最小单元。
+- **Instance**：`UGameplayAbility` 的 C++ 对象。根据实例化策略，可能复用同一个实例（`InstancedPerActor`），也可能每次激活都新建（`InstancedPerExecution`）。
 
-UGameplayAbility (逻辑载体)
-  ├── AbilityTags / CancelAbilitiesWithTag / BlockAbilitiesWithTag
-  ├── InstancingPolicy / NetExecutionPolicy
-  ├── CooldownGameplayEffectClass / CostGameplayEffectClass
-  ├── ActivateAbility() / EndAbility()
-  └── OnGameplayAbilityEnded (委托)
-```
+这里有个新手常见的误区：**`UGameplayAbility` 本身是个 `UCLASS`，有 CDO（Class Default Object）**。你配的所有属性（冷却 GE 类、消耗 GE 类、Tag 要求）都存在 CDO 上。Spec 里的 `Ability` 字段引用的是这个 CDO，而"激活"时真正被调用逻辑的，是根据实例化策略拿到的实例。
 
 ---
 
-## 7.3 UGameplayAbility：三层策略
+## 三、四维策略枚举：GA 的行为开关
 
-打开 `GameplayAbility.h`，第一眼看到的是三个枚举，它们共同决定了技能的行为模式。这三层策略必须一起理解。
-
-### 7.3.1 NetExecutionPolicy：在哪执行？
+GA 的行为由**四个独立的策略枚举**控制，全部定义在 `GameplayAbilityTypes.h`。这里要先纠正一个流传很广的错误：UE5.8 里 GAS 的枚举**不是 `enum class`**，而是 `UENUM(BlueprintType)` 包一个 `namespace`，里面是 `enum Type : int`：
 
 ```cpp
-// GameplayAbility.h:205-217
+// GameplayAbilityTypes.h:25
 UENUM(BlueprintType)
-enum class EGameplayAbilityNetExecutionPolicy : uint8
+namespace EGameplayAbilityNetExecutionPolicy
 {
-    LocalPredicted  UMETA(DisplayName = "Local Predicted"),
-    LocalOnly       UMETA(DisplayName = "Local Only"),
-    ServerInitiated UMETA(DisplayName = "Server Initiated"),
-    ServerOnly      UMETA(DisplayName = "Server Only")
-};
-```
-
-四种策略的差别很关键：
-
-| 策略 | 客户端执行 | 服务器执行 | 典型场景 |
-|------|-----------|-----------|---------|
-| `LocalPredicted` | ✅ 预测执行 | ✅ 验证执行 | 移动、跳跃、射击（立即响应） |
-| `LocalOnly` | ✅ 执行 | ❌ 不执行 | 本地纯表现技能（UI动画、相机震动） |
-| `ServerInitiated` | ❌ 不执行 | ✅ 执行，然后复制到客户端 | AI 技能、GM命令 |
-| `ServerOnly` | ❌ 不执行 | ✅ 执行，不复制 | 服务器逻辑专用 |
-
-`InternalTryActivateAbility` 中可以看到这些策略如何被检查：
-
-```cpp
-// AbilitySystemComponent_Abilities.cpp:1764-1793
-// LocalPredicted/LocalOnly 需要 bIsLocal 为 true
-if (!bIsLocal)
-{
-    if (Ability->GetNetExecutionPolicy() == EGameplayAbilityNetExecutionPolicy::LocalOnly
-        || (Ability->GetNetExecutionPolicy() == EGameplayAbilityNetExecutionPolicy::LocalPredicted
-            && !InPredictionKey.IsValidKey()))
+    enum Type : int
     {
-        // 不允许执行：不是本地客户端，或者没有有效预测Key
-        return false;
-    }
-}
-
-// ServerOnly/ServerInitiated 需要 ROLE_Authority
-if (NetMode != ROLE_Authority
-    && (Ability->GetNetExecutionPolicy() == EGameplayAbilityNetExecutionPolicy::ServerOnly
-        || Ability->GetNetExecutionPolicy() == EGameplayAbilityNetExecutionPolicy::ServerInitiated))
-{
-    return false;
+        LocalPredicted,
+        LocalOnly,
+        ServerInitiated,
+        ServerOnly,
+    };
 }
 ```
 
-**设计要点**：`LocalPredicted` + 有效 `PredictionKey` 时，即使在 `ROLE_SimulatedProxy` 上也能执行——因为客户端合法地预测了自己的技能。
+这种写法让枚举既能被反射（`UENUM`），又能被 `TEnumAsByte` / 位运算使用，是 Epic 在 GAS 里的统一风格。
 
-### 7.3.2 InstancingPolicy：何时创建实例？
+### 3.1 NetExecutionPolicy —— 技能在哪执行（`GameplayAbilityTypes.h:58-76`）
 
-```cpp
-// GameplayAbility.h:233-240
-UENUM(BlueprintType)
-enum class EGameplayAbilityInstancingPolicy : uint8
-{
-    NonInstanced                    UMETA(DisplayName = "Non-Instanced"),
-    InstancedPerActor               UMETA(DisplayName = "Instanced Per Actor"),
-    InstancedPerExecution           UMETA(DisplayName = "Instanced Per Execution"),
-};
-```
+| 值 | 含义 | 典型场景 |
+|----|------|---------|
+| `LocalPredicted` | 本地立即执行 + 服务器验证 | 需要即时反馈的攻击、位移 |
+| `LocalOnly` | 只在本地执行，服务器不跑 | 纯表现、UI 类技能 |
+| `ServerInitiated` | 客户端请求，服务器发起 | 由服务器统一调度的技能 |
+| `ServerOnly` | 只在服务器执行 | GM 指令、服务器逻辑 |
 
-这是最容易踩坑的策略。
+### 3.2 InstancingPolicy —— 实例怎么创建（`GameplayAbilityTypes.h:36-56`）
 
-| 策略 | 实例行为 | 内存 | 适用场景 | 风险 |
-|------|---------|------|---------|------|
-| `NonInstanced` | 无实例，直接在 CDO 上调用 `ActivateAbility` | 零开销 | 纯函数式技能（跳跃、奔跑） | ❌ 不能使用 AbilityTask（Task 需要对象实例做 RootObject） |
-| `InstancedPerActor` | 每个 Actor 创建一个实例，复用 | 每技能一份 | 有状态的技能（连招、蓄力） | 首次激活时实例化，后面复用 |
-| `InstancedPerExecution` | 每次激活创建新实例 | 每次激活一份 | 需要干净状态的技能 | 注意 GC 和性能 |
+| 值 | 含义 | 适用 |
+|----|------|------|
+| `InstancedPerActor` | 每个 Actor 复用同一实例 | 有状态、需要跨激活保留变量的技能（**默认推荐**） |
+| `InstancedPerExecution` | 每次激活新建实例 | 无状态、可并行多次触发的技能 |
+| `NonInstanced` | 已废弃（5.5 起 `DEPRECATED`） | 新代码请改用 `InstancedPerActor` |
 
-`InternalTryActivateAbility` 中的实例化逻辑：
+注意：`NonInstanced` 在 UE 5.5 已被标记废弃，源码注释明确指向 `InstancedPerActor`。很多旧教程还在提 `NonInstanced`，新项目里别再用它。
 
-```cpp
-// AbilitySystemComponent_Abilities.cpp:1851-1889
-bool bIsInstancedPerExecution = (Ability->GetInstancingPolicy() 
-    == EGameplayAbilityInstancingPolicy::InstancedPerExecution);
+### 3.3 ReplicationPolicy —— 实例是否复制（`GameplayAbilityTypes.h:98-110`）
 
-// InstancedPerActor -> 检查是否已有实例
-if (Ability->GetInstancingPolicy() == EGameplayAbilityInstancingPolicy::InstancedPerActor)
-{
-    if (Spec->IsActive())
-    {
-        if (Ability->bRetriggerInstancedAbility && InstancedAbility)
-        {
-            // 重触发：先结束现有实例，再激活新的
-            InstancedAbility->EndAbility(Handle, ActorInfo, ActivationInfo,
-                true /*bReplicateEndAbility*/, false /*bWasCancelled*/);
-        }
-        else
-        {
-            return false; // 已在激活状态，不允许
-        }
-    }
-}
+| 值 | 含义 |
+|----|------|
+| `ReplicateNo` | 不复制实例（`LocalOnly` / `ServerOnly` 技能用） |
+| `ReplicateYes` | 复制实例到所有端（`InstancedPerActor` 技能的默认） |
 
-// 检测到需要实例化
-if (bIsInstancedPerExecution || !InstancedAbility)
-{
-    InstancedAbility = Ability->CreateInstance(*this);
-}
+### 3.4 NetSecurityPolicy —— 谁来结束技能（`GameplayAbilityTypes.h:78-96`）
 
-Spec->AddInstance(InstancedAbility);
-```
+这是**最常被遗漏的第四层**。很多文章只讲"三层策略"，但源码里实打实有四个枚举：
 
-**三个关键细节**：
-1. `NonInstanced` 不能使用 Task，因为 `UAbilityTask::Activate()` 依赖 Outer 对象的生命周期
-2. `InstancedPerActor` 设置 `bRetriggerInstancedAbility = true` 后会先 End 再重新 Activate
-3. `InstancedPerExecution` 每次 new 一个，要留意 `EndAbility` 清理
+| 值 | 含义 |
+|----|------|
+| `ClientOrServer` | 客户端或服务器都能结束技能（默认） |
+| `ServerOnlyExecution` | 仅服务器能执行结束 |
+| `ServerOnlyTermination` | 仅服务器能终止技能 |
+| `ServerOnly` | 执行与终止都仅服务器 |
 
-### 7.3.3 ReplicationPolicy：实例如何复制？
-
-```cpp
-// GameplayAbility.h:242-248
-UENUM(BlueprintType)
-enum class EGameplayAbilityReplicationPolicy : uint8
-{
-    ReplicateNo                    UMETA(DisplayName = "Do Not Replicate"),
-    ReplicateYes                   UMETA(DisplayName = "Replicate"),
-};
-```
-
-这个枚举只有两个值，但决策点不在枚举本身，而在 **什么时候需要用 `ReplicateYes`**：
-
-- `NonInstanced` + `ReplicateNo`：完全不复制（常见组合）
-- `InstancedPerActor` / `InstancedPerExecution` + `ReplicateYes`：实例状态需要在网络上同步时使用（如当前 `ActivationInfo`、`MontageRepData`）
+`NetSecurityPolicy` 控制的是"谁有权结束/终止这个技能"，对多人对战的反作弊至关重要——你不希望客户端作弊时能随便终止一个服务器的关键技能。
 
 ---
 
-## 7.4 FGameplayAbilitySpec：ASC 中的技能槽位
+## 四、Spec 与 Handle：技能的"档案"与"门牌号"
 
-`FGameplayAbilitySpec` 是 ASC 存储技能的状态结构，不是技能逻辑本身。
-
-```cpp
-// GameplayAbilitySpec.h:40-118
-USTRUCT(BlueprintType)
-struct FGameplayAbilitySpec : public FFastArraySerializerItem
-{
-    GENERATED_USTRUCT_BODY()
-
-    // 索引句柄——外部持有这个值来引用技能
-    UPROPERTY()
-    FGameplayAbilitySpecHandle Handle;
-
-    // 技能 CDO（NonInstanced）或指向 CDO（Instanced）
-    UPROPERTY()
-    TObjectPtr<UGameplayAbility> Ability;
-
-    // 技能等级（影响 GE 数值计算、Cost/Cooldown 强度等）
-    UPROPERTY()
-    int32 Level;
-
-    // 输入绑定 ID（EnhancedInput 体系下的映射键）
-    UPROPERTY()
-    int32 InputID;
-
-    // 技能来源对象（GiveAbility 时传入的 SourceObject）
-    UPROPERTY()
-    TObjectPtr<UObject> SourceObject;
-
-    // 当前激活计数（同 Spec 可多次激活，如 InstancedPerExecution）
-    UPROPERTY()
-    uint8 ActiveCount;
-
-    // 是否因网络而来（远端激活的标记）
-    UPROPERTY()
-    uint8 InputPressed : 1;
-
-    // 标记为待移除（在下一帧安全清理）
-    UPROPERTY()
-    uint8 RemoveAfterActivation : 1;
-
-    // 实例化技能的复制容器（InstancedPerActor/InstancedPerExecution）
-    UPROPERTY()
-    TArray<TObjectPtr<UGameplayAbility>> ReplicatedInstances;
-};
-```
-
-**Handle 的轻量特性**：
+### 4.1 FGameplayAbilitySpecHandle（`GameplayAbilitySpecHandle.h`）
 
 ```cpp
-// GameplayAbilitySpecHandle.h
 USTRUCT(BlueprintType)
 struct FGameplayAbilitySpecHandle
 {
-    GENERATED_USTRUCT_BODY()
+    GENERATED_BODY()
 
+    FGameplayAbilitySpecHandle()
+        : Handle(INDEX_NONE) {}
+
+    bool IsValid() const { return Handle != INDEX_NONE; }
+
+    void GenerateNewHandle();   // 注意：这里只是"声明"，实现在 .cpp
+
+private:
     UPROPERTY()
-    int32 Handle;
-
-    bool IsValid() const    { return Handle != INDEX_NONE; }
-    void GenerateNewHandle() { static int32 GHandle = 1; Handle = GHandle++; }
+    int32 Handle = INDEX_NONE;
 };
 ```
 
-Handle 就是一个 `int32`，ASC 用它通过 `FindAbilitySpecFromHandle()` 查找 `FGameplayAbilitySpec`。整个 GAS 系统都用 Handle 做技能引用，而不是直接持有指针。
+两个关键点：
 
-**ActiveCount 的含义**：`InstancedPerExecution` 下，同一个 Spec 可以同时有多个活跃实例。`ActiveCount` 追踪这个数字。当 `ActiveCount` 归零时，说明所有实例都已经 `EndAbility`。
+1. **`GenerateNewHandle()` 只是声明，不是内联实现。** 真实实现在 `GameplayAbilitySpecHandle.cpp` 里，用一个全局自增计数器分配句柄。很多文章把它写成 `{ static int32 GHandle = 1; Handle = GHandle++; }` 的内联形式，那是臆造。
+2. `Handle` 是 `private` 的 `int32`，默认 `INDEX_NONE`（无效）。对外只通过 `IsValid()` 判断。
+
+### 4.2 FGameplayAbilitySpec（`GameplayAbilitySpec.h`）
+
+`FGameplayAbilitySpec` 继承自 `FFastArraySerializerItem`（第 168 行），字段从 195 行开始：
+
+```cpp
+struct FGameplayAbilitySpec : public FFastArraySerializerItem
+{
+    UPROPERTY()
+    FGameplayAbilitySpecHandle Handle;          // 195 句柄
+
+    UPROPERTY()
+    TObjectPtr<UGameplayAbility> Ability;        // 199 CDO 引用
+
+    UPROPERTY()
+    int32 Level = 1;                            // 203 技能等级
+
+    UPROPERTY()
+    int32 InputID = INDEX_NONE;                 // 207 输入 ID
+
+    UPROPERTY()
+    TWeakObjectPtr<UObject> SourceObject;        // 211 来源对象（弱引用）
+
+    UPROPERTY(NotReplicated)
+    uint8 ActiveCount = 0;                      // 215 当前激活次数（本地）
+
+    UPROPERTY(NotReplicated)
+    uint8 InputPressed : 1;                     // 219 输入是否按下（位域）
+
+    UPROPERTY()
+    uint8 RemoveAfterActivation : 1;            // 223
+
+    UPROPERTY()
+    uint8 PendingRemove : 1;                    // 227
+
+    UPROPERTY()
+    uint8 bActivateOnce : 1;                    // 231 只激活一次
+
+    TSharedPtr<FGameplayAbilitySpec::...> GameplayEventData; // 234
+
+    // 以下两个字段在 5.5 已 DEPRECATED：
+    // FGameplayAbilityActivationInfo ActivationInfo;   // 239
+    // FGameplayTagContainer DynamicAbilityTags;        // 243
+
+    FGameplayAbilityTriggerData DynamicAbilityTriggers; // 254
+    // ...
+};
+```
+
+几个**最容易记错**的字段：
+
+- **`SourceObject` 是 `TWeakObjectPtr<UObject>`（弱引用）**，不是 `TObjectPtr`。弱引用的意义是：不阻止来源对象被 GC，同时能在对象已销毁时感知到。
+- **`ActiveCount` / `InputPressed` 带 `NotReplicated`**——它们是纯本地状态，不参与网络复制。
+- **`InputPressed` 是 `uint8 : 1` 位域**，不是 `bool`。GAS 为了把多个布尔标记压进一个字节，大量使用位域。
+- **`ActivationInfo` / `DynamicAbilityTags` 在 5.5 已废弃**，源码注释明确标记，新代码应避免使用。
 
 ---
 
-## 7.5 技能激活完整链路
+## 五、激活链路：从 TryActivateAbility 到 ActivateAbility
 
-这是本篇最核心的部分。从 `TryActivateAbility` 到 `ActivateAbility`，经历五层检查。
+这是本篇的核心。整条链路是：
 
-### 7.5.1 TryActivateAbility：入口
-
-```cpp
-// AbilitySystemComponent.h:1040
-bool TryActivateAbility(FGameplayAbilitySpecHandle AbilityToActivate, 
-    bool bAllowRemoteActivation = true);
+```
+TryActivateAbility(Handle)
+  └─ InternalTryActivateAbility(...)     // ASC 层，做多层检查
+      ├─ CanActivateAbility(...)          // 冷却 / 消耗 / Tag / 输入检查
+      ├─ 实例化：根据 InstancingPolicy 取实例
+      └─ CallActivateAbility(...)         // 调用实例
+          └─ ActivateAbility(...)         // 虚函数 → 蓝图 K2_ActivateAbility
 ```
 
-这是公开入口，做三件事：
-1. 如果当前是 Authority，直接调 `InternalTryActivateAbility`
-2. 如果不是 Authority 但 `bAllowRemoteActivation = true`，走 RPC `ServerTryActivateAbility`
-3. 如果也不行，返回 false
+### 5.1 入口：TryActivateAbility
+
+你调用的第一个函数是 `UAbilitySystemComponent::TryActivateAbility(Handle)`。它做一层简单包装（确认 Spec 存在等）后，把请求转交给 `InternalTryActivateAbility`。真正的重活都在后者。
+
+### 5.2 内部：InternalTryActivateAbility
+
+`InternalTryActivateAbility`（`AbilitySystemComponent_Abilities.cpp`）是 ASC 侧的调度核心，它负责：
+
+1. 根据 Handle 找到 `FGameplayAbilitySpec`，确认 Ability CDO 有效；
+2. 调用 `CanActivateAbility` 做业务检查（下一节详解）；
+3. 做网络策略检查——例如 `LocalPredicted` 技能在非本地执行时，必须携带有效的 `FPredictionKey`（预测相关，下篇展开）；
+4. 根据 `InstancingPolicy` 获取或创建实例；
+5. 设置 `Spec->ActiveCount++`，调用 `CallActivateAbility`。
+
+### 5.3 CanActivateAbility：九道检查的真实顺序
+
+`CanActivateAbility`（`GameplayAbility.cpp:457`）是激活前的"体检"。它的检查顺序是**固定且有讲究的**：
 
 ```cpp
-// AbilitySystemComponent_Abilities.cpp:1678-1682
-bool UAbilitySystemComponent::TryActivateAbility(
-    FGameplayAbilitySpecHandle AbilityToActivate, bool bAllowRemoteActivation)
+bool UGameplayAbility::CanActivateAbility(...)
 {
-    // ... 权限检查 ...
-    return InternalTryActivateAbility(AbilityToActivate);
-}
-```
-
-### 7.5.2 InternalTryActivateAbility：六层关卡
-
-`InternalTryActivateAbility` 是整个激活流程的核心。它像安检流水线，任何一层失败都会中断并通知 `AbilityFailed`。
-
-`InternalTryActivateAbilityFailureTags` 是静态成员，记录最近一次失败的原因。
-
-```cpp
-// AbilitySystemComponent_Abilities.cpp:1704
-bool UAbilitySystemComponent::InternalTryActivateAbility(
-    FGameplayAbilitySpecHandle Handle, FPredictionKey InPredictionKey,
-    UGameplayAbility** OutInstancedAbility,
-    FOnGameplayAbilityEnded::FDelegate* OnGameplayAbilityEndedDelegate,
-    const FGameplayEventData* TriggerEventData)
-{
-    InternalTryActivateAbilityFailureTags.Reset();
-```
-
-**关卡 1：Handle 有效性和 Spec 存在性**
-
-```cpp
-    if (Handle.IsValid() == false) { return false; }
-
-    FGameplayAbilitySpec* Spec = FindAbilitySpecFromHandle(Handle);
-    if (!Spec) { return false; }
-
-    // 锁定列表，防止激活期间 Spec 被销毁
-    ABILITYLIST_SCOPE_LOCK();
-```
-
-**关卡 2：ActorInfo 有效性**
-
-```cpp
-    const FGameplayAbilityActorInfo* ActorInfo = AbilityActorInfo.Get();
-    if (ActorInfo == nullptr || !ActorInfo->OwnerActor.IsValid()
-                            || !ActorInfo->AvatarActor.IsValid())
-    {
+    // 1. AvatarActor 有效 + 本地角色允许执行（模拟代理不能激活）
+    AActor* const AvatarActor = ActorInfo ? ActorInfo->AvatarActor.Get() : nullptr;
+    if (AvatarActor == nullptr || !ShouldActivateAbility(AvatarActor->GetLocalRole()))
         return false;
-    }
-```
 
-**关卡 3：网络执行策略检查**（7.3.1 已详述）
+    // 2. ASC 有效
+    // 3. Spec 有效（FindAbilitySpecFromHandle）
 
-**关卡 4：事件触发检查（TriggerEventData）**
-
-```cpp
-    if (TriggerEventData)
-    {
-        if (!AbilitySource->ShouldAbilityRespondToEvent(ActorInfo, TriggerEventData))
-        {
-            NotifyAbilityFailed(Handle, AbilitySource,
-                InternalTryActivateAbilityFailureTags);
-            return false;
-        }
-    }
-```
-
-`TriggerEventData` 由事件驱动技能时传入（如被 GE 触发的技能）。此时要多做一层检查：技能是否应该响应这个事件？
-
-**关卡 5：CanActivateAbility**
-
-```cpp
-    {
-        const FGameplayTagContainer* SourceTags = TriggerEventData
-            ? &TriggerEventData->InstigatorTags : nullptr;
-        const FGameplayTagContainer* TargetTags = TriggerEventData
-            ? &TriggerEventData->TargetTags : nullptr;
-
-        FScopedCanActivateAbilityLogEnabler LogEnabler;
-        if (!AbilitySource->CanActivateAbility(Handle, ActorInfo,
-                SourceTags, TargetTags, &InternalTryActivateAbilityFailureTags))
-        {
-            if (InternalTryActivateAbilityFailureTags.IsEmpty())
-            {
-                InternalTryActivateAbilityFailureTags.AddTag(
-                    GetDefault<UGameplayAbilitiesDeveloperSettings>()
-                        ->ActivateFailCanActivateAbilityTag);
-            }
-            NotifyAbilityFailed(Handle, AbilitySource,
-                InternalTryActivateAbilityFailureTags);
-            return false;
-        }
-    }
-```
-
-这里有几个微妙点：
-- `SourceTags` 和 `TargetTags` 来自事件驱动——非事件激活时两个都是 nullptr
-- `FScopedCanActivateAbilityLogEnabler` 是 RAII，启用日志输出
-- 如果 `CanActivateAbility` 返回 false 却没有填充 FailureTags，引擎会补一个默认 tag
-
-**关卡 6：InstancedPerActor 重复激活检查**（7.3.2 已详述）
-
-全部通过后，进入实例化阶段和下一环节。
-
-### 7.5.3 CanActivateAbility：我们能激活吗？
-
-这是蓝图可以覆写的验证函数。GAS 为你做了基础的 Tag 检查，你只需要补充业务逻辑。
-
-```cpp
-// GameplayAbility.cpp
-virtual bool CanActivateAbility(
-    const FGameplayAbilitySpecHandle Handle,
-    const FGameplayAbilityActorInfo* ActorInfo,
-    const FGameplayTagContainer* SourceTags,
-    const FGameplayTagContainer* TargetTags,
-    FGameplayTagContainer* OptionalRelevantTags) const;
-```
-
-默认实现检查：
-1. **`ActivationRequiredTags`** — Actor 必须拥有这些 Tags
-2. **`ActivationBlockedTags`** — Actor 不能有这些 Tags
-3. **SourceTags / TargetTags** — 事件驱动时的额外条件（`SourceTagsMustHave`、`TargetTagsMustHave`、`SourceTagsMustNotHave`、`TargetTagsMustNotHave`）
-
-蓝图覆写最常见的模式：
-
-```cpp
-// 蓝图 C++ 混合覆写
-bool UMyAbility::CanActivateAbility(...) const
-{
-    if (!Super::CanActivateAbility(Handle, ActorInfo, SourceTags,
-            TargetTags, OptionalRelevantTags))
-    {
+    // 4. 输入是否被抑制（UI 打开、被其他技能阻塞等）
+    if (AbilitySystemComponent->GetUserAbilityActivationInhibited())
         return false;
-    }
-    // 自定义条件：有武器吗？有弹药吗？
-    return MyCheckHasWeapon() && MyCheckHasAmmo();
+
+    // 5. 冷却检查（先！）
+    if (!AbilitySystemGlobals.ShouldIgnoreCooldowns() && !CheckCooldown(Handle, ActorInfo, OptionalRelevantTags))
+        return false;
+
+    // 6. 消耗检查（后）
+    if (!AbilitySystemGlobals.ShouldIgnoreCosts() && !CheckCost(Handle, ActorInfo, OptionalRelevantTags))
+        return false;
+
+    // 7. Tag 要求检查（ActivationBlockedTags / ActivationRequiredTags）
+    if (!DoesAbilitySatisfyTagRequirements(*AbilitySystemComponent, SourceTags, TargetTags, OptionalRelevantTags))
+        return false;
+
+    // 8. 输入 ID 是否被阻塞
+    if (AbilitySystemComponent->IsAbilityInputBlocked(Spec->InputID))
+        return false;
+
+    // 9. 蓝图覆写：K2_CanActivateAbility（bHasBlueprintCanUse）
 }
 ```
 
-### 7.5.4 PreActivate 与 CallActivateAbility
+顺序背后的逻辑：**先查冷却、再查消耗**——冷却没好就直接返回，不必再算消耗；资源不足就不必再查 Tag。检查成本从低到高排列，能早退就早退。
 
-通过所有检查后，进入激活执行阶段。
+### 5.4 CallActivateAbility：真正的"点火"
 
-```cpp
-// AbilitySystemComponent_Abilities.cpp（InternalTryActivateAbility 尾部）
-    // 通知：技能即将激活
-    NotifyAbilityCommit(Handle);
+`CallActivateAbility`（`GameplayAbility.cpp`）负责：
 
-    // 某些场景下需要复制 InputPressed 状态
-    if (!bIsLocal && Ability->GetReplicationPolicy()
-        == EGameplayAbilityReplicationPolicy::ReplicateNo)
-    {
-        Ability->CallActivateAbility(Handle, ActorInfo,
-            Spec->ActivationInfo, OnGameplayAbilityEndedDelegate,
-            TriggerEventData);
-    }
-    else
-    {
-        // 打印激活信息以便调试
-        UE_LOGF(LogAbilitySystem, Verbose, TEXT("%s: Activating %s"),
-            *GetNameSafe(GetOwner()), *Ability->GetName());
-    }
+- 设置 `bIsActive = true`；
+- 广播 `OnGameplayAbilityActivated`；
+- 调用虚函数 `ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData)`——蓝图事件 `K2_ActivateAbility`（即"ActivateAbility"节点）就是在这里被触发的。
 
-    // PreActivate — 实例化后、ActivateAbility 前的钩子
-    InstancedAbility->PreActivate(Handle, ActorInfo,
-        Spec->ActivationInfo, SpecInput, TriggerEventData);
-```
-
-`PreActivate` 是 5.4 新加的钩子，在主 `ActivateAbility` 之前调用，适合做初始化但还不该"正式激活"的准备工作。
-
-```cpp
-// CallActivateAbility
-void UGameplayAbility::CallActivateAbility(
-    const FGameplayAbilitySpecHandle Handle,
-    const FGameplayAbilityActorInfo* ActorInfo,
-    const FGameplayAbilityActivationInfo ActivationInfo,
-    FOnGameplayAbilityEnded::FDelegate* OnGameplayAbilityEndedDelegate = nullptr,
-    const FGameplayEventData* TriggerEventData = nullptr)
-{
-    // 绑定结束回调
-    if (OnGameplayAbilityEndedDelegate)
-    {
-        OnGameplayAbilityEnded.Add(*OnGameplayAbilityEndedDelegate);
-    }
-
-    // 调用蓝图事件或 C++ 覆写
-    ActivateAbility(Handle, ActorInfo, ActivationInfo,
-        TriggerEventData);
-}
-```
-
-### 7.5.5 ActivateAbility：你的蓝图入口
-
-```cpp
-// GameplayAbility.h
-UFUNCTION(BlueprintImplementableEvent, Category = "Ability")
-void K2_ActivateAbility();
-
-UFUNCTION(BlueprintImplementableEvent, Category = "Ability")
-void K2_ActivateAbilityFromEvent(const FGameplayEventData& EventData);
-
-virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle,
-    const FGameplayAbilityActorInfo* ActorInfo,
-    const FGameplayAbilityActivationInfo ActivationInfo,
-    const FGameplayEventData* TriggerEventData);
-```
-
-蓝图实现：
-- 按键激活 → `K2_ActivateAbility`
-- 事件激活 → `K2_ActivateAbilityFromEvent`
-
-C++ 覆写：
-- 直接覆写 `ActivateAbility`，在里面启动 `UAbilityTask`：
-
-```cpp
-void UMyAbility::ActivateAbility(...)
-{
-    // 播放蒙太奇并等待通知
-    UAbilityTask_PlayMontageAndWait* Task = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(
-        this, TEXT("PlayAttack"), AttackMontage);
-    Task->OnCompleted.AddDynamic(this, &UMyAbility::OnMontageCompleted);
-    Task->Activate(); // ReadyForActivation → Active
-
-    // 等待输入释放（蓄力技能）
-    UAbilityTask_WaitInputRelease* WaitRelease = UAbilityTask_WaitInputRelease::WaitInputRelease(this);
-    WaitRelease->OnRelease.AddDynamic(this, &UMyAbility::OnInputReleased);
-    WaitRelease->Activate();
-}
-```
-
-> 图注：GA激活链路全景
->
-> ```
-> TryActivateAbility(Handle)
->   │
->   ├─ Authority?
->   │   ├─ Yes → InternalTryActivateAbility(Handle)
->   │   └─ No  → ServerTryActivateAbility RPC → (Server) InternalTryActivateAbility
->   │
-> InternalTryActivateAbility:
->   ├─ [关卡1] Handle 有效？→ Spec 存在？
->   ├─ [关卡2] ActorInfo 有效？
->   ├─ [关卡3] NetExecutionPolicy 匹配当前 NetMode？
->   ├─ [关卡4] TriggerEventData → ShouldAbilityRespondToEvent？
->   ├─ [关卡5] CanActivateAbility → Tags / 蓝图覆写？
->   ├─ [关卡6] InstancedPerActor 重复激活检查？
->   │
->   ├─ 实例化（如果需要）
->   ├─ Spec->ActiveCount++
->   ├─ PreActivate(Handle, ActorInfo, ...)
->   └─ CallActivateAbility(Handle, ActorInfo, ...)
->       └─ ActivateAbility(Handle, ActorInfo, ...)
->           ├─ K2_ActivateAbility() [蓝图]
->           └─ AbilityTask::Activate() [C++ Task]
-> ```
+到这里，你的蓝图逻辑才开始执行。而上一篇/下一篇常说的 `CommitAbility`、`EndAbility`，都是在你蓝图逻辑里**主动调用**的。
 
 ---
 
-## 7.6 CommitAbility：资源消耗与冷却
+## 六、CommitAbility：资源提交的真实顺序
 
-技能激活后，在合适的时候调用 `CommitAbility`，它会完成两件事：
+技能的"消耗资源"（冷却 + 消耗）通过 `CommitAbility` 完成。它分两个阶段，**顺序极其重要，很多文章写反了**：
 
 ```cpp
-// GameplayAbility.cpp
-virtual void CommitAbility(const FGameplayAbilitySpecHandle Handle,
-    const FGameplayAbilityActorInfo* ActorInfo,
-    const FGameplayAbilityActivationInfo ActivationInfo,
-    FGameplayTagContainer* OptionalRelevantTags = nullptr);
-
-void UGameplayAbility::CommitAbility(...)
+// GameplayAbility.cpp:578
+bool UGameplayAbility::CommitAbility(const FGameplayAbilitySpecHandle Handle, ...)
 {
-    // 1. 施加 Cost GE（消耗法力、体力等）
-    ApplyCost(Handle, ActorInfo, ActivationInfo);
+    if (!CommitCheck(Handle, ActorInfo, ActivationInfo))   // 1. 先检查
+        return false;
 
-    // 2. 施加 Cooldown GE（进入冷却）
-    ApplyCooldown(Handle, ActorInfo, ActivationInfo);
+    CommitExecute(Handle, ActorInfo, ActivationInfo);      // 2. 再执行
+    K2_CommitExecute();                                    // 3. 蓝图钩子
+    NotifyAbilityCommit(this);                             // 4. 通知提交
+    return true;
 }
 ```
 
-`CostGameplayEffectClass` 和 `CooldownGameplayEffectClass` 都定义在 `UGameplayAbility` 上：
+`CommitCheck` 的检查顺序是**先冷却、后消耗**：
 
 ```cpp
-// GameplayAbility.h
-UPROPERTY(EditDefaultsOnly, Category = "Costs")
-TSubclassOf<UGameplayEffect> CostGameplayEffectClass;
-
-UPROPERTY(EditDefaultsOnly, Category = "Cooldowns")
-TSubclassOf<UGameplayEffect> CooldownGameplayEffectClass;
+bool UGameplayAbility::CommitCheck(...)
+{
+    if (!CheckCooldown(Handle, ActorInfo))    // 671-674 先查冷却
+        return false;
+    if (!CheckCost(Handle, ActorInfo))        // 676-679 再查消耗
+        return false;
+    return true;
+}
 ```
 
-**为什么是 GE 而不是直接修改属性？** 这样 Cost 和 Cooldown 可以复用现有 GE 框架的所有能力：Modifier 计算（基于属性、基于Tag计数等）、Stacking、Duration Policy、网络复制……一个 `CooldownGE` 就是一个 Duration GE，它的 `DurationPolicy` 决定冷却时长，GE 过期后自动移除，冷却结束。
+`CommitExecute` 的执行顺序**同样是先冷却、后消耗**：
 
-**CommitAbility 的设计约定**：
-- 它不自动调用——你必须在 `ActivateAbility` 中显式调用
-- 一般调用位置：确认消耗后（蓄力技能在释放时确认）；立即消耗（瞬时技能在 ActivateAbility 开头）
-- 它不验证是否有足够资源——你需要先用 `CheckCost` 验证（返回 false 则不能 Commit）
-- CooldownGE 施加到外层的 ASC 上，CostGE 施加到自身
+```cpp
+void UGameplayAbility::CommitExecute(...)
+{
+    ApplyCooldown(Handle, ActorInfo, ActivationInfo);   // 686 先扣冷却
+    ApplyCost(Handle, ActorInfo, ActivationInfo);       // 688 再扣消耗
+}
+```
+
+**顺序为什么重要**：检查顺序决定了报错优先级——冷却没好，就不必再查消耗；资源不足，就不必扣冷却。而执行顺序与检查顺序**严格对应**，保证"检查通过 → 执行成功"的一致性。如果你把 Cost 放在 Cooldown 前面，就会出现"扣了蓝但冷却没好导致技能失败"的 bug。
 
 ---
 
-## 7.7 EndAbility：技能结束
+## 七、EndAbility：清理流程的真实顺序
+
+`EndAbility`（`GameplayAbility.cpp:802`）是激活的镜像，负责把所有状态归零。真实顺序如下：
 
 ```cpp
-// GameplayAbility.h
-void K2_EndAbility();
-void K2_OnEndAbility(bool bWasCancelled);
-
-void UGameplayAbility::EndAbility(
-    const FGameplayAbilitySpecHandle Handle,
-    const FGameplayAbilityActorInfo* ActorInfo,
-    const FGameplayAbilityActivationInfo ActivationInfo,
-    bool bReplicateEndAbility,
-    bool bWasCancelled)
+void UGameplayAbility::EndAbility(...)
 {
-    // 1. 清理所有 AbilityTask
-    for (int32 TaskIdx = ActiveTasks.Num() - 1; TaskIdx >= 0; --TaskIdx)
-    {
-        if (UAbilityTask* Task = ActiveTasks[TaskIdx])
-        {
-            Task->EndTask();
-        }
-        ActiveTasks.RemoveAt(TaskIdx);
-    }
+    // 1. 合法性检查 + 重入保护
+    //    ScopeLockCount > 0 时，加入 WaitingToExecute 延迟执行
 
-    // 2. 广播委托
-    OnGameplayAbilityEnded.Broadcast(this);
+    // 2. bIsAbilityEnding = true
 
-    // 3. 通知 ASC
-    if (AbilitySystemComponent.IsValid())
-    {
-        AbilitySystemComponent->NotifyAbilityEnded(Handle, this, bWasCancelled);
-    }
-
-    // 4. 蓝图回调
+    // 3. 蓝图回调（最先触发！）
     K2_OnEndAbility(bWasCancelled);
 
-    // 5. 网络复制
-    if (bReplicateEndAbility && AbilitySystemComponent.IsValid())
+    // 4. 清理 latent actions 和 timers
+
+    // 5. 广播并清空结束委托
+    OnGameplayAbilityEnded.Broadcast(this);
+    OnGameplayAbilityEnded.Clear();
+    OnGameplayAbilityEndedWithData.Broadcast(...);
+    OnGameplayAbilityEndedWithData.Clear();
+
+    // 6. bIsActive = false; bIsAbilityEnding = false
+
+    // 7. 清理所有 Task：倒序遍历，逐个 TaskOwnerEnded()，再 Reset()
+    for (int32 TaskIndex = ActiveTasks.Num() - 1; TaskIndex >= 0; --TaskIndex)
     {
-        AbilitySystemComponent->ReplicateEndAbility(Handle, 
-            GetCurrentAbilitySpecHandle(), ActivationInfo);
+        ActiveTasks[TaskIndex]->TaskOwnerEnded();
     }
+    ActiveTasks.Reset();
+
+    // 8. 网络同步：ReplicateEndOrCancelAbility
+
+    // 9. 移除 ActivationOwnedTags（RemoveLooseGameplayTags）
+
+    // 10. 清理 TrackedGameplayCues
+
+    // 11. HandleChangeAbilityCanBeCanceled
+
+    // 12. ApplyAbilityBlockAndCancelTags
+
+    // 13. ClearAbilityReplicatedDataCache
+
+    // 14. NotifyAbilityEnded
 }
 ```
 
-`EndAbility` 的核心约定：
-1. **Task 清理** — 所有未完成的 Task 被 `EndTask()` 终止
-2. **委托广播** — `OnGameplayAbilityEnded` 通知所有监听者（包括 ASC）
-3. **ASC 通知** — `NotifyAbilityEnded` 递减 `ActiveCount`
-4. **蓝图回调** — `K2_OnEndAbility(bWasCancelled)` —— 一个参数告诉你为什么结束
+两个**关键纠正**：
 
-`bReplicateEndAbility` 参数控制是否将结束通知发送到客户端。大多数情况用 `true`。
+1. **`K2_OnEndAbility`（蓝图 OnEndAbility 事件）在流程最前面触发**，不是最后。很多文章把蓝图回调放在结尾，是错的——EndAbility 一进来先通知蓝图，再做底层清理。
+2. **Task 清理用的是 `TaskOwnerEnded()`，不是 `EndTask()`**，且采用**倒序遍历 + `ActiveTasks.Reset()`**。倒序是因为 Task 可能在回调里移除自己或别的 Task；`Reset()` 一次性清空整个数组。
 
 ---
 
-## 7.8 Block & Cancel：标签驱动的技能互斥
+## 八、Block & Cancel：技能之间的相互影响
 
-GAS 用 GameplayTags 实现技能之间的互斥和取消，不需要硬编码的引用关系。
+技能不是孤立存在的。GA 用三组 Tag 容器表达技能间的"相互干扰"（`GameplayAbility.h:738-755`）：
 
-**取消关系 (`CancelAbilitiesWithTag`)**：
-当一个技能激活时，所有匹配 Tag 的已激活技能被 `CancelAbility`。
+| 字段 | 类型 | 作用 |
+|------|------|------|
+| `ActivationOwnedTags` | `FGameplayTagContainer` | 激活期间赋予拥有者的 Tag |
+| `ActivationRequiredTags` | `FGameplayTagContainer` | 必须满足才能激活的 Tag |
+| `ActivationBlockedTags` | `FGameplayTagContainer` | 存在即阻止激活的 Tag |
+| `BlockAbilitiesWithTag` | `FGameplayTagContainer` | 激活期间阻塞其他带此 Tag 的技能 |
+| `CancelAbilitiesWithTag` | `FGameplayTagContainer` | 激活时取消其他带此 Tag 的技能 |
 
-```cpp
-// GameplayAbility.h
-UPROPERTY(EditDefaultsOnly, Category = "Advanced", meta = (Categories = "AbilityTagCategory"))
-FGameplayTagContainer CancelAbilitiesWithTag;
-```
+配合两个 GE 类：
 
-**阻塞关系 (`BlockAbilitiesWithTag`)**：
-当一个技能激活期间，所有匹配 Tag 的待激活技能被阻止（`CanActivateAbility` 返回 false）。
+| 字段 | 类型 | 作用 |
+|------|------|------|
+| `CooldownGameplayEffectClass` | `TSubclassOf<UGameplayEffect>` | 冷却 GE（`CheckCooldown`/`ApplyCooldown` 用它） |
+| `CostGameplayEffectClass` | `TSubclassOf<UGameplayEffect>` | 消耗 GE（`CheckCost`/`ApplyCost` 用它） |
 
-```cpp
-// GameplayAbility.h
-UPROPERTY(EditDefaultsOnly, Category = "Advanced", meta = (Categories = "AbilityTagCategory"))
-FGameplayTagContainer BlockAbilitiesWithTag;
-```
+这解释了前面 `CheckCooldown` / `ApplyCooldown` 是怎么工作的：它们本质上是去查/去施加一个冷却 GE。GA 本身不直接操作冷却值，而是**把冷却和消耗都建模成 GE**——这是 GAS 设计里"一切都走 GE"的体现，也是上一篇 GE 讲完后，本篇能顺理成章接上的原因。
 
-**激活阻塞 (`ActivationBlockedTags`)**：
-当 Actor 拥有这些 Tags 时，技能无法激活（如"眩晕" Tag 阻塞所有主动技能）。
-
-```cpp
-// GameplayAbility.h
-UPROPERTY(EditDefaultsOnly, Category = "Tags", meta = (Categories = "ActivationTagCategory"))
-FGameplayTagContainer ActivationBlockedTags;
-```
-
-**实际互斥场景示例**：
-
-```
-技能A (近战攻击)：
-  BlockAbilitiesWithTag = ["Ability.Skill"]
-
-技能B (大招)：
-  AbilityTags = ["Ability.Skill"]
-  ActivationBlockedTags = ["State.Stunned"]
-
-技能C (被眩晕GE)：
-  施加 "State.Stunned" Tag → 拥有 Ability.Skill 标签的技能全部阻塞
-```
-
-**关键洞察**：Block 和 Cancel 都通过 Tag 匹配实现，这意味着：
-- 新的 GE 可以间接阻塞技能（通过施加 Tag）
-- 技能之间的互斥关系由数据配置，不由代码硬编码
-- 一个 Tag 能同时影响多个技能
-
-`InternalTryActivateAbility` 中的阻塞检查：
-
-```cpp
-// AbilitySystemComponent_Abilities.cpp
-// CanActivateAbility 内部会执行：
-const FGameplayTagContainer& OwnedTags = ActorInfo->AbilitySystemComponent->
-    GetOwnedGameplayTags();
-if (OwnedTags.HasAny(ActivationBlockedTags))
-{
-    return false; // 拥有阻塞标签
-}
-```
-
-以及跨技能阻塞：
-
-```cpp
-// Check if any active ability blocks this one
-for (const FGameplayAbilitySpec& ActiveSpec : GetActivatableAbilities())
-{
-    if (ActiveSpec.IsActive())
-    {
-        if (Ability->GetAssetTags().HasAny(
-            ActiveSpec.Ability->BlockAbilitiesWithTag))
-        {
-            return false; // 某个活跃技能阻塞了这个技能
-        }
-    }
-}
-```
+一个典型的"沉默"设计：给沉默技能配置 `ActivationBlockedTags` 包含 `State.Silenced`，当玩家身上有该 Tag 时，`DoesAbilitySatisfyTagRequirements` 在第七道检查就会拦下激活。
 
 ---
 
-## 7.9 设计思考
+## 九、设计思考：为什么 GA 要拆成"检查 + 执行 + 提交 + 结束"四段？
 
-### 为什么用 "三层策略" 而不是一个统一的枚举？
+回顾整条链路，你会看到一个清晰的阶段划分：
 
-Epic 把 NetExecutionPolicy、InstancingPolicy、ReplicationPolicy 拆成三个独立枚举，这是深思熟虑的结果：
+- **CanActivateAbility**（检查）——纯函数式，无副作用，可以反复调用；
+- **ActivateAbility**（执行）——产生副作用，是你的业务逻辑；
+- **CommitAbility**（提交）——扣冷却、扣消耗，把"承诺"兑现；
+- **EndAbility**（结束）——清理、归零、通知。
 
-**正交设计**：三种策略的决策是独立的。
-- `NonInstanced` 的技能也可以是 `ServerOnly`（如服务器端的积分结算技能）
-- `InstancedPerExecution` 的技能可以是 `LocalOnly`（如客户端纯表现技能）
-- 不合理的组合（如 `NonInstanced` + `ReplicateYes`）在运行时会被发现
+这个划分的意义在于**可预测性**。激活前可以反复"体检"而不产生任何副作用；激活后的资源扣减被单独拎出来（`Commit`），让"什么时候扣资源"成为你的显式决定——你可以在动画播到一半才 `CommitAbility`，也可以一激活就提交。网络预测能正常工作，也依赖这种"检查/执行/提交"的清晰边界（服务器重放时，检查通过才能提交）。
 
-如果把这三个维度合并成一个枚举，会出现 4×3×2 = 24 种组合的 "超级策略枚举"，反而难以理解。
-
-### 为什么 Cost 和 Cooldown 是 GE 而不是直接属性修改？
-
-这是一种"组合优于继承"的设计。如果 Cost 和 Cooldown 是独立的属性系统，它们需要：
-- 独立的数值计算逻辑
-- 独立的网络复制
-- 独立的 Stacking / Duration 逻辑
-
-复用 GE 框架后，Cost 和 Cooldown 天然获得：
-- `ModifierMagnitudeCalculation` — 自定义计算公式
-- `DurationPolicy` — 冷却时长即 GE 时长
-- `Stacking` — 多层冷却的概念直接可用
-- 网络复制 — GE 的复制机制直接承担
-
-这是一种"不做不必要的抽象"的务实设计。
-
-### 为什么激活失败用 Tag 而不是 ErrorCode？
-
-`InternalTryActivateAbilityFailureTags` 是 `FGameplayTagContainer` 而不是 `int32 ErrorCode`。这又是 Tag 驱动哲学的体现：
-
-- 不同的失败原因可以组合（"网络错误 + 冷却中"是两个 Tag）
-- 蓝图可以直接用 Tag 查询 "哪种失败" 并展示不同 UI
-- 新增失败原因不需要修改枚举，只需加 Tag
+另一个设计点是**三层模型（Handle / Spec / Instance）的网络友好性**。网络复制的最小单元是 Spec（元数据），而不是实例（执行体）。服务器和客户端各自维护自己的实例，通过 Spec 对齐状态。这为下篇要讲的"预测 + 回滚"打下了基础——预测的本质，就是客户端先用自己的实例跑一遍，服务器用权威实例再跑一遍，两边用同一个 `FPredictionKey` 对齐。
 
 ---
 
-## 7.10 总结
+## 十、总结
 
-本篇覆盖了 GameplayAbility 的核心框架：
+本篇从"激活"这条主线出发，拆开了 GA 的核心框架：
 
 | 主题 | 关键点 |
 |------|--------|
-| **三层策略** | NetExecutionPolicy 决定在哪执行，InstancingPolicy 决定何时创建实例，ReplicationPolicy 决定是否复制 |
-| **FGameplayAbilitySpec** | ASC 中的"技能槽位"，持有 Level、InputID、ActiveCount 等运行时状态 |
-| **激活链路** | TryActivateAbility → InternalTryActivateAbility（6层关卡）→ PreActivate → CallActivateAbility → ActivateAbility |
-| **CommitAbility** | 施加 CostGE + CooldownGE，复用现有 GE 框架 |
-| **EndAbility** | 清理 Task、广播委托、通知 ASC、蓝图回调 |
-| **Block & Cancel** | Tag 驱动的互斥——配置即可实现任意复杂的互斥关系 |
+| **三层模型** | Handle（int32 门牌号）→ Spec（元数据档案）→ Instance（执行体） |
+| **四维策略枚举** | NetExecution / Instancing / Replication / **NetSecurity**（第四层常被漏掉）；UE5.8 用 `UENUM + namespace + enum Type : int`，非 `enum class` |
+| **InstancingPolicy** | `InstancedPerActor` 复用实例，`InstancedPerExecution` 每次新建，`NonInstanced` 已废弃 |
+| **Spec 字段** | `SourceObject` 是 `TWeakObjectPtr`；`ActiveCount`/`InputPressed` 是 `NotReplicated` 的 `uint8` 位域 |
+| **CanActivateAbility** | 九道检查，顺序固定：冷却 → 消耗 → Tag → 输入阻塞 → 蓝图覆写 |
+| **CommitAbility** | `CommitCheck` 先冷却后消耗，`CommitExecute` 同样先 `ApplyCooldown` 后 `ApplyCost` |
+| **EndAbility** | `K2_OnEndAbility` 最先触发；Task 用 `TaskOwnerEnded()` 倒序清理 + `ActiveTasks.Reset()` |
+| **Block & Cancel** | 三组 Tag + 两个 GE 类，冷却/消耗本质都是 GE |
 
-**下篇预告**：`ActivateAbility` 之后发生了什么？走进 AbilityTask 的世界——WaitDelay、PlayMontageAndWait、WaitGameplayEvent、WaitAttributeChange，以及输入绑定、瞄准系统和网络预测机制。
+下一篇进入 GA 的运行时子系统——AbilityTask 体系、技能输入绑定、瞄准系统与网络预测。
 
-[返回系列目录](../README.md)
+**上一篇**：[06 | GameplayEffect — 效果与计算 (下)](../06-GameplayEffect/06-GameplayEffect文章.md)
+
+**下一篇**：[08 | GameplayAbility — Task/输入/预测 (下)](../08-GameplayAbility/08-GameplayAbility文章.md) —— 拆解 AbilityTask 工厂模式、`AbilityLocalInputPressed/Released` 输入路由、TargetActor 瞄准与 `FPredictionKey` 预测。
+
+---
+
+*本文基于 UE 5.8 源码分析。系列文章会继续按模块拆解，从基础到高级，从 API 到设计哲学。*
