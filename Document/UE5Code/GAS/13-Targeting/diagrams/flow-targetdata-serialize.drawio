@@ -1,0 +1,73 @@
+<mxfile host="65bd71144e">
+    <diagram id="v-hVhAOlj5vml5DK2Xbb" name="第 1 页">
+        <mxGraphModel dx="1348" dy="1008" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="900" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="t" value="FGameplayAbilityTargetDataHandle 多态序列化 —— 先传类型、再传数据" style="text;html=1;fontSize=22;fontStyle=1;fontColor=#1a1a2e;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="250" y="10" width="900" height="36" as="geometry"/>
+                </mxCell>
+                <mxCell id="st1" value="&lt;b&gt;发送端（Saving）&lt;/b&gt;" style="text;html=1;fontSize=13;fontColor=#E65100;fontStyle=1;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="80" y="60" width="500" height="24" as="geometry"/>
+                </mxCell>
+                <mxCell id="n1" value="① Ar &lt;&lt; UniqueId&#10;+ DataNum（数据源数量）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#FB8C00;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="80" y="90" width="280" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="a1" value="" style="endArrow=block;endFill=1;strokeWidth=1.5;" parent="1" source="n1" target="n2" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="n2" value="② 对每个元素：GetScriptStruct()&#10;拿到具体子类类型" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#FB8C00;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="80" y="160" width="280" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="a2" value="" style="endArrow=block;endFill=1;strokeWidth=1.5;" parent="1" source="n2" target="n3" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="n3" value="③ TargetDataStructCache.NetSerialize()&#10;序列化「类型」" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#FB8C00;fontSize=12;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="80" y="230" width="280" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="a3" value="" style="endArrow=block;endFill=1;strokeWidth=1.5;" parent="1" source="n3" target="n4" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="n4" value="④ STRUCT_NetSerializeNative?&#10;→ 调子类的 NetSerialize 序列化数据" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#FB8C00;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="80" y="300" width="280" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="st2" value="&lt;b&gt;接收端（Loading）&lt;/b&gt;" style="text;html=1;fontSize=13;fontColor=#0D47A1;fontStyle=1;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="900" y="60" width="420" height="24" as="geometry"/>
+                </mxCell>
+                <mxCell id="m1" value="⑤ 读出 DataNum → SetNum" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1E88E5;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="900" y="90" width="280" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="am1" value="" style="endArrow=block;endFill=1;strokeWidth=1.5;" parent="1" source="m1" target="m2" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="m2" value="⑥ 读出「类型」→ 知道是哪个子类&#10;malloc(GetStructureSize()) + InitializeStruct" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1E88E5;fontSize=12;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="900" y="155" width="300" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="am2" value="" style="endArrow=block;endFill=1;strokeWidth=1.5;" parent="1" source="m2" target="m3" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="m3" value="⑦ 按子类 NetSerialize 反序列化数据" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1E88E5;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="900" y="225" width="280" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="am3" value="" style="endArrow=block;endFill=1;strokeWidth=1.5;" parent="1" source="m3" target="m4" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="m4" value="⑧ 用 FGameplayAbilityTargetDataDeleter&#10;（DestroyStruct + Free）析构" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1E88E5;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="900" y="290" width="300" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="cross" value="网络传输" style="endArrow=blockThin;endFill=1;strokeWidth=2;strokeColor=#82b366;fontSize=12;fontColor=#82b366;fontStyle=1;edgeStyle=orthogonalEdgeStyle;" parent="1" source="n4" target="m1" edge="1">
+                    <mxGeometry x="-0.4684" y="-2" relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="730" y="328"/>
+                            <mxPoint x="730" y="115"/>
+                        </Array>
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="note" value="&lt;b&gt;关键点&lt;/b&gt;&lt;br&gt;▸ 先传「类型」（TargetDataStructCache），再传「数据」——接收方才知道该反序列化成哪个子类&lt;br&gt;▸ 加载时 malloc(GetStructureSize()) + InitializeStruct，因为事先不知道类型、不知道大小&lt;br&gt;▸ 自定义 Deleter：TSharedPtr 默认 delete 不认识多态 USTRUCT，必须 DestroyStruct + Free&lt;br&gt;▸ 没有原生 NetSerialize 的子类直接 Fatal（WithNetSerializer = true 是 REQUIRED）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF9C4;strokeColor=#F57F17;strokeWidth=1;fontSize=11;verticalAlign=top;spacingTop=8;" parent="1" vertex="1">
+                    <mxGeometry x="80" y="420" width="1120" height="100" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

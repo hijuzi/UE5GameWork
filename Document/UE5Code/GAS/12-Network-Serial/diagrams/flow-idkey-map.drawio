@@ -1,0 +1,72 @@
+<mxfile host="65bd71144e">
+    <diagram id="EMGXy8ObRffIO1jWRpaz" name="第 1 页">
+        <mxGraphModel dx="982" dy="857" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1500" pageHeight="760" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="t" value="ReplicationID vs 索引 —— 身份稳定、位置可变" style="text;html=1;fontSize=22;fontStyle=1;fontColor=#1a1a2e;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="250" y="10" width="1000" height="36" as="geometry"/>
+                </mxCell>
+                <mxCell id="st1" value="&lt;b&gt;服务器（删除 B 前）&lt;/b&gt;" style="text;html=1;fontSize=13;fontColor=#E65100;fontStyle=1;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="70" width="400" height="24" as="geometry"/>
+                </mxCell>
+                <mxCell id="a1" value="A&#10;[ID=1]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#FB8C00;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="100" width="90" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="b1" value="B&#10;[ID=2]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#FB8C00;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="160" y="100" width="90" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="c1" value="C&#10;[ID=3]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#FB8C00;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="270" y="100" width="90" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="d1" value="D&#10;[ID=4]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#FB8C00;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="380" y="100" width="90" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="idx1" value="索引: 0  1  2  3" style="text;html=1;fontSize=11;fontColor=#999;align=center;fontStyle=2;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="180" width="400" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="st2" value="&lt;b&gt;服务器（删除 B 后）&lt;/b&gt;" style="text;html=1;fontSize=13;fontColor=#E65100;fontStyle=1;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="220" width="400" height="24" as="geometry"/>
+                </mxCell>
+                <mxCell id="a2" value="A&#10;[ID=1]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#FB8C00;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="250" width="90" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="c2" value="C&#10;[ID=3]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#FB8C00;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="160" y="250" width="90" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="d2" value="D&#10;[ID=4]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#FB8C00;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="260" y="250" width="90" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="idx2" value="索引: 0  1  2  ← C 的索引从 2 变成 1，但 ID 仍是 3" style="text;html=1;fontSize=11;fontColor=#CC0000;align=center;fontStyle=2;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="320" width="400" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="arrow" value="删除 B (ID=2)" style="endArrow=blockThin;endFill=1;strokeWidth=2;strokeColor=#CC0000;dashed=1;fontSize=11;fontColor=#CC0000;edgeStyle=orthogonalEdgeStyle;" parent="1" source="st1" target="st2" edge="1">
+                    <mxGeometry x="0.2063" relative="1" as="geometry">
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="st3" value="&lt;b&gt;客户端（含预测元素 X）&lt;/b&gt;" style="text;html=1;fontSize=13;fontColor=#0D47A1;fontStyle=1;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="900" y="70" width="500" height="24" as="geometry"/>
+                </mxCell>
+                <mxCell id="ca" value="A&#10;[ID=1]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1E88E5;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="900" y="100" width="90" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="cb" value="B&#10;[ID=2]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1E88E5;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="1000" y="100" width="90" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="cx" value="X&#10;[预测]&#10;无 ID" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#66BB6A;fontSize=12;dashed=1;" parent="1" vertex="1">
+                    <mxGeometry x="1100" y="100" width="90" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="cc" value="C&#10;[ID=3]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1E88E5;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="1200" y="100" width="90" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="idx3" value="索引: 0  1  2  3  ← 客户端索引与服务器不同，但 ID 对齐" style="text;html=1;fontSize=11;fontColor=#0D47A1;align=center;fontStyle=2;" parent="1" vertex="1">
+                    <mxGeometry x="900" y="160" width="500" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="note" value="&lt;b&gt;核心结论&lt;/b&gt;&lt;br&gt;▸ ReplicationID 是「身份」，复制且在两端同步；删除/插入只影响「索引」&lt;br&gt;▸ 预测元素 X 无 ReplicationID，通过 ItemMap.Reset() 不参与复制对比&lt;br&gt;▸ 服务器说「删 ID=2」，客户端按 ID 找到 B 删除，索引错位不影响正确性" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF9C4;strokeColor=#F57F17;strokeWidth=1;fontSize=11;verticalAlign=top;spacingTop=8;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="360" width="1340" height="80" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

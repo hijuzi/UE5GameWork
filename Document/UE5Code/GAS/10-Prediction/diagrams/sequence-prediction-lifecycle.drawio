@@ -1,0 +1,209 @@
+<mxfile host="65bd71144e">
+  <diagram name="GAS Prediction Lifecycle" id="gas-prediction-sequence">
+    <mxGraphModel dx="1382" dy="1504" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1080" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="title" value="GAS 预测生命周期 — Client/Server 时序图" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontSize=16;fontStyle=1;fontColor=#222222;" parent="1" vertex="1">
+          <mxGeometry x="240" y="12" width="600" height="28" as="geometry"/>
+        </mxCell>
+        <mxCell id="legend" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FAFAFA;strokeColor=#BBBBBB;arcSize=12;" parent="1" vertex="1">
+          <mxGeometry x="820" y="4" width="230" height="44" as="geometry"/>
+        </mxCell>
+        <mxCell id="leg-t" value="图例" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=9;fontStyle=1;fontColor=#888888;" parent="1" vertex="1">
+          <mxGeometry x="828" y="6" width="30" height="14" as="geometry"/>
+        </mxCell>
+        <mxCell id="leg-a1" value="" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#2E7DFF;" parent="1" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="828" y="32" as="sourcePoint"/>
+            <mxPoint x="858" y="32" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="leg-t1" value="调用" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=9;fontColor=#555;" parent="1" vertex="1">
+          <mxGeometry x="862" y="24" width="26" height="14" as="geometry"/>
+        </mxCell>
+        <mxCell id="leg-a2" value="" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#FF8C00;" parent="1" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="902" y="32" as="sourcePoint"/>
+            <mxPoint x="932" y="32" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="leg-t2" value="复制" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=9;fontColor=#555;" parent="1" vertex="1">
+          <mxGeometry x="936" y="24" width="26" height="14" as="geometry"/>
+        </mxCell>
+        <mxCell id="leg-a3" value="" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#CC0000;dashed=1;dashPattern=4 4;" parent="1" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="976" y="32" as="sourcePoint"/>
+            <mxPoint x="1006" y="32" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="leg-t3" value="回滚" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=9;fontColor=#555;" parent="1" vertex="1">
+          <mxGeometry x="1010" y="24" width="26" height="14" as="geometry"/>
+        </mxCell>
+        <mxCell id="h-c" value="客户端 (Client)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1E88E5;fontSize=13;fontStyle=1;fontColor=#0D47A1;arcSize=14;" parent="1" vertex="1">
+          <mxGeometry x="40" y="80" width="200" height="32" as="geometry"/>
+        </mxCell>
+        <mxCell id="h-s" value="服务器 (Server)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#FB8C00;fontSize=13;fontStyle=1;fontColor=#E65100;arcSize=14;" parent="1" vertex="1">
+          <mxGeometry x="740" y="80" width="200" height="32" as="geometry"/>
+        </mxCell>
+        <mxCell id="ll-c" value="" style="endArrow=none;html=1;strokeWidth=1;strokeColor=#90CAF9;dashed=1;dashPattern=5 5;" parent="1" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="140" y="112" as="sourcePoint"/>
+            <mxPoint x="140" y="1050" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ll-s" value="" style="endArrow=none;html=1;strokeWidth=1;strokeColor=#FFCC80;dashed=1;dashPattern=5 5;" parent="1" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="840" y="112" as="sourcePoint"/>
+            <mxPoint x="840" y="1050" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 客户端：生成预测键 -->
+        <mxCell id="s1" value="① 生成 FPredictionKey (CreateNewPredictionKey)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1E88E5;fontSize=11;fontColor=#0D47A1;arcSize=10;" parent="1" vertex="1">
+          <mxGeometry x="40" y="136" width="240" height="28" as="geometry"/>
+        </mxCell>
+        <mxCell id="a1" value="" style="endArrow=classic;html=1;strokeWidth=1;strokeColor=#BDBDBD;" parent="1" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="140" y="164" as="sourcePoint"/>
+            <mxPoint x="140" y="184" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 客户端：本地预测执行 -->
+        <mxCell id="s2" value="② 本地预测执行 ActivateAbility + 副作用 (GE/GC/Tag)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1E88E5;fontSize=11;fontColor=#0D47A1;arcSize=10;" parent="1" vertex="1">
+          <mxGeometry x="40" y="188" width="320" height="28" as="geometry"/>
+        </mxCell>
+        <mxCell id="a2" value="" style="endArrow=classic;html=1;strokeWidth=1;strokeColor=#BDBDBD;" parent="1" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="140" y="216" as="sourcePoint"/>
+            <mxPoint x="140" y="236" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- RPC：ServerTryActivateAbility -->
+        <mxCell id="ar3" value="" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#2E7DFF;" parent="1" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="140" y="264" as="sourcePoint"/>
+            <mxPoint x="840" y="264" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ar3l" value="③ ServerTryActivateAbility (RPC, 带 PredictionKey)" style="text;html=1;strokeColor=#BBDEFB;fillColor=#FFFFFF;align=center;verticalAlign=middle;whiteSpace=wrap;fontSize=9;fontColor=#1565C0;fontStyle=1;rounded=1;arcSize=20;" parent="1" vertex="1">
+          <mxGeometry x="330" y="246" width="320" height="16" as="geometry"/>
+        </mxCell>
+
+        <!-- 服务器：权威检查 -->
+        <mxCell id="b4" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#FB8C00;arcSize=10;" parent="1" vertex="1">
+          <mxGeometry x="740" y="300" width="280" height="52" as="geometry"/>
+        </mxCell>
+        <mxCell id="t4h" value="④ 权威 CanActivateAbility() 检查" style="text;html=1;strokeColor=none;fillColor=none;fontSize=10;fontColor=#E65100;fontStyle=1;align=left;" parent="1" vertex="1">
+          <mxGeometry x="752" y="304" width="256" height="16" as="geometry"/>
+        </mxCell>
+        <mxCell id="t4a" value="⑤ 决定激活 → Succeed / Failed" style="text;html=1;strokeColor=none;fillColor=none;fontSize=10;fontColor=#E65100;fontStyle=1;align=left;" parent="1" vertex="1">
+          <mxGeometry x="752" y="326" width="256" height="16" as="geometry"/>
+        </mxCell>
+
+        <!-- 失败分支 -->
+        <mxCell id="s5" value="⑥ Failed: ClientActivateAbilityFailed (RPC)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#FB8C00;fontSize=10;fontColor=#E65100;arcSize=10;" parent="1" vertex="1">
+          <mxGeometry x="740" y="380" width="300" height="28" as="geometry"/>
+        </mxCell>
+        <mxCell id="ar5" value="" style="endArrow=classic;html=1;strokeWidth=1.5;strokeColor=#CC0000;dashed=1;dashPattern=6 4;" parent="1" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="840" y="408" as="sourcePoint"/>
+            <mxPoint x="140" y="408" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ar5l" value="服务器拒绝" style="text;html=1;strokeColor=#FFCDD2;fillColor=#FFFFFF;align=center;verticalAlign=middle;whiteSpace=wrap;fontSize=9;fontColor=#CC0000;fontStyle=1;rounded=1;arcSize=20;" parent="1" vertex="1">
+          <mxGeometry x="420" y="392" width="120" height="16" as="geometry"/>
+        </mxCell>
+
+        <!-- 客户端回滚 -->
+        <mxCell id="b6" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1E88E5;arcSize=10;" parent="1" vertex="1">
+          <mxGeometry x="40" y="430" width="300" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="t6h" value="⑦ BroadcastRejectedDelegate" style="text;html=1;strokeColor=none;fillColor=none;fontSize=10;fontColor=#0D47A1;fontStyle=1;align=left;" parent="1" vertex="1">
+          <mxGeometry x="52" y="434" width="276" height="16" as="geometry"/>
+        </mxCell>
+        <mxCell id="t6a" value="→ 回滚预测副作用 (Undo)" style="text;html=1;strokeColor=none;fillColor=none;fontSize=9;fontColor=#1565C0;align=left;" parent="1" vertex="1">
+          <mxGeometry x="52" y="456" width="276" height="16" as="geometry"/>
+        </mxCell>
+        <mxCell id="t6b" value="→ 结束技能" style="text;html=1;strokeColor=none;fillColor=none;fontSize=9;fontColor=#1565C0;align=left;" parent="1" vertex="1">
+          <mxGeometry x="52" y="478" width="276" height="16" as="geometry"/>
+        </mxCell>
+
+        <!-- 成功分支 -->
+        <mxCell id="s7" value="⑧ Succeed: ClientActivateAbilitySucceed (RPC)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#FB8C00;fontSize=10;fontColor=#E65100;arcSize=10;" parent="1" vertex="1">
+          <mxGeometry x="740" y="540" width="300" height="28" as="geometry"/>
+        </mxCell>
+        <mxCell id="ar7" value="" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#2E7DFF;" parent="1" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="840" y="568" as="sourcePoint"/>
+            <mxPoint x="140" y="568" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ar7l" value="服务器确认 (立即到达)" style="text;html=1;strokeColor=#BBDEFB;fillColor=#FFFFFF;align=center;verticalAlign=middle;whiteSpace=wrap;fontSize=9;fontColor=#1565C0;fontStyle=1;rounded=1;arcSize=20;" parent="1" vertex="1">
+          <mxGeometry x="400" y="552" width="180" height="16" as="geometry"/>
+        </mxCell>
+
+        <!-- 客户端等待 -->
+        <mxCell id="s8" value="⑨ 等待属性复制追上 (ReplicatedPredictionKey)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1E88E5;fontSize=11;fontColor=#0D47A1;arcSize=10;" parent="1" vertex="1">
+          <mxGeometry x="40" y="610" width="320" height="28" as="geometry"/>
+        </mxCell>
+        <mxCell id="a8" value="" style="endArrow=classic;html=1;strokeWidth=1;strokeColor=#BDBDBD;" parent="1" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="140" y="638" as="sourcePoint"/>
+            <mxPoint x="140" y="658" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 复制权威 GE -->
+        <mxCell id="ar9" value="" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#FF8C00;" parent="1" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="840" y="692" as="sourcePoint"/>
+            <mxPoint x="140" y="692" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ar9l" value="⑩ 服务器权威 GE/属性 复制到客户端" style="text;html=1;strokeColor=#FFE0B2;fillColor=#FFFFFF;align=center;verticalAlign=middle;whiteSpace=wrap;fontSize=9;fontColor=#E65100;fontStyle=1;rounded=1;arcSize=20;" parent="1" vertex="1">
+          <mxGeometry x="360" y="676" width="260" height="16" as="geometry"/>
+        </mxCell>
+
+        <!-- CatchUp -->
+        <mxCell id="b11" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1E88E5;arcSize=10;" parent="1" vertex="1">
+          <mxGeometry x="40" y="720" width="300" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="t11h" value="⑪ FReplicatedPredictionKeyItem::OnRep" style="text;html=1;strokeColor=none;fillColor=none;fontSize=10;fontColor=#0D47A1;fontStyle=1;align=left;" parent="1" vertex="1">
+          <mxGeometry x="52" y="724" width="276" height="16" as="geometry"/>
+        </mxCell>
+        <mxCell id="t11a" value="→ CatchUpTo → 撤销本地预测副作用" style="text;html=1;strokeColor=none;fillColor=none;fontSize=9;fontColor=#1565C0;align=left;" parent="1" vertex="1">
+          <mxGeometry x="52" y="746" width="276" height="16" as="geometry"/>
+        </mxCell>
+        <mxCell id="t11b" value="→ 换用服务器权威状态 (Redo)" style="text;html=1;strokeColor=none;fillColor=none;fontSize=9;fontColor=#1565C0;align=left;" parent="1" vertex="1">
+          <mxGeometry x="52" y="768" width="276" height="16" as="geometry"/>
+        </mxCell>
+
+        <!-- 关键设计点 -->
+        <mxCell id="ins" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#AB47BC;arcSize=10;" parent="1" vertex="1">
+          <mxGeometry x="40" y="820" width="940" height="150" as="geometry"/>
+        </mxCell>
+        <mxCell id="insh" value="关键设计点" style="text;html=1;strokeColor=none;fillColor=none;fontSize=11;fontStyle=1;fontColor=#6A1B9A;align=left;" parent="1" vertex="1">
+          <mxGeometry x="56" y="824" width="90" height="16" as="geometry"/>
+        </mxCell>
+        <mxCell id="ins1" value="① Undo（拒绝）：ClientActivateAbilityFailed → BroadcastRejectedDelegate，立即回滚" style="text;html=1;strokeColor=none;fillColor=none;fontSize=9;fontColor=#4A148C;align=left;" parent="1" vertex="1">
+          <mxGeometry x="56" y="848" width="440" height="16" as="geometry"/>
+        </mxCell>
+        <mxCell id="ins2" value="② Redo（确认）：Succeed RPC 立即到达，但属性复制几帧后才到" style="text;html=1;strokeColor=none;fillColor=none;fontSize=9;fontColor=#4A148C;align=left;" parent="1" vertex="1">
+          <mxGeometry x="56" y="872" width="440" height="16" as="geometry"/>
+        </mxCell>
+        <mxCell id="ins3" value="③ 真正撤销本地预测，要等 ReplicatedPredictionKey 追上 (OnRep → CatchUpTo)" style="text;html=1;strokeColor=none;fillColor=none;fontSize=9;fontColor=#4A148C;align=left;" parent="1" vertex="1">
+          <mxGeometry x="520" y="848" width="440" height="16" as="geometry"/>
+        </mxCell>
+        <mxCell id="ins4" value="④ FPredictionKey 只回传给发起它的客户端 (NetSerialize)" style="text;html=1;strokeColor=none;fillColor=none;fontSize=9;fontColor=#4A148C;align=left;" parent="1" vertex="1">
+          <mxGeometry x="520" y="872" width="440" height="16" as="geometry"/>
+        </mxCell>
+        <mxCell id="ins5" value="⑤ 预测窗口仅限 ActivateAbility 调用栈，不跨帧 (Timer/latent 会失效)" style="text;html=1;strokeColor=none;fillColor=none;fontSize=9;fontColor=#4A148C;align=left;" parent="1" vertex="1">
+          <mxGeometry x="56" y="896" width="560" height="16" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

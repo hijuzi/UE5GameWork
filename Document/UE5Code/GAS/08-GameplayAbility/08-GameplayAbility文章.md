@@ -132,6 +132,10 @@ void ReadyForActivation();
       → Activate()（protected 虚函数，子类 override，真正启动）
 ```
 
+![AbilityTask 继承与激活机制](diagrams/class-abilitytask-hierarchy.png)
+
+*图：AbilityTask 继承体系与生命周期 —— UGameplayTask → UAbilityTask（抽象基类，未重新声明 Activate）→ 具体子类（override Activate）；右侧为「创建 → 绑定委托 → ReadyForActivation → Activate」激活链路与「广播委托 → EndTask → TaskOwnerEnded」清理链路*
+
 **在 C++ 里手动使用 Task** 时，正确姿势是调用 `ReadyForActivation()`，而不是 `Activate()`（后者是 protected，外部无法调用）：
 
 ```cpp
@@ -289,6 +293,10 @@ WaitTargetData（确认类型=UserConfirmed，TargetActor=某瞄准 Actor）
 ```
 
 配合 `WaitConfirmCancel`，就实现了"瞄准 → 等确认 → 释放"的完整循环。
+
+![瞄准系统交互时序](diagrams/sequence-targeting.png)
+
+*图：瞄准系统交互时序 —— 技能调用 WaitTargetData → Task 激活 → Spawn TargetActor + 注册委托 → StartTargeting → 玩家瞄准产生 TargetData；`alt` 分支区分 Instant（立即 ConfirmTargeting）与 UserConfirmed（绑定确认/取消输入）；数据就绪经 TargetDataReadyDelegate → ValidData.Broadcast 回到蓝图，取消走 CanceledDelegate → Cancelled.Broadcast*
 
 ### 5.4 FGameplayAbilityTargetData：目标数据的真实形态
 

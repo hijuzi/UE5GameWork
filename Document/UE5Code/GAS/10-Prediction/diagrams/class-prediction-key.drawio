@@ -1,0 +1,87 @@
+<mxGraphModel page="1" pageWidth="1600" pageHeight="900" gridSize="10">
+<root>
+<mxCell id="0"/><mxCell id="1" parent="0"/>
+
+<mxCell id="t" value="FPredictionKey 结构 —— 字段 / 委托 / 依赖链 (Base Key)" style="text;html=1;fontSize=22;fontStyle=1;fontColor=#1a1a2e;align=center;" vertex="1" parent="1">
+  <mxGeometry x="250" y="10" width="1100" height="36" as="geometry"/>
+</mxCell>
+
+<!-- FPredictionKey 结构 -->
+<mxCell id="s1" value="&lt;b style=&quot;font-size:16px;&quot;&gt;FPredictionKey&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px;color:#555;&quot;&gt;对账令牌 · USTRUCT&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#999;&quot;&gt;─────────────────────────────&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px;&quot;&gt;▸ +Current: int16 (唯一 ID)&lt;br&gt;▸ +Base: int16 (NotReplicated, 依赖链根)&lt;br&gt;▸ +bIsServerInitiated: bool&lt;br&gt;▸ -PredictiveConnectionObjectKey: FObjectKey&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;fontSize=12;arcSize=14;verticalAlign=top;spacingTop=10;" vertex="1" parent="1">
+  <mxGeometry x="60" y="70" width="340" height="190" as="geometry"/>
+</mxCell>
+
+<!-- 委托机制 -->
+<mxCell id="s2" value="&lt;b style=&quot;font-size:16px;&quot;&gt;回滚钩子&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px;color:#555;&quot;&gt;Undo / Redo 入口&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#999;&quot;&gt;─────────────────────────────&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px;&quot;&gt;▸ NewRejectedDelegate() — 明确拒绝&lt;br&gt;▸ NewCaughtUpDelegate() — 状态追上&lt;br&gt;▸ NewRejectOrCaughtUpDelegate() — 任一&lt;br&gt;&lt;font color=&quot;#b85450&quot;&gt;▸ 转发到 FPredictionKeyDelegates&lt;/font&gt;&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=2;fontSize=12;arcSize=14;verticalAlign=top;spacingTop=10;" vertex="1" parent="1">
+  <mxGeometry x="60" y="320" width="340" height="180" as="geometry"/>
+</mxCell>
+
+<mxCell id="e12" value="提供" style="endArrow=blockThin;endFill=1;strokeWidth=2;strokeColor=#7F8C8D;fontSize=11;fontColor=#7F8C8D;fontStyle=1;labelBackgroundColor=#FFF;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="s1" target="s2"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+<!-- FPredictionKeyDelegates -->
+<mxCell id="s3" value="&lt;b style=&quot;font-size:16px;&quot;&gt;FPredictionKeyDelegates&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px;color:#555;&quot;&gt;委托注册表 (静态单例)&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#999;&quot;&gt;─────────────────────────────&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px;&quot;&gt;▸ DelegateMap: TMap&amp;lt;KeyType, FDelegates&amp;gt;&lt;br&gt;▸ RejectedDelegates[] / CaughtUpDelegates[]&lt;br&gt;▸ Reject(Key) / CatchUpTo(Key)&lt;br&gt;▸ AddDependency(ThisKey, DependsOn)&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;strokeWidth=2;fontSize=12;arcSize=14;verticalAlign=top;spacingTop=10;" vertex="1" parent="1">
+  <mxGeometry x="500" y="320" width="360" height="180" as="geometry"/>
+</mxCell>
+
+<mxCell id="e23" value="委托转发" style="endArrow=blockThin;endFill=1;strokeWidth=2;strokeColor=#b85450;fontSize=11;fontColor=#b85450;fontStyle=1;labelBackgroundColor=#FFF;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="s2" target="s3"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+<!-- 依赖链 -->
+<mxCell id="ctx" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#82b366;strokeWidth=2;dashed=1;arcSize=14;" vertex="1" parent="1">
+  <mxGeometry x="500" y="70" width="1020" height="220" as="geometry"/>
+</mxCell>
+<mxCell id="ctxlab" value="&lt;b&gt;依赖链&lt;/b&gt; — X → Y → Z 的 Base Key 与回滚传播" style="text;html=1;fontSize=13;fontColor=#82b366;fontStyle=1;align=center;" vertex="1" parent="1">
+  <mxGeometry x="500" y="72" width="1020" height="22" as="geometry"/>
+</mxCell>
+
+<mxCell id="kx" value="&lt;b&gt;GA_X&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px;&quot;&gt;Key [1/0]&lt;br&gt;Base=0&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;verticalAlign=middle;" vertex="1" parent="1">
+  <mxGeometry x="540" y="110" width="200" height="80" as="geometry"/>
+</mxCell>
+
+<mxCell id="ky" value="&lt;b&gt;GA_Y&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px;&quot;&gt;Key [2/1]&lt;br&gt;Base=1 (X)&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;verticalAlign=middle;" vertex="1" parent="1">
+  <mxGeometry x="800" y="110" width="200" height="80" as="geometry"/>
+</mxCell>
+
+<mxCell id="kz" value="&lt;b&gt;GA_Z&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px;&quot;&gt;Key [3/1]&lt;br&gt;Base=1 (X)&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;verticalAlign=middle;" vertex="1" parent="1">
+  <mxGeometry x="1060" y="110" width="200" height="80" as="geometry"/>
+</mxCell>
+
+<mxCell id="cxy" value="触发" style="endArrow=blockThin;endFill=1;strokeWidth=2;strokeColor=#82b366;fontSize=11;fontColor=#82b366;labelBackgroundColor=#FFF;" edge="1" parent="1" source="kx" target="ky"><mxGeometry relative="1" as="geometry"/></mxCell>
+<mxCell id="cyz" value="触发" style="endArrow=blockThin;endFill=1;strokeWidth=2;strokeColor=#82b366;fontSize=11;fontColor=#82b366;labelBackgroundColor=#FFF;" edge="1" parent="1" source="ky" target="kz"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+<mxCell id="depnote" value="&lt;b&gt;AddDependency(Z, Y)&lt;/b&gt;: 若 Y 被 Reject，则 Z 也 Reject&lt;br&gt;&lt;font style=&quot;font-size:11px;&quot;&gt;依赖关系只在客户端维护，服务器不知道依赖链&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff9c4;strokeColor=#F57F17;strokeWidth=1;fontSize=12;verticalAlign=middle;" vertex="1" parent="1">
+  <mxGeometry x="540" y="230" width="720" height="50" as="geometry"/>
+</mxCell>
+
+<!-- 图例 -->
+<mxCell id="leg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;strokeWidth=1;arcSize=14;" vertex="1" parent="1">
+  <mxGeometry x="60" y="550" width="340" height="200" as="geometry"/>
+</mxCell>
+<mxCell id="leglab" value="&lt;b&gt;图例&lt;/b&gt;" style="text;html=1;fontSize=13;fontColor=#333333;align=center;" vertex="1" parent="1">
+  <mxGeometry x="190" y="558" width="80" height="20" as="geometry"/>
+</mxCell>
+<mxCell id="leg1" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;arcSize=10;" vertex="1" parent="1">
+  <mxGeometry x="80" y="585" width="24" height="14" as="geometry"/>
+</mxCell>
+<mxCell id="leg1t" value="FPredictionKey (对账令牌)" style="text;html=1;fontSize=10;fontColor=#6c8ebf;align=left;" vertex="1" parent="1">
+  <mxGeometry x="112" y="583" width="280" height="18" as="geometry"/>
+</mxCell>
+<mxCell id="leg2" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=2;arcSize=10;" vertex="1" parent="1">
+  <mxGeometry x="80" y="610" width="24" height="14" as="geometry"/>
+</mxCell>
+<mxCell id="leg2t" value="回滚钩子 (Undo/Redo)" style="text;html=1;fontSize=10;fontColor=#d6b656;align=left;" vertex="1" parent="1">
+  <mxGeometry x="112" y="608" width="280" height="18" as="geometry"/>
+</mxCell>
+<mxCell id="leg3" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;strokeWidth=2;arcSize=10;" vertex="1" parent="1">
+  <mxGeometry x="80" y="635" width="24" height="14" as="geometry"/>
+</mxCell>
+<mxCell id="leg3t" value="委托注册表" style="text;html=1;fontSize=10;fontColor=#b85450;align=left;" vertex="1" parent="1">
+  <mxGeometry x="112" y="633" width="280" height="18" as="geometry"/>
+</mxCell>
+<mxCell id="leg4" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;arcSize=10;" vertex="1" parent="1">
+  <mxGeometry x="80" y="660" width="24" height="14" as="geometry"/>
+</mxCell>
+<mxCell id="leg4t" value="依赖链节点 (Base Key)" style="text;html=1;fontSize=10;fontColor=#82b366;align=left;" vertex="1" parent="1">
+  <mxGeometry x="112" y="658" width="280" height="18" as="geometry"/>
+</mxCell>
+
+</root></mxGraphModel>

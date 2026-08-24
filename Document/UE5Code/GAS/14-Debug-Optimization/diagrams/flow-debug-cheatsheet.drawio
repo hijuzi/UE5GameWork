@@ -1,0 +1,82 @@
+<mxfile host="65bd71144e">
+    <diagram id="1LyutuoDX-fUU8PZa0Y9" name="第 1 页">
+        <mxGraphModel dx="554" dy="591" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1500" pageHeight="900" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="t" value="GAS 调试工具速查 —— 四子视图 / HUD 命令 / 全局开关" style="text;html=1;fontSize=22;fontStyle=1;fontColor=#1a1a2e;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="250" y="10" width="1000" height="36" as="geometry"/>
+                </mxCell>
+                <mxCell id="grp1" value="&lt;b&gt;GameplayDebugger 四子视图&lt;/b&gt;&lt;br&gt;（按 ' 呼出，Shift+数字切换）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1E88E5;strokeWidth=2;fontSize=13;verticalAlign=top;spacingTop=6;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="70" width="420" height="340" as="geometry"/>
+                </mxCell>
+                <mxCell id="g1a" value="Shift+1 → Tags（拥有 Tag + 计数）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1E88E5;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="110" width="380" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="g1b" value="Shift+2 → Abilities（等级/激活/来源）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1E88E5;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="165" width="380" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="g1c" value="Shift+3 → Effects（时长/周期/层数）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1E88E5;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="220" width="380" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="g1d" value="Shift+4 → Attributes（含网络状态）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1E88E5;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="275" width="380" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="g1e" value="颜色：ServerOnly(橙) / LocalOnly(蓝) / Both" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF9C4;strokeColor=#F57F17;strokeWidth=1;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="335" width="380" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="grp2" value="&lt;b&gt;HUD 调试命令&lt;/b&gt;&lt;br&gt;（#if !UE_BUILD_SHIPPING）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#FB8C00;strokeWidth=2;fontSize=13;verticalAlign=top;spacingTop=6;" parent="1" vertex="1">
+                    <mxGeometry x="500" y="70" width="460" height="340" as="geometry"/>
+                </mxCell>
+                <mxCell id="g2a" value="AbilitySystem.DebugBasicHUD" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#FB8C00;fontSize=11;fontStyle=1;align=left;spacingLeft=8;" parent="1" vertex="1">
+                    <mxGeometry x="520" y="110" width="420" height="26" as="geometry"/>
+                </mxCell>
+                <mxCell id="g2b" value="AbilitySystem.DebugAbilityTags [Tag]..." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#FB8C00;fontSize=11;fontStyle=1;align=left;spacingLeft=8;" parent="1" vertex="1">
+                    <mxGeometry x="520" y="145" width="420" height="26" as="geometry"/>
+                </mxCell>
+                <mxCell id="g2c" value="AbilitySystem.DebugAttribute [Attr]..." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#FB8C00;fontSize=11;fontStyle=1;align=left;spacingLeft=8;" parent="1" vertex="1">
+                    <mxGeometry x="520" y="180" width="420" height="26" as="geometry"/>
+                </mxCell>
+                <mxCell id="g2d" value="AbilitySystem.ClearDebugAttributes" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#FB8C00;fontSize=11;fontStyle=1;align=left;spacingLeft=8;" parent="1" vertex="1">
+                    <mxGeometry x="520" y="215" width="420" height="26" as="geometry"/>
+                </mxCell>
+                <mxCell id="g2e" value="AbilitySystem.DebugIncludeModifiers" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#FB8C00;fontSize=11;fontStyle=1;align=left;spacingLeft=8;" parent="1" vertex="1">
+                    <mxGeometry x="520" y="250" width="420" height="26" as="geometry"/>
+                </mxCell>
+                <mxCell id="g2f" value="AbilitySystem.DebugBlockedAbilityTags [Tag]..." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#FB8C00;fontSize=11;fontStyle=1;align=left;spacingLeft=8;" parent="1" vertex="1">
+                    <mxGeometry x="520" y="285" width="420" height="26" as="geometry"/>
+                </mxCell>
+                <mxCell id="g2g" value="CVar: AbilitySystem.DebugDrawMaxDistance = 2048" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF9C4;strokeColor=#F57F17;strokeWidth=1;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="520" y="335" width="420" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="grp3" value="&lt;b&gt;全局开关（AbilitySystemGlobals）&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#66BB6A;strokeWidth=2;fontSize=13;verticalAlign=top;spacingTop=6;" parent="1" vertex="1">
+                    <mxGeometry x="1000" y="70" width="440" height="340" as="geometry"/>
+                </mxCell>
+                <mxCell id="g3a" value="ShouldIgnoreCooldowns()&#10;→ 调试时无视冷却" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#66BB6A;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="1020" y="110" width="400" height="45" as="geometry"/>
+                </mxCell>
+                <mxCell id="g3b" value="ShouldIgnoreCosts()&#10;→ 调试时无视消耗" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#66BB6A;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="1020" y="170" width="400" height="45" as="geometry"/>
+                </mxCell>
+                <mxCell id="g3c" value="ShouldReplicateActivationOwnedTags()&#10;→ 激活拥有 Tag 是否复制" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#66BB6A;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="1020" y="230" width="400" height="45" as="geometry"/>
+                </mxCell>
+                <mxCell id="g3d" value="⚠️ 均「Always returns false in shipping builds」" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFEBEE;strokeColor=#E53935;strokeWidth=1;fontSize=11;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="1020" y="295" width="400" height="45" as="geometry"/>
+                </mxCell>
+                <mxCell id="grp4" value="&lt;b&gt;性能剖析&lt;/b&gt;&lt;br&gt;STATGROUP_AbilitySystem" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#AB47BC;strokeWidth=2;fontSize=13;verticalAlign=top;spacingTop=6;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="460" width="1400" height="200" as="geometry"/>
+                </mxCell>
+                <mxCell id="g4a" value="DECLARE_CYCLE_STAT → stat AbilitySystem 查看" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#AB47BC;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="50" y="510" width="440" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="g4b" value="CSV_SCOPED_TIMING_STAT_EXCLUSIVE → csvprofile 逐帧剖析" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#AB47BC;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="520" y="510" width="440" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="g4c" value="热点：TickAbilityTasks / ServerTryActivate / FindAbilitySpecFromHandle" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#AB47BC;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="980" y="510" width="440" height="40" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

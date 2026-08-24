@@ -1,0 +1,145 @@
+<mxfile host="65bd71144e">
+    <diagram name="FastArray Replication" id="fastarray-sequence">
+        <mxGraphModel dx="982" dy="857" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1080" pageHeight="819" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="title" value="FastArray 增量复制 — Server/Client 时序图" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontSize=16;fontStyle=1;fontColor=#222222;" parent="1" vertex="1">
+                    <mxGeometry x="240" y="12" width="600" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="legend" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FAFAFA;strokeColor=#BBBBBB;arcSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="820" y="4" width="230" height="44" as="geometry"/>
+                </mxCell>
+                <mxCell id="leg-t" value="图例" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=9;fontStyle=1;fontColor=#888888;" parent="1" vertex="1">
+                    <mxGeometry x="828" y="6" width="30" height="14" as="geometry"/>
+                </mxCell>
+                <mxCell id="leg-a1" value="" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#2E7DFF;" parent="1" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="828" y="32" as="sourcePoint"/>
+                        <mxPoint x="858" y="32" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="leg-t1" value="复制" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=9;fontColor=#555;" parent="1" vertex="1">
+                    <mxGeometry x="862" y="24" width="26" height="14" as="geometry"/>
+                </mxCell>
+                <mxCell id="leg-a2" value="" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#FF8C00;" parent="1" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="902" y="32" as="sourcePoint"/>
+                        <mxPoint x="932" y="32" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="leg-t2" value="回调" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=9;fontColor=#555;" parent="1" vertex="1">
+                    <mxGeometry x="936" y="24" width="26" height="14" as="geometry"/>
+                </mxCell>
+                <mxCell id="leg-a3" value="" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#CC0000;dashed=1;dashPattern=4 4;" parent="1" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="976" y="32" as="sourcePoint"/>
+                        <mxPoint x="1006" y="32" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="leg-t3" value="删除" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=9;fontColor=#555;" parent="1" vertex="1">
+                    <mxGeometry x="1010" y="24" width="26" height="14" as="geometry"/>
+                </mxCell>
+                <mxCell id="h-s" value="服务器 (Server)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#FB8C00;fontSize=13;fontStyle=1;fontColor=#E65100;arcSize=14;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="80" width="200" height="32" as="geometry"/>
+                </mxCell>
+                <mxCell id="h-c" value="客户端 (Client)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1E88E5;fontSize=13;fontStyle=1;fontColor=#0D47A1;arcSize=14;" parent="1" vertex="1">
+                    <mxGeometry x="740" y="80" width="200" height="32" as="geometry"/>
+                </mxCell>
+                <mxCell id="ll-s" value="" style="endArrow=none;html=1;strokeWidth=1;strokeColor=#FFCC80;dashed=1;dashPattern=5 5;" parent="1" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="140" y="112" as="sourcePoint"/>
+                        <mxPoint x="140" y="750" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="ll-c" value="" style="endArrow=none;html=1;strokeWidth=1;strokeColor=#90CAF9;dashed=1;dashPattern=5 5;" parent="1" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="840" y="112" as="sourcePoint"/>
+                        <mxPoint x="840" y="750" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="s1" value="① GE 被修改（属性/堆叠/移除）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#FB8C00;fontSize=11;fontColor=#E65100;arcSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="136" width="240" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="a1" value="" style="endArrow=classic;html=1;strokeWidth=1;strokeColor=#BDBDBD;" parent="1" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="140" y="164" as="sourcePoint"/>
+                        <mxPoint x="140" y="184" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="s2" value="② MarkItemDirty()&#10;ReplicationID / Key++" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#FB8C00;fontSize=11;fontColor=#E65100;arcSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="188" width="240" height="44" as="geometry"/>
+                </mxCell>
+                <mxCell id="a2" value="" style="endArrow=classic;html=1;strokeWidth=1;strokeColor=#BDBDBD;" parent="1" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="140" y="232" as="sourcePoint"/>
+                        <mxPoint x="140" y="252" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="s3" value="③ FastArrayDeltaSerialize()&#10;对比 IDToCLMap" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#FB8C00;fontSize=11;fontColor=#E65100;arcSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="256" width="240" height="44" as="geometry"/>
+                </mxCell>
+                <mxCell id="a3" value="" style="endArrow=classic;html=1;strokeWidth=1;strokeColor=#BDBDBD;" parent="1" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="140" y="300" as="sourcePoint"/>
+                        <mxPoint x="140" y="320" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="s4" value="④ 输出 diff：变更数 + 删除数&#10;+ 每个变更元素的 NetSerialize" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#FB8C00;fontSize=11;fontColor=#E65100;arcSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="324" width="260" height="44" as="geometry"/>
+                </mxCell>
+                <mxCell id="arp" value="" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#2E7DFF;startArrow=none;" parent="1" edge="1" source="arpl">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="140" y="400" as="sourcePoint"/>
+                        <mxPoint x="840" y="400" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="s6" value="⑥ 构建 ReplicationID → 本地索引 映射" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1E88E5;fontSize=11;fontColor=#0D47A1;arcSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="720" y="436" width="280" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="a6" value="" style="endArrow=classic;html=1;strokeWidth=1;strokeColor=#BDBDBD;" parent="1" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="840" y="464" as="sourcePoint"/>
+                        <mxPoint x="840" y="484" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="s7" value="⑦ 按变更/删除逐个回调" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1E88E5;fontSize=11;fontColor=#0D47A1;arcSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="720" y="488" width="280" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="s7a" value="PostReplicatedAdd（新增）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#66BB6A;fontSize=10;fontColor=#2E7D32;arcSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="720" y="540" width="240" height="26" as="geometry"/>
+                </mxCell>
+                <mxCell id="s7b" value="PostReplicatedChange（变更）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#66BB6A;fontSize=10;fontColor=#2E7D32;arcSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="720" y="580" width="240" height="26" as="geometry"/>
+                </mxCell>
+                <mxCell id="s7c" value="PreReplicatedRemove（删除）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFEBEE;strokeColor=#E53935;fontSize=10;fontColor=#C62828;arcSize=10;dashed=1;" parent="1" vertex="1">
+                    <mxGeometry x="720" y="620" width="240" height="26" as="geometry"/>
+                </mxCell>
+                <mxCell id="ins" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#AB47BC;arcSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="680" width="940" height="66" as="geometry"/>
+                </mxCell>
+                <mxCell id="insh" value="关键设计点" style="text;html=1;strokeColor=none;fillColor=none;fontSize=11;fontStyle=1;fontColor=#6A1B9A;align=left;" parent="1" vertex="1">
+                    <mxGeometry x="56" y="684" width="90" height="16" as="geometry"/>
+                </mxCell>
+                <mxCell id="ins1" value="① ReplicationID 在两端同步（身份），索引不同步（位置）" style="text;html=1;strokeColor=none;fillColor=none;fontSize=9;fontColor=#4A148C;align=left;" parent="1" vertex="1">
+                    <mxGeometry x="56" y="704" width="440" height="16" as="geometry"/>
+                </mxCell>
+                <mxCell id="ins2" value="② 带宽只与实际变化元素数成正比，与数组总长无关" style="text;html=1;strokeColor=none;fillColor=none;fontSize=9;fontColor=#4A148C;align=left;" parent="1" vertex="1">
+                    <mxGeometry x="56" y="722" width="440" height="16" as="geometry"/>
+                </mxCell>
+                <mxCell id="ins3" value="③ ItemMap.Reset() 允许客户端插入预测元素而不污染复制" style="text;html=1;strokeColor=none;fillColor=none;fontSize=9;fontColor=#4A148C;align=left;" parent="1" vertex="1">
+                    <mxGeometry x="520" y="704" width="448" height="16" as="geometry"/>
+                </mxCell>
+                <mxCell id="2" value="" style="endArrow=none;html=1;strokeWidth=2;strokeColor=#2E7DFF;" edge="1" parent="1" target="arpl">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="140" y="400" as="sourcePoint"/>
+                        <mxPoint x="840" y="400" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="arpl" value="⑤ 复制 diff（仅变化元素，非全量）" style="text;html=1;strokeColor=#BBDEFB;fillColor=#FFFFFF;align=center;verticalAlign=middle;whiteSpace=wrap;fontSize=9;fontColor=#1565C0;fontStyle=1;rounded=1;arcSize=20;" parent="1" vertex="1">
+                    <mxGeometry x="360" y="394" width="260" height="16" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

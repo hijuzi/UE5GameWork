@@ -1,0 +1,126 @@
+<mxfile host="65bd71144e">
+    <diagram id="puTBA1gYZkrFI3_POJgW" name="第 1 页">
+        <mxGraphModel dx="3610" dy="2857" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="900" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="t" value="GameplayCue 路由流程 —— 抑制 → 翻译 → 路由 三步" style="text;html=1;fontSize=22;fontStyle=1;fontColor=#1a1a2e;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="250" y="10" width="900" height="36" as="geometry"/>
+                </mxCell>
+                <mxCell id="src" value="触发源" style="shape=ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="200" y="30" width="160" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="s1" value="GE 路径&#10;GameplayCues[] 自动触发" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="150" width="200" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="s2" value="GA 路径&#10;AddGameplayCue 手动触发" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="300" y="150" width="200" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="es1" value="" style="endArrow=block;endFill=1;strokeWidth=1.5;edgeStyle=orthogonalEdgeStyle;" parent="1" source="src" target="s1" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="es2" value="" style="endArrow=block;endFill=1;strokeWidth=1.5;edgeStyle=orthogonalEdgeStyle;" parent="1" source="src" target="s2" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="entry" value="HandleGameplayCue(TargetActor, Tag, EventType, Parameters)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="120" y="260" width="320" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1e" value="" style="endArrow=block;endFill=1;strokeWidth=2;edgeStyle=orthogonalEdgeStyle;" parent="1" source="s1" target="entry" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e2e" value="" style="endArrow=block;endFill=1;strokeWidth=2;edgeStyle=orthogonalEdgeStyle;" parent="1" source="s2" target="entry" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="step1" value="① ShouldSuppressGameplayCues()&#10;是否整体抑制？(目标正在死亡等)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fad7a1;strokeColor=#e67e22;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="120" y="360" width="320" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1s" value="" style="endArrow=block;endFill=1;strokeWidth=2;edgeStyle=orthogonalEdgeStyle;" parent="1" source="entry" target="step1" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="no1" value="是 → 直接 return 不处理" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="500" y="367.5" width="180" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="en1" value="是" style="endArrow=block;endFill=1;strokeWidth=2;strokeColor=#b85450;fontSize=11;fontColor=#b85450;edgeStyle=orthogonalEdgeStyle;" parent="1" source="step1" target="no1" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="step2" value="② TranslateGameplayCue()&#10;Tag 翻译 (FGameplayCueTranslationManager)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fad7a1;strokeColor=#e67e22;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="120" y="460" width="320" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="e2s" value="否" style="endArrow=block;endFill=1;strokeWidth=2;fontSize=11;fontColor=#82b366;edgeStyle=orthogonalEdgeStyle;" parent="1" source="step1" target="step2" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="transnote" value="设备差异 / 调试替换&#10;可映射到另一 Tag" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5f8;strokeColor=#82c7cc;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="500" y="460" width="200" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="etn" value="" style="endArrow=block;endFill=0;strokeWidth=1.5;strokeColor=#82c7cc;dashed=1;edgeStyle=orthogonalEdgeStyle;" parent="1" source="step2" target="transnote" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="step3" value="③ RouteGameplayCue()&#10;查找 CueSet 映射 → 调用 Notify" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fad7a1;strokeColor=#e67e22;fontSize=12;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="120" y="560" width="320" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="e3s" value="" style="endArrow=block;endFill=1;strokeWidth=2;edgeStyle=orthogonalEdgeStyle;" parent="1" source="step2" target="step3" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="notify" value="按 EventType 调用 Notify 事件" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="120" y="660" width="320" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="en3" value="" style="endArrow=block;endFill=1;strokeWidth=2;edgeStyle=orthogonalEdgeStyle;" parent="1" source="step3" target="notify" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="n1" value="OnActive" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="500" y="620" width="110" height="36" as="geometry"/>
+                </mxCell>
+                <mxCell id="n2" value="WhileActive" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="630" y="620" width="110" height="36" as="geometry"/>
+                </mxCell>
+                <mxCell id="n3" value="Executed" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="500" y="667" width="110" height="36" as="geometry"/>
+                </mxCell>
+                <mxCell id="n4" value="Removed" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="630" y="667" width="110" height="36" as="geometry"/>
+                </mxCell>
+                <mxCell id="enn" value="" style="endArrow=block;endFill=1;strokeWidth=2;edgeStyle=orthogonalEdgeStyle;" parent="1" source="notify" target="n1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="400" y="640"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="enn2" value="" style="endArrow=block;endFill=1;strokeWidth=2;edgeStyle=orthogonalEdgeStyle;" parent="1" source="notify" target="n2" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="280" y="760"/>
+                            <mxPoint x="780" y="760"/>
+                            <mxPoint x="780" y="638"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="enn3" value="" style="endArrow=block;endFill=1;strokeWidth=2;edgeStyle=orthogonalEdgeStyle;" parent="1" source="notify" target="n3" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="enn4" value="" style="endArrow=block;endFill=1;strokeWidth=2;edgeStyle=orthogonalEdgeStyle;" parent="1" source="notify" target="n4" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="470" y="685"/>
+                            <mxPoint x="470" y="740"/>
+                            <mxPoint x="685" y="740"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="pool" value="回收池 (Preallocation)&#10;Recycle() / ReuseAfterRecycle()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="500" y="770" width="220" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="epool" value="结束后回收" style="endArrow=block;endFill=1;strokeWidth=2;strokeColor=#9673a6;fontSize=11;fontColor=#9673a6;edgeStyle=orthogonalEdgeStyle;" parent="1" source="notify" target="pool" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="280" y="790"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="note" value="&lt;b&gt;源码要点&lt;/b&gt;（对照 GameplayCueManager.h:173-180）&lt;br&gt;▸ 三步路由：ShouldSuppressGameplayCues → TranslateGameplayCue → RouteGameplayCue&lt;br&gt;▸ CueSet 维护 Tag → Notify 类的映射&lt;br&gt;▸ 复制 vs 非复制：技能用复制 GC，动画用非复制 GC" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF9C4;strokeColor=#F57F17;strokeWidth=1;fontSize=11;verticalAlign=top;spacingTop=8;" parent="1" vertex="1">
+                    <mxGeometry x="820" y="620" width="520" height="120" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

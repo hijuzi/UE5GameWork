@@ -1,0 +1,122 @@
+<mxfile host="65bd71144e">
+    <diagram id="HHk0hCqEGUnH_3b7FyJC" name="第 1 页">
+        <mxGraphModel dx="792" dy="591" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="1150" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="t" value="GameplayAbility 激活链路 —— 检查 / 执行 / 提交 / 结束 四段" style="text;html=1;fontSize=22;fontStyle=1;fontColor=#1a1a2e;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="200" y="10" width="800" height="36" as="geometry"/>
+                </mxCell>
+                <mxCell id="stage1" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#82c7cc;strokeWidth=2;dashed=1;arcSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="60" width="400" height="330" as="geometry"/>
+                </mxCell>
+                <mxCell id="stage1lab" value="&lt;b&gt;阶段一：检查&lt;/b&gt;（无副作用，可反复调用）" style="text;html=1;fontSize=13;fontColor=#0e8088;fontStyle=1;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="62" width="400" height="22" as="geometry"/>
+                </mxCell>
+                <mxCell id="n1" value="TryActivateAbility(Handle)&#10;（入口）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="150" y="90" width="220" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="n2" value="InternalTryActivateAbility()&#10;（ASC 调度核心）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="150" y="160" width="220" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="n3" value="CanActivateAbility()&#10;九道检查：冷却→消耗→Tag→输入" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="130" y="230" width="260" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="n3no" value="失败 → 拒绝激活" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="180" y="320" width="150" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="stage2" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#82b366;strokeWidth=2;dashed=1;arcSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="520" y="60" width="400" height="330" as="geometry"/>
+                </mxCell>
+                <mxCell id="stage2lab" value="&lt;b&gt;阶段二：执行&lt;/b&gt;（产生副作用 = 业务逻辑）" style="text;html=1;fontSize=13;fontColor=#82b366;fontStyle=1;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="520" y="62" width="400" height="22" as="geometry"/>
+                </mxCell>
+                <mxCell id="n4" value="按 InstancingPolicy&#10;取实例（复用/新建）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="600" y="140" width="240" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="n5" value="CallActivateAbility()&#10;设置 bIsActive=true" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="600" y="230" width="240" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="n6" value="ActivateAbility()&#10;→ 蓝图 K2_ActivateAbility" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="600" y="312.5" width="240" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="stage3" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#e67e22;strokeWidth=2;dashed=1;arcSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="440" width="400" height="300" as="geometry"/>
+                </mxCell>
+                <mxCell id="stage3lab" value="&lt;b&gt;阶段三：提交&lt;/b&gt;（CommitAbility，蓝图内主动调用）" style="text;html=1;fontSize=13;fontColor=#e67e22;fontStyle=1;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="442" width="400" height="22" as="geometry"/>
+                </mxCell>
+                <mxCell id="n7" value="CommitCheck()&#10;先 CheckCooldown → 后 CheckCost" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fad7a1;strokeColor=#e67e22;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="130" y="475" width="260" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="n8" value="CommitExecute()&#10;先 ApplyCooldown → 后 ApplyCost" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fad7a1;strokeColor=#e67e22;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="130" y="550" width="260" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="n9" value="K2_CommitExecute() →&#10;NotifyAbilityCommit()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fad7a1;strokeColor=#e67e22;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="130" y="625" width="260" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="stage4" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#b85450;strokeWidth=2;dashed=1;arcSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="520" y="440" width="400" height="300" as="geometry"/>
+                </mxCell>
+                <mxCell id="stage4lab" value="&lt;b&gt;阶段四：结束&lt;/b&gt;（EndAbility，清理归零）" style="text;html=1;fontSize=13;fontColor=#b85450;fontStyle=1;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="520" y="442" width="400" height="22" as="geometry"/>
+                </mxCell>
+                <mxCell id="n10" value="K2_OnEndAbility()&#10;（蓝图回调，最先触发）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="590" y="475" width="260" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="n11" value="清理 ActiveTasks&#10;倒序 TaskOwnerEnded() + Reset()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="590" y="550" width="260" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="n12" value="移除 Tags / 清理 Cue /&#10;NotifyAbilityEnded()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="590" y="625" width="260" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="c1" value="检查通过" style="endArrow=blockThin;endFill=1;strokeWidth=2;strokeColor=#82b366;fontSize=11;fontColor=#82b366;fontStyle=1;labelBackgroundColor=#FFF;edgeStyle=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="n3" target="n4" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="c2" value="激活后主动调用" style="endArrow=blockThin;endFill=1;strokeWidth=2;strokeColor=#e67e22;fontSize=11;fontColor=#e67e22;fontStyle=1;labelBackgroundColor=#FFF;edgeStyle=orthogonalEdgeStyle;" parent="1" source="n6" target="n7" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="720" y="410"/>
+                            <mxPoint x="260" y="410"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="c3" value="结束" style="endArrow=blockThin;endFill=1;strokeWidth=2;strokeColor=#b85450;fontSize=11;fontColor=#b85450;fontStyle=1;labelBackgroundColor=#FFF;edgeStyle=orthogonalEdgeStyle;" parent="1" source="n9" target="n10" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="490" y="653"/>
+                            <mxPoint x="490" y="503"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="i1" value="" style="endArrow=block;endFill=1;strokeWidth=1.5;" parent="1" source="n1" target="n2" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="i2" value="" style="endArrow=block;endFill=1;strokeWidth=1.5;" parent="1" source="n2" target="n3" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="i3" value="否" style="endArrow=block;endFill=1;strokeWidth=1.5;strokeColor=#b85450;fontSize=10;fontColor=#b85450;" parent="1" source="n3" target="n3no" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="i4" value="" style="endArrow=block;endFill=1;strokeWidth=1.5;" parent="1" source="n4" target="n5" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="i5" value="" style="endArrow=block;endFill=1;strokeWidth=1.5;" parent="1" source="n5" target="n6" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="i6" value="" style="endArrow=block;endFill=1;strokeWidth=1.5;" parent="1" source="n7" target="n8" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="i7" value="" style="endArrow=block;endFill=1;strokeWidth=1.5;" parent="1" source="n8" target="n9" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="i8" value="" style="endArrow=block;endFill=1;strokeWidth=1.5;" parent="1" source="n10" target="n11" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="i9" value="" style="endArrow=block;endFill=1;strokeWidth=1.5;" parent="1" source="n11" target="n12" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

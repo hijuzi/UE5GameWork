@@ -1,0 +1,84 @@
+<mxGraphModel page="1" pageWidth="1700" pageHeight="700" gridSize="10">
+<root>
+<mxCell id="0"/><mxCell id="1" parent="0"/>
+
+<mxCell id="t" value="GameplayAbility 三层模型 —— Handle → Spec → Instance + 四维策略枚举" style="text;html=1;fontSize=22;fontStyle=1;fontColor=#1a1a2e;align=center;" vertex="1" parent="1">
+  <mxGeometry x="250" y="10" width="1200" height="36" as="geometry"/>
+</mxCell>
+
+<!-- Layer 1: FGameplayAbilitySpecHandle -->
+<mxCell id="s1" value="&lt;b style=&quot;font-size:16px;&quot;&gt;① FGameplayAbilitySpecHandle&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px;color:#555;&quot;&gt;轻量句柄 · USTRUCT&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#999;&quot;&gt;─────────────────────────────&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px;&quot;&gt;▸ -Handle: int32 (private, INDEX_NONE)&lt;br&gt;▸ +IsValid(): bool&lt;br&gt;▸ +GenerateNewHandle() 声明于 .cpp&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=2;fontSize=12;arcSize=14;verticalAlign=top;spacingTop=10;" vertex="1" parent="1">
+  <mxGeometry x="40" y="70" width="320" height="160" as="geometry"/>
+</mxCell>
+
+<mxCell id="e12" value="索引 · 门牌号" style="endArrow=blockThin;endFill=1;strokeWidth=3;strokeColor=#d6b656;fontSize=11;fontColor=#d6b656;fontStyle=1;labelBackgroundColor=#FFF;edgeStyle=none;" edge="1" parent="1" source="s1" target="s2"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+<!-- Layer 2: FGameplayAbilitySpec -->
+<mxCell id="s2" value="&lt;b style=&quot;font-size:16px;&quot;&gt;② FGameplayAbilitySpec&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px;color:#555;&quot;&gt;技能档案 · : FFastArraySerializerItem&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#999;&quot;&gt;─────────────────────────────&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px;&quot;&gt;▸ Handle: FGameplayAbilitySpecHandle&lt;br&gt;▸ Ability: TObjectPtr&amp;lt;UGameplayAbility&amp;gt; (CDO)&lt;br&gt;▸ Level / InputID: int32&lt;br&gt;▸ SourceObject: TWeakObjectPtr (弱引用)&lt;br&gt;▸ ActiveCount / InputPressed: uint8 (NotReplicated)&lt;br&gt;▸ bActivateOnce: uint8:1 (位域)&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;strokeWidth=2;fontSize=12;arcSize=14;verticalAlign=top;spacingTop=10;" vertex="1" parent="1">
+  <mxGeometry x="460" y="70" width="360" height="200" as="geometry"/>
+</mxCell>
+
+<mxCell id="e23" value="实例化策略决定&#xa;复用 / 新建" style="endArrow=blockThin;endFill=1;strokeWidth=3;strokeColor=#82b366;fontSize=11;fontColor=#82b366;fontStyle=1;labelBackgroundColor=#FFF;edgeStyle=none;" edge="1" parent="1" source="s2" target="s3"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+<!-- Layer 3: UGameplayAbility Instance -->
+<mxCell id="s3" value="&lt;b style=&quot;font-size:16px;&quot;&gt;③ UGameplayAbility 实例&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px;color:#555;&quot;&gt;执行体 · UCLASS (有 CDO)&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#999;&quot;&gt;─────────────────────────────&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px;&quot;&gt;▸ CanActivateAbility() 九道检查&lt;br&gt;▸ ActivateAbility() 蓝图入口&lt;br&gt;▸ CommitAbility() 冷却+消耗&lt;br&gt;▸ EndAbility() 清理归零&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;fontSize=12;arcSize=14;verticalAlign=top;spacingTop=10;" vertex="1" parent="1">
+  <mxGeometry x="920" y="70" width="320" height="160" as="geometry"/>
+</mxCell>
+
+<!-- Policy Enum Container -->
+<mxCell id="ctx" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#b0e3e6;strokeWidth=2;dashed=1;arcSize=14;" vertex="1" parent="1">
+  <mxGeometry x="40" y="310" width="1200" height="210" as="geometry"/>
+</mxCell>
+<mxCell id="ctxlab" value="&lt;b&gt;四维策略枚举&lt;/b&gt; — 定义于 GameplayAbilityTypes.h（UENUM + namespace + enum Type : int）" style="text;html=1;fontSize=13;fontColor=#0e8088;fontStyle=1;align=center;" vertex="1" parent="1">
+  <mxGeometry x="250" y="312" width="780" height="22" as="geometry"/>
+</mxCell>
+
+<mxCell id="p1" value="&lt;b&gt;NetExecutionPolicy&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;技能在哪执行&lt;br&gt;LocalPredicted / LocalOnly&lt;br&gt;ServerInitiated / ServerOnly&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5f8;strokeColor=#82c7cc;fontSize=11;verticalAlign=top;spacingTop=6;" vertex="1" parent="1">
+  <mxGeometry x="60" y="344" width="270" height="150" as="geometry"/>
+</mxCell>
+
+<mxCell id="p2" value="&lt;b&gt;InstancingPolicy&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;实例怎么创建&lt;br&gt;InstancedPerActor (默认)&lt;br&gt;InstancedPerExecution&lt;br&gt;&lt;font color=&quot;#b85450&quot;&gt;NonInstanced (5.5 已废弃)&lt;/font&gt;&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5f8;strokeColor=#82c7cc;fontSize=11;verticalAlign=top;spacingTop=6;" vertex="1" parent="1">
+  <mxGeometry x="350" y="344" width="270" height="150" as="geometry"/>
+</mxCell>
+
+<mxCell id="p3" value="&lt;b&gt;ReplicationPolicy&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;实例是否复制&lt;br&gt;ReplicateNo / ReplicateYes&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5f8;strokeColor=#82c7cc;fontSize=11;verticalAlign=top;spacingTop=6;" vertex="1" parent="1">
+  <mxGeometry x="640" y="344" width="270" height="150" as="geometry"/>
+</mxCell>
+
+<mxCell id="p4" value="&lt;b&gt;NetSecurityPolicy&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;谁来结束技能（第四层，常被漏掉）&lt;br&gt;ClientOrServer (默认)&lt;br&gt;ServerOnlyExecution&lt;br&gt;ServerOnlyTermination / ServerOnly&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF9C4;strokeColor=#F57F17;strokeWidth=1;fontSize=11;verticalAlign=top;spacingTop=6;" vertex="1" parent="1">
+  <mxGeometry x="930" y="344" width="290" height="150" as="geometry"/>
+</mxCell>
+
+<!-- Legend -->
+<mxCell id="leg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;strokeWidth=1;arcSize=14;" vertex="1" parent="1">
+  <mxGeometry x="1280" y="70" width="240" height="200" as="geometry"/>
+</mxCell>
+<mxCell id="leglab" value="&lt;b&gt;图例&lt;/b&gt;" style="text;html=1;fontSize=13;fontColor=#333333;align=center;" vertex="1" parent="1">
+  <mxGeometry x="1360" y="78" width="80" height="20" as="geometry"/>
+</mxCell>
+<mxCell id="leg1" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=2;arcSize=10;" vertex="1" parent="1">
+  <mxGeometry x="1300" y="105" width="24" height="14" as="geometry"/>
+</mxCell>
+<mxCell id="leg1t" value="句柄 (int32 门牌号)" style="text;html=1;fontSize=10;fontColor=#d6b656;align=left;" vertex="1" parent="1">
+  <mxGeometry x="1332" y="103" width="180" height="18" as="geometry"/>
+</mxCell>
+<mxCell id="leg2" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;strokeWidth=2;arcSize=10;" vertex="1" parent="1">
+  <mxGeometry x="1300" y="130" width="24" height="14" as="geometry"/>
+</mxCell>
+<mxCell id="leg2t" value="档案 (元数据 Spec)" style="text;html=1;fontSize=10;fontColor=#b85450;align=left;" vertex="1" parent="1">
+  <mxGeometry x="1332" y="128" width="180" height="18" as="geometry"/>
+</mxCell>
+<mxCell id="leg3" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;arcSize=10;" vertex="1" parent="1">
+  <mxGeometry x="1300" y="155" width="24" height="14" as="geometry"/>
+</mxCell>
+<mxCell id="leg3t" value="执行体 (Instance)" style="text;html=1;fontSize=10;fontColor=#6c8ebf;align=left;" vertex="1" parent="1">
+  <mxGeometry x="1332" y="153" width="180" height="18" as="geometry"/>
+</mxCell>
+<mxCell id="leg4" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF9C4;strokeColor=#F57F17;strokeWidth=1;arcSize=10;" vertex="1" parent="1">
+  <mxGeometry x="1300" y="180" width="24" height="14" as="geometry"/>
+</mxCell>
+<mxCell id="leg4t" value="易漏的第四层策略" style="text;html=1;fontSize=10;fontColor=#F57F17;align=left;" vertex="1" parent="1">
+  <mxGeometry x="1332" y="178" width="180" height="18" as="geometry"/>
+</mxCell>
+
+</root></mxGraphModel>

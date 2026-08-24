@@ -1,0 +1,61 @@
+<mxfile host="65bd71144e">
+    <diagram id="caSxLtrO_iu9y0qSFZiq" name="第 1 页">
+        <mxGraphModel dx="945" dy="1008" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="819" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="t" value="GameplayDebugger 数据流 —— CollectData → Serialize → DrawData" style="text;html=1;fontSize=22;fontStyle=1;fontColor=#1a1a2e;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="250" y="10" width="900" height="36" as="geometry"/>
+                </mxCell>
+                <mxCell id="st1" value="&lt;b&gt;服务器（Authority）&lt;/b&gt;" style="text;html=1;fontSize=13;fontColor=#E65100;fontStyle=1;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="80" y="60" width="560" height="24" as="geometry"/>
+                </mxCell>
+                <mxCell id="n1" value="① CollectData()&#10;从 ASC 收集四类数据" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#FB8C00;fontSize=12;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="80" y="90" width="280" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="a1" value="" style="endArrow=block;endFill=1;strokeWidth=1.5;" parent="1" source="n1" target="n2" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="n2" value="② 四类数据：OwnedTags + TagCounts&#10;Abilities / GameplayEffects / Attributes" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#FB8C00;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="175" width="320" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="a2" value="" style="endArrow=block;endFill=1;strokeWidth=1.5;" parent="1" source="n2" target="n3" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="n3" value="③ FRepData::Serialize()&#10;复制给客户端" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#FB8C00;fontSize=12;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="80" y="250" width="280" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="cross" value="网络复制（服务器权威数据）" style="endArrow=blockThin;endFill=1;strokeWidth=2;strokeColor=#82b366;fontSize=12;fontColor=#82b366;fontStyle=1;edgeStyle=orthogonalEdgeStyle;" parent="1" source="n3" target="n4" edge="1">
+                    <mxGeometry x="-0.4291" y="-3" relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="690" y="277"/>
+                            <mxPoint x="690" y="117"/>
+                        </Array>
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="st2" value="&lt;b&gt;客户端（Local）&lt;/b&gt;" style="text;html=1;fontSize=13;fontColor=#0D47A1;fontStyle=1;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="760" y="60" width="560" height="24" as="geometry"/>
+                </mxCell>
+                <mxCell id="n4" value="④ 反序列化：区分 ServerOnly /&#10;LocalOnly / Both（三色）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1E88E5;fontSize=12;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="760" y="90" width="280" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="a4" value="" style="endArrow=block;endFill=1;strokeWidth=1.5;" parent="1" source="n4" target="n5" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="n5" value="⑤ 合并本地数据 + 服务器数据&#10;（BuildTagsString 等）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1E88E5;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="760" y="175" width="280" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="a5" value="" style="endArrow=block;endFill=1;strokeWidth=1.5;" parent="1" source="n5" target="n6" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="n6" value="⑥ DrawData() 绘制到屏幕&#10;（Shift+1~4 切换子视图）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1E88E5;fontSize=12;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="760" y="250" width="280" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="note" value="&lt;b&gt;关键点&lt;/b&gt;&lt;br&gt;▸ 服务器收集权威数据 → 复制给客户端 → 客户端合并本地数据后绘制&lt;br&gt;▸ 颜色区分网络归属：ServerOnly（橙）/ LocalOnly（蓝）/ Both&lt;br&gt;▸ 客户端不是「被动显示服务器数据」，而是「合并两端数据」，才能如实反映属性/GE 的真实状态" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF9C4;strokeColor=#F57F17;strokeWidth=1;fontSize=11;verticalAlign=top;spacingTop=8;" parent="1" vertex="1">
+                    <mxGeometry x="80" y="360" width="960" height="90" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

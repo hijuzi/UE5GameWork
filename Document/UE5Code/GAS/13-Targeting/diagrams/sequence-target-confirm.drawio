@@ -1,0 +1,160 @@
+<mxfile host="65bd71144e">
+    <diagram name="Targeting Confirm" id="targeting-sequence">
+        <mxGraphModel dx="1637" dy="1224" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1080" pageHeight="900" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="title" value="瞄准确认流程 — 技能 / Task / TargetActor 时序图" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontSize=16;fontStyle=1;fontColor=#222222;" parent="1" vertex="1">
+                    <mxGeometry x="240" y="12" width="600" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="legend" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FAFAFA;strokeColor=#BBBBBB;arcSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="820" y="4" width="230" height="44" as="geometry"/>
+                </mxCell>
+                <mxCell id="leg-t" value="图例" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=9;fontStyle=1;fontColor=#888888;" parent="1" vertex="1">
+                    <mxGeometry x="828" y="6" width="30" height="14" as="geometry"/>
+                </mxCell>
+                <mxCell id="leg-a1" value="" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#2E7DFF;" parent="1" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="828" y="32" as="sourcePoint"/>
+                        <mxPoint x="858" y="32" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="leg-t1" value="调用" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=9;fontColor=#555;" parent="1" vertex="1">
+                    <mxGeometry x="862" y="24" width="26" height="14" as="geometry"/>
+                </mxCell>
+                <mxCell id="leg-a2" value="" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#FF8C00;" parent="1" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="902" y="32" as="sourcePoint"/>
+                        <mxPoint x="932" y="32" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="leg-t2" value="回调" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=9;fontColor=#555;" parent="1" vertex="1">
+                    <mxGeometry x="936" y="24" width="26" height="14" as="geometry"/>
+                </mxCell>
+                <mxCell id="leg-a3" value="" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#CC0000;dashed=1;dashPattern=4 4;" parent="1" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="976" y="32" as="sourcePoint"/>
+                        <mxPoint x="1006" y="32" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="leg-t3" value="取消" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=9;fontColor=#555;" parent="1" vertex="1">
+                    <mxGeometry x="1010" y="24" width="26" height="14" as="geometry"/>
+                </mxCell>
+                <mxCell id="h-ga" value="技能 (GA)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1E88E5;fontSize=13;fontStyle=1;fontColor=#0D47A1;arcSize=14;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="80" width="200" height="32" as="geometry"/>
+                </mxCell>
+                <mxCell id="h-task" value="WaitTargetData Task" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#66BB6A;fontSize=13;fontStyle=1;fontColor=#1B5E20;arcSize=14;" parent="1" vertex="1">
+                    <mxGeometry x="370" y="80" width="200" height="32" as="geometry"/>
+                </mxCell>
+                <mxCell id="h-ta" value="TargetActor" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#FB8C00;fontSize=13;fontStyle=1;fontColor=#E65100;arcSize=14;" parent="1" vertex="1">
+                    <mxGeometry x="740" y="80" width="200" height="32" as="geometry"/>
+                </mxCell>
+                <mxCell id="ll-ga" value="" style="endArrow=none;html=1;strokeWidth=1;strokeColor=#90CAF9;dashed=1;dashPattern=5 5;" parent="1" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="140" y="112" as="sourcePoint"/>
+                        <mxPoint x="140" y="820" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="ll-task" value="" style="endArrow=none;html=1;strokeWidth=1;strokeColor=#A5D6A7;dashed=1;dashPattern=5 5;" parent="1" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="470" y="112" as="sourcePoint"/>
+                        <mxPoint x="470" y="820" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="ll-ta" value="" style="endArrow=none;html=1;strokeWidth=1;strokeColor=#FFCC80;dashed=1;dashPattern=5 5;" parent="1" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="840" y="112" as="sourcePoint"/>
+                        <mxPoint x="840" y="820" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="s1" value="① WaitTargetData(ConfirmationType, TargetClass)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1E88E5;fontSize=11;fontColor=#0D47A1;arcSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="140" width="300" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="ar1" value="" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#2E7DFF;" parent="1" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="140" y="200" as="sourcePoint"/>
+                        <mxPoint x="470" y="200" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="ar1l" value="创建 Task" style="text;html=1;strokeColor=#BBDEFB;fillColor=#FFFFFF;align=center;verticalAlign=middle;whiteSpace=wrap;fontSize=9;fontColor=#1565C0;fontStyle=1;rounded=1;arcSize=20;" parent="1" vertex="1">
+                    <mxGeometry x="260" y="190" width="100" height="16" as="geometry"/>
+                </mxCell>
+                <mxCell id="s2" value="② ReadyForActivation() → Activate()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#66BB6A;fontSize=11;fontColor=#1B5E20;arcSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="370" y="225" width="300" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="ar3" value="" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#2E7DFF;" parent="1" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="470" y="280" as="sourcePoint"/>
+                        <mxPoint x="840" y="280" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="ar3l" value="③ SpawnActor + 注册 TargetDataReadyDelegate" style="text;html=1;strokeColor=#BBDEFB;fillColor=#FFFFFF;align=center;verticalAlign=middle;whiteSpace=wrap;fontSize=9;fontColor=#1565C0;fontStyle=1;rounded=1;arcSize=20;" parent="1" vertex="1">
+                    <mxGeometry x="540" y="270" width="230" height="16" as="geometry"/>
+                </mxCell>
+                <mxCell id="s4" value="④ StartTargeting(Ability)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#FB8C00;fontSize=11;fontColor=#E65100;arcSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="740" y="320" width="240" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="altbox" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#BDBDBD;arcSize=10;dashed=1;" parent="1" vertex="1">
+                    <mxGeometry x="700" y="380" width="300" height="110" as="geometry"/>
+                </mxCell>
+                <mxCell id="altl" value="确认类型" style="text;html=1;strokeColor=none;fillColor=none;fontSize=9;fontStyle=1;fontColor=#888888;align=left;" parent="1" vertex="1">
+                    <mxGeometry x="716" y="384" width="80" height="14" as="geometry"/>
+                </mxCell>
+                <mxCell id="s5a" value="⑤a Instant → ConfirmTargeting()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#FB8C00;fontSize=10;fontColor=#E65100;arcSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="716" y="405" width="260" height="26" as="geometry"/>
+                </mxCell>
+                <mxCell id="s5b" value="⑤b UserConfirmed → BindToConfirmCancelInputs()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#FB8C00;fontSize=10;fontColor=#E65100;arcSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="716" y="450" width="280" height="26" as="geometry"/>
+                </mxCell>
+                <mxCell id="ar6" value="" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#FF8C00;" parent="1" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="840" y="560" as="sourcePoint"/>
+                        <mxPoint x="470" y="560" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="ar6l" value="⑥ TargetDataReadyDelegate 广播" style="text;html=1;strokeColor=#FFE0B2;fillColor=#FFFFFF;align=center;verticalAlign=middle;whiteSpace=wrap;fontSize=9;fontColor=#E65100;fontStyle=1;rounded=1;arcSize=20;" parent="1" vertex="1">
+                    <mxGeometry x="570" y="550" width="180" height="16" as="geometry"/>
+                </mxCell>
+                <mxCell id="ar7" value="" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#FF8C00;" parent="1" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="470" y="610" as="sourcePoint"/>
+                        <mxPoint x="140" y="610" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="ar7l" value="⑦ ValidData.Broadcast → 蓝图" style="text;html=1;strokeColor=#FFE0B2;fillColor=#FFFFFF;align=center;verticalAlign=middle;whiteSpace=wrap;fontSize=9;fontColor=#E65100;fontStyle=1;rounded=1;arcSize=20;" parent="1" vertex="1">
+                    <mxGeometry x="200" y="600" width="200" height="16" as="geometry"/>
+                </mxCell>
+                <mxCell id="ar8" value="" style="endArrow=classic;html=1;strokeWidth=1.5;strokeColor=#CC0000;dashed=1;dashPattern=6 4;startArrow=none;" parent="1" edge="1" source="ar8l">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="840" y="660" as="sourcePoint"/>
+                        <mxPoint x="140" y="660" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="ins" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#AB47BC;arcSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="720" width="940" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="insh" value="关键设计点" style="text;html=1;strokeColor=none;fillColor=none;fontSize=11;fontStyle=1;fontColor=#6A1B9A;align=left;" parent="1" vertex="1">
+                    <mxGeometry x="56" y="724" width="90" height="16" as="geometry"/>
+                </mxCell>
+                <mxCell id="ins1" value="① TargetActor 委托是 FAbilityTargetData（TargetDataReadyDelegate / CanceledDelegate）" style="text;html=1;strokeColor=none;fillColor=none;fontSize=9;fontColor=#4A148C;align=left;" parent="1" vertex="1">
+                    <mxGeometry x="56" y="744" width="440" height="16" as="geometry"/>
+                </mxCell>
+                <mxCell id="ins2" value="② 确认类型是 WaitTargetData 工厂参数 ConfirmationType，非 TargetActor 成员" style="text;html=1;strokeColor=none;fillColor=none;fontSize=9;fontColor=#4A148C;align=left;" parent="1" vertex="1">
+                    <mxGeometry x="56" y="764" width="440" height="16" as="geometry"/>
+                </mxCell>
+                <mxCell id="ins3" value="③ ShouldProduceTargetDataOnServer 决定目标数据的权威归属" style="text;html=1;strokeColor=none;fillColor=none;fontSize=9;fontColor=#4A148C;align=left;" parent="1" vertex="1">
+                    <mxGeometry x="520" y="744" width="440" height="16" as="geometry"/>
+                </mxCell>
+                <mxCell id="5" value="" style="endArrow=none;html=1;strokeWidth=1.5;strokeColor=#CC0000;dashed=1;dashPattern=6 4;" edge="1" parent="1" target="ar8l">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="840" y="660" as="sourcePoint"/>
+                        <mxPoint x="140" y="660" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="ar8l" value="⑧ CanceledDelegate → Cancelled.Broadcast" style="text;html=1;strokeColor=#FFCDD2;fillColor=#FFFFFF;align=center;verticalAlign=middle;whiteSpace=wrap;fontSize=9;fontColor=#CC0000;fontStyle=1;rounded=1;arcSize=20;" parent="1" vertex="1">
+                    <mxGeometry x="300" y="650" width="280" height="16" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

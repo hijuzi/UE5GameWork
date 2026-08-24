@@ -63,6 +63,10 @@
 
 这里有个新手常见的误区：**`UGameplayAbility` 本身是个 `UCLASS`，有 CDO（Class Default Object）**。你配的所有属性（冷却 GE 类、消耗 GE 类、Tag 要求）都存在 CDO 上。Spec 里的 `Ability` 字段引用的是这个 CDO，而"激活"时真正被调用逻辑的，是根据实例化策略拿到的实例。
 
+![GA 三层模型与四维策略](diagrams/class-ga-three-layer.png)
+
+*图：GA 三层模型与四维策略枚举 —— Handle（句柄）→ Spec（档案）→ Instance（执行体）三级结构，以及定义于 GameplayAbilityTypes.h 的四个策略枚举（含常被遗漏的 NetSecurityPolicy）*
+
 ---
 
 ## 三、四维策略枚举：GA 的行为开关
@@ -224,6 +228,10 @@ TryActivateAbility(Handle)
       └─ CallActivateAbility(...)         // 调用实例
           └─ ActivateAbility(...)         // 虚函数 → 蓝图 K2_ActivateAbility
 ```
+
+![GA 激活链路四段式](diagrams/flow-activation.png)
+
+*图：GA 激活链路四段式 —— 检查（无副作用）→ 执行（产生副作用）→ 提交（CommitAbility）→ 结束（EndAbility），其中 CommitCheck/CommitExecute 均遵循"先冷却后消耗"的顺序*
 
 ### 5.1 入口：TryActivateAbility
 

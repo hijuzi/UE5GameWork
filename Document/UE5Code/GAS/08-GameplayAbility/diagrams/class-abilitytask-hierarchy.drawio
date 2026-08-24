@@ -1,0 +1,114 @@
+<mxGraphModel page="1" pageWidth="1700" pageHeight="760" gridSize="10">
+<root>
+<mxCell id="0"/><mxCell id="1" parent="0"/>
+
+<mxCell id="t" value="AbilityTask 继承体系 —— 工厂 / 激活 / 委托 / 清理 全链路" style="text;html=1;fontSize=22;fontStyle=1;fontColor=#1a1a2e;align=center;" vertex="1" parent="1">
+  <mxGeometry x="250" y="10" width="1200" height="36" as="geometry"/>
+</mxCell>
+
+<!-- 基类 UGameplayTask -->
+<mxCell id="s1" value="&lt;b style=&quot;font-size:16px;&quot;&gt;UGameplayTask&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px;color:#555;&quot;&gt;通用任务基类 · GameplayTasks 模块&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#999;&quot;&gt;─────────────────────────────&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px;&quot;&gt;▸ +ReadyForActivation() (public, 蓝图入口)&lt;br&gt;▸ #Activate() (protected 虚函数, 默认空)&lt;br&gt;▸ #OnDestroy(bool bInOwnerFinished)&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;strokeWidth=2;fontSize=12;arcSize=14;verticalAlign=top;spacingTop=10;" vertex="1" parent="1">
+  <mxGeometry x="40" y="70" width="340" height="170" as="geometry"/>
+</mxCell>
+
+<mxCell id="e12" value="继承" style="endArrow=block;endFill=0;strokeWidth=2;strokeColor=#7F8C8D;fontSize=11;fontColor=#7F8C8D;fontStyle=1;labelBackgroundColor=#FFF;edgeStyle=orthogonalEdgeStyle;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="s1" target="s2"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+<!-- 抽象基类 UAbilityTask -->
+<mxCell id="s2" value="&lt;b style=&quot;font-size:16px;&quot;&gt;UAbilityTask&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px;color:#555;&quot;&gt;抽象基类 · UCLASS(Abstract, MinimalAPI)&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#999;&quot;&gt;─────────────────────────────&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px;&quot;&gt;▸ +Ability: TObjectPtr&amp;lt;UGameplayAbility&amp;gt;&lt;br&gt;▸ +AbilitySystemComponent: TWeakObjectPtr&lt;br&gt;&lt;font color=&quot;#b85450&quot;&gt;▸ 未重新声明 Activate()&lt;/font&gt;&lt;br&gt;▸ +NewAbilityTask&amp;lt;T&amp;gt;() 模板工厂&lt;br&gt;▸ +OnDestroy(bool bInOwnerFinished) override&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=2;fontSize=12;arcSize=14;verticalAlign=top;spacingTop=10;" vertex="1" parent="1">
+  <mxGeometry x="40" y="280" width="340" height="200" as="geometry"/>
+</mxCell>
+
+<!-- 具体子类 -->
+<mxCell id="s3" value="&lt;b style=&quot;font-size:16px;&quot;&gt;具体子类 (示例)&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px;color:#555;&quot;&gt;按需 override Activate()&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#999;&quot;&gt;─────────────────────────────&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px;&quot;&gt;▸ UAbilityTask_WaitDelay&lt;br&gt;▸ UAbilityTask_PlayMontageAndWait&lt;br&gt;▸ UAbilityTask_WaitGameplayEvent&lt;br&gt;▸ UAbilityTask_WaitAttributeChange&lt;br&gt;▸ UAbilityTask_WaitOverlap&lt;br&gt;▸ UAbilityTask_WaitTargetData (重写 Activate)&lt;br&gt;▸ UAbilityTask_WaitConfirmCancel&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;fontSize=12;arcSize=14;verticalAlign=top;spacingTop=10;" vertex="1" parent="1">
+  <mxGeometry x="40" y="530" width="340" height="200" as="geometry"/>
+</mxCell>
+
+<mxCell id="e23" value="继承" style="endArrow=block;endFill=0;strokeWidth=2;strokeColor=#7F8C8D;fontSize=11;fontColor=#7F8C8D;fontStyle=1;labelBackgroundColor=#FFF;edgeStyle=orthogonalEdgeStyle;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="s2" target="s3"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+<!-- 激活机制流程 -->
+<mxCell id="ctx" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#82b366;strokeWidth=2;dashed=1;arcSize=14;" vertex="1" parent="1">
+  <mxGeometry x="500" y="70" width="560" height="300" as="geometry"/>
+</mxCell>
+<mxCell id="ctxlab" value="&lt;b&gt;激活机制&lt;/b&gt; — 创建 → 绑定 → 激活 → 启动" style="text;html=1;fontSize=13;fontColor=#82b366;fontStyle=1;align=center;" vertex="1" parent="1">
+  <mxGeometry x="500" y="72" width="560" height="22" as="geometry"/>
+</mxCell>
+
+<mxCell id="a1" value="① 静态工厂 (如 WaitDelay)&#xa;NewAbilityTask&lt;T&gt;() 创建 + InitTask" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" vertex="1" parent="1">
+  <mxGeometry x="540" y="110" width="480" height="50" as="geometry"/>
+</mxCell>
+
+<mxCell id="a2" value="② 蓝图节点绑定输出委托&#xa;(OnFinish / OnTrigger / OnBlendOut...)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" vertex="1" parent="1">
+  <mxGeometry x="540" y="180" width="480" height="50" as="geometry"/>
+</mxCell>
+
+<mxCell id="a3" value="③ ReadyForActivation() (public)&#xa;内部状态检查后调用" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" vertex="1" parent="1">
+  <mxGeometry x="540" y="250" width="480" height="50" as="geometry"/>
+</mxCell>
+
+<mxCell id="a4" value="④ Activate() (protected, 子类 override)&#xa;真正启动逻辑 (如 SetTimer)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fad7a1;strokeColor=#e67e22;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+  <mxGeometry x="540" y="320" width="480" height="50" as="geometry"/>
+</mxCell>
+
+<mxCell id="ia1" value="" style="endArrow=block;endFill=1;strokeWidth=1.5;" edge="1" parent="1" source="a1" target="a2"><mxGeometry relative="1" as="geometry"/></mxCell>
+<mxCell id="ia2" value="" style="endArrow=block;endFill=1;strokeWidth=1.5;" edge="1" parent="1" source="a2" target="a3"><mxGeometry relative="1" as="geometry"/></mxCell>
+<mxCell id="ia3" value="" style="endArrow=block;endFill=1;strokeWidth=1.5;" edge="1" parent="1" source="a3" target="a4"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+<!-- 委托广播与清理 -->
+<mxCell id="ctx2" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#b85450;strokeWidth=2;dashed=1;arcSize=14;" vertex="1" parent="1">
+  <mxGeometry x="500" y="420" width="560" height="310" as="geometry"/>
+</mxCell>
+<mxCell id="ctx2lab" value="&lt;b&gt;委托广播与清理&lt;/b&gt; — Task 生命周期收尾" style="text;html=1;fontSize=13;fontColor=#b85450;fontStyle=1;align=center;" vertex="1" parent="1">
+  <mxGeometry x="500" y="422" width="560" height="22" as="geometry"/>
+</mxCell>
+
+<mxCell id="b1" value="⑤ 满足条件 → 广播 FMulticastDelegate&#xa;(OnFinish / OnTrigger...)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12;" vertex="1" parent="1">
+  <mxGeometry x="540" y="460" width="480" height="50" as="geometry"/>
+</mxCell>
+
+<mxCell id="b2" value="⑥ EndTask() 自毁" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12;" vertex="1" parent="1">
+  <mxGeometry x="540" y="530" width="480" height="50" as="geometry"/>
+</mxCell>
+
+<mxCell id="b3" value="⑦ 技能 EndAbility → 倒序 TaskOwnerEnded()&#xa;+ ActiveTasks.Reset() 统一清理" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+  <mxGeometry x="540" y="600" width="480" height="55" as="geometry"/>
+</mxCell>
+
+<mxCell id="ib1" value="" style="endArrow=block;endFill=1;strokeWidth=1.5;" edge="1" parent="1" source="b1" target="b2"><mxGeometry relative="1" as="geometry"/></mxCell>
+<mxCell id="ib2" value="" style="endArrow=block;endFill=1;strokeWidth=1.5;" edge="1" parent="1" source="b2" target="b3"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+<!-- 激活与清理的关系 -->
+<mxCell id="cbridge" value="Task 运行中" style="endArrow=blockThin;endFill=1;strokeWidth=2;strokeColor=#e67e22;fontSize=11;fontColor=#e67e22;fontStyle=1;labelBackgroundColor=#FFF;edgeStyle=none;" edge="1" parent="1" source="a4" target="b1"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+<!-- Legend -->
+<mxCell id="leg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;strokeWidth=1;arcSize=14;" vertex="1" parent="1">
+  <mxGeometry x="1160" y="70" width="260" height="200" as="geometry"/>
+</mxCell>
+<mxCell id="leglab" value="&lt;b&gt;图例&lt;/b&gt;" style="text;html=1;fontSize=13;fontColor=#333333;align=center;" vertex="1" parent="1">
+  <mxGeometry x="1240" y="78" width="80" height="20" as="geometry"/>
+</mxCell>
+<mxCell id="leg1" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;strokeWidth=2;arcSize=10;" vertex="1" parent="1">
+  <mxGeometry x="1180" y="105" width="24" height="14" as="geometry"/>
+</mxCell>
+<mxCell id="leg1t" value="通用基类 (GameplayTasks)" style="text;html=1;fontSize=10;fontColor=#9673a6;align=left;" vertex="1" parent="1">
+  <mxGeometry x="1212" y="103" width="200" height="18" as="geometry"/>
+</mxCell>
+<mxCell id="leg2" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=2;arcSize=10;" vertex="1" parent="1">
+  <mxGeometry x="1180" y="130" width="24" height="14" as="geometry"/>
+</mxCell>
+<mxCell id="leg2t" value="抽象基类 (UAbilityTask)" style="text;html=1;fontSize=10;fontColor=#d6b656;align=left;" vertex="1" parent="1">
+  <mxGeometry x="1212" y="128" width="200" height="18" as="geometry"/>
+</mxCell>
+<mxCell id="leg3" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;arcSize=10;" vertex="1" parent="1">
+  <mxGeometry x="1180" y="155" width="24" height="14" as="geometry"/>
+</mxCell>
+<mxCell id="leg3t" value="具体子类 (override Activate)" style="text;html=1;fontSize=10;fontColor=#6c8ebf;align=left;" vertex="1" parent="1">
+  <mxGeometry x="1212" y="153" width="200" height="18" as="geometry"/>
+</mxCell>
+<mxCell id="leg4" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fad7a1;strokeColor=#e67e22;strokeWidth=2;arcSize=10;" vertex="1" parent="1">
+  <mxGeometry x="1180" y="180" width="24" height="14" as="geometry"/>
+</mxCell>
+<mxCell id="leg4t" value="真正启动逻辑 (Activate)" style="text;html=1;fontSize=10;fontColor=#e67e22;align=left;" vertex="1" parent="1">
+  <mxGeometry x="1212" y="178" width="200" height="18" as="geometry"/>
+</mxCell>
+
+</root></mxGraphModel>

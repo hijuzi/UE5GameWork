@@ -1,0 +1,91 @@
+<mxfile host="65bd71144e">
+    <diagram id="spomPny5l0ocC_3mUOK8" name="第 1 页">
+        <mxGraphModel dx="1295" dy="1008" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1500" pageHeight="900" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="t" value="GE 生命周期分发 —— 遍历 GEComponents 广播五回调" style="text;html=1;fontSize=22;fontStyle=1;fontColor=#1a1a2e;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="250" y="10" width="1000" height="36" as="geometry"/>
+                </mxCell>
+                <mxCell id="n1" value="CanApply()&#10;一票否决" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="80" y="80" width="200" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="n2" value="OnActiveGameplayEffectAdded()&#10;返回 false → inhibit" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="80" y="200" width="200" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="n3" value="OnGameplayEffectExecuted()&#10;仅 Authority / instant+周期" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="80" y="320" width="200" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="n4" value="OnGameplayEffectApplied()&#10;应用/堆叠，优先用" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="80" y="440" width="200" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="n5" value="OnGameplayEffectChanged()&#10;重置缓存 + 聚合" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="80" y="560" width="200" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="an1" value="" style="endArrow=block;endFill=1;strokeWidth=1.5;edgeStyle=orthogonalEdgeStyle;" parent="1" source="n1" target="n2" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="an2" value="" style="endArrow=block;endFill=1;strokeWidth=1.5;edgeStyle=orthogonalEdgeStyle;" parent="1" source="n2" target="n3" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="an3" value="" style="endArrow=block;endFill=1;strokeWidth=1.5;edgeStyle=orthogonalEdgeStyle;" parent="1" source="n3" target="n4" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="an4" value="" style="endArrow=block;endFill=1;strokeWidth=1.5;edgeStyle=orthogonalEdgeStyle;" parent="1" source="n4" target="n5" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="arr" value="&lt;b&gt;GEComponents&lt;/b&gt;&lt;br&gt;TArray&amp;lt;TObjectPtr&amp;lt;UGameplayEffectComponent&amp;gt;&amp;gt;&lt;br&gt;(Instanced)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=2;fontSize=12;arcSize=14;verticalAlign=middle;" parent="1" vertex="1">
+                    <mxGeometry x="460" y="170" width="340" height="90" as="geometry"/>
+                </mxCell>
+                <mxCell id="c1" value="TargetTags 组件" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="1000" y="110" width="180" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="c2" value="Immunity 组件" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="1000" y="170" width="180" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="c3" value="AdditionalEffects 组件" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="1000" y="220" width="180" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="c4" value="自定义组件 (项目)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="1000" y="280" width="180" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="d1" value="遍历调用" style="endArrow=blockThin;endFill=1;strokeWidth=2;strokeColor=#d6b656;fontSize=10;fontColor=#d6b656;edgeStyle=orthogonalEdgeStyle;" parent="1" source="n1" target="arr" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="d2" value="" style="endArrow=blockThin;endFill=1;strokeWidth=2;strokeColor=#82b366;edgeStyle=orthogonalEdgeStyle;" parent="1" source="arr" target="c1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="750" y="130"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="d3" value="" style="endArrow=blockThin;endFill=1;strokeWidth=2;strokeColor=#82b366;edgeStyle=orthogonalEdgeStyle;" parent="1" source="arr" target="c2" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="970" y="190"/>
+                            <mxPoint x="970" y="190"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="d4" value="" style="endArrow=blockThin;endFill=1;strokeWidth=2;strokeColor=#82b366;edgeStyle=orthogonalEdgeStyle;" parent="1" source="arr" target="c3" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="950" y="240"/>
+                            <mxPoint x="950" y="240"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="d5" value="" style="endArrow=blockThin;endFill=1;strokeWidth=2;strokeColor=#82b366;edgeStyle=orthogonalEdgeStyle;" parent="1" source="arr" target="c4" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="750" y="300"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="note" value="&lt;b&gt;关键点&lt;/b&gt;&lt;br&gt;▸ CanApply / OnAdded：一票否决（任一组件返回 false → 阻止 / inhibit）&lt;br&gt;▸ Executed / Applied：纯通知（遍历所有组件逐个调用）&lt;br&gt;▸ Changed：重置三个缓存 Tag，再从组件重新聚合" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF9C4;strokeColor=#F57F17;strokeWidth=1;fontSize=11;verticalAlign=top;spacingTop=8;" parent="1" vertex="1">
+                    <mxGeometry x="480" y="460" width="640" height="90" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

@@ -1,0 +1,85 @@
+<mxfile host="65bd71144e">
+    <diagram id="lxNbz56JkCHdMHadPr4W" name="第 1 页">
+        <mxGraphModel dx="1376" dy="1071" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1700" pageHeight="819" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="t" value="UGameplayEffectComponent 继承体系 —— 基类 + 18 个内置组件（四大类）" style="text;html=1;fontSize=22;fontStyle=1;fontColor=#1a1a2e;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="200" y="10" width="1300" height="36" as="geometry"/>
+                </mxCell>
+                <mxCell id="base" value="&lt;b style=&quot;font-size:16px;&quot;&gt;UGameplayEffectComponent&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px;color:#555;&quot;&gt;抽象基类 · UObject&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#999;&quot;&gt;─────────────────────────────&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px;&quot;&gt;UCLASS(Abstract, Const, DefaultToInstanced, EditInlineNew,&lt;br&gt;CollapseCategories, Within=GameplayEffect, MinimalAPI)&lt;br&gt;▸ CanGameplayEffectApply()&lt;br&gt;▸ OnActiveGameplayEffectAdded()&lt;br&gt;▸ OnGameplayEffectExecuted()&lt;br&gt;▸ OnGameplayEffectApplied()&lt;br&gt;▸ OnGameplayEffectChanged()&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=2;fontSize=12;arcSize=14;verticalAlign=top;spacingTop=10;" parent="1" vertex="1">
+                    <mxGeometry x="515" y="60" width="420" height="180" as="geometry"/>
+                </mxCell>
+                <mxCell id="grp1" value="&lt;b&gt;Tags 类&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=1;fontSize=13;fontStyle=1;verticalAlign=top;spacingTop=4;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="350" width="320" height="140" as="geometry"/>
+                </mxCell>
+                <mxCell id="g1" value="▸ TargetTags（授予目标 Tag）&lt;br&gt;▸ AssetTags（资产 Tag）&lt;br&gt;▸ TargetTagRequirements（Tag 条件）&lt;br&gt;▸ BlockAbilityTags（阻挡技能）&lt;br&gt;▸ CancelAbilityTags（取消技能）" style="text;html=1;fontSize=11;fontColor=#0D47A1;align=left;spacingLeft=8;spacingTop=4;" parent="1" vertex="1">
+                    <mxGeometry x="52" y="386" width="296" height="170" as="geometry"/>
+                </mxCell>
+                <mxCell id="grp2" value="&lt;b&gt;条件类&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=1;fontSize=13;fontStyle=1;verticalAlign=top;spacingTop=4;" parent="1" vertex="1">
+                    <mxGeometry x="390" y="350" width="320" height="140" as="geometry"/>
+                </mxCell>
+                <mxCell id="g2" value="▸ CustomCanApply（自定义条件）&lt;br&gt;▸ ChanceToApply（概率应用）&lt;br&gt;▸ Immunity（免疫其他效果）" style="text;html=1;fontSize=11;fontColor=#1B5E20;align=left;spacingLeft=8;spacingTop=4;" parent="1" vertex="1">
+                    <mxGeometry x="402" y="386" width="296" height="170" as="geometry"/>
+                </mxCell>
+                <mxCell id="grp3" value="&lt;b&gt;附加类&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fad7a1;strokeColor=#e67e22;strokeWidth=1;fontSize=13;fontStyle=1;verticalAlign=top;spacingTop=4;" parent="1" vertex="1">
+                    <mxGeometry x="740" y="350" width="320" height="140" as="geometry"/>
+                </mxCell>
+                <mxCell id="g3" value="▸ AdditionalEffects（附加 GE）&lt;br&gt;▸ Abilities（授予技能）&lt;br&gt;▸ RemoveOther（移除其他效果）" style="text;html=1;fontSize=11;fontColor=#E65100;align=left;spacingLeft=8;spacingTop=4;" parent="1" vertex="1">
+                    <mxGeometry x="752" y="386" width="296" height="170" as="geometry"/>
+                </mxCell>
+                <mxCell id="grp4" value="&lt;b&gt;UI 类&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;strokeWidth=1;fontSize=13;fontStyle=1;verticalAlign=top;spacingTop=4;" parent="1" vertex="1">
+                    <mxGeometry x="1090" y="350" width="320" height="140" as="geometry"/>
+                </mxCell>
+                <mxCell id="g4" value="▸ UIData（UI 展示数据：图标/描述）" style="text;html=1;fontSize=11;fontColor=#6A1B9A;align=left;spacingLeft=8;spacingTop=4;" parent="1" vertex="1">
+                    <mxGeometry x="1102" y="386" width="296" height="170" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1" value="继承" style="endArrow=block;endFill=0;strokeWidth=1.5;strokeColor=#7F8C8D;fontSize=10;fontColor=#7F8C8D;edgeStyle=orthogonalEdgeStyle;exitX=0.25;exitY=1;entryX=0.5;entryY=0;" parent="1" source="base" target="grp1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="620" y="290"/>
+                            <mxPoint x="200" y="290"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e2" value="继承" style="endArrow=block;endFill=0;strokeWidth=1.5;strokeColor=#7F8C8D;fontSize=10;fontColor=#7F8C8D;edgeStyle=orthogonalEdgeStyle;exitX=0.42;exitY=1;entryX=0.5;entryY=0;" parent="1" source="base" target="grp2" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="691" y="310"/>
+                            <mxPoint x="550" y="310"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e3" value="继承" style="endArrow=block;endFill=0;strokeWidth=1.5;strokeColor=#7F8C8D;fontSize=10;fontColor=#7F8C8D;edgeStyle=orthogonalEdgeStyle;exitX=0.58;exitY=1;entryX=0.5;entryY=0;" parent="1" source="base" target="grp3" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="759" y="310"/>
+                            <mxPoint x="900" y="310"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e4" value="继承" style="endArrow=block;endFill=0;strokeWidth=1.5;strokeColor=#7F8C8D;fontSize=10;fontColor=#7F8C8D;edgeStyle=orthogonalEdgeStyle;exitX=0.75;exitY=1;entryX=0.5;entryY=0;" parent="1" source="base" target="grp4" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="leg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;strokeWidth=1;arcSize=14;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="620" width="1370" height="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="leglab" value="&lt;b&gt;图例 / 关键点&lt;/b&gt;" style="text;html=1;fontSize=13;fontColor=#333333;align=left;" parent="1" vertex="1">
+                    <mxGeometry x="56" y="628" width="200" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="leg1" value="▸ 组件是 UObject（非 Actor 组件），Outer 是 GameplayEffect（Within=GameplayEffect）" style="text;html=1;fontSize=11;fontColor=#333;align=left;" parent="1" vertex="1">
+                    <mxGeometry x="56" y="654" width="620" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="leg2" value="▸ 一个 GE 资产只有一份组件，被所有应用实例共享 → 不能存运行时状态" style="text;html=1;fontSize=11;fontColor=#333;align=left;" parent="1" vertex="1">
+                    <mxGeometry x="56" y="680" width="620" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="leg3" value="▸ 项目可自定义组件：继承 UGameplayEffectComponent + 重写回调" style="text;html=1;fontSize=11;fontColor=#333;align=left;" parent="1" vertex="1">
+                    <mxGeometry x="720" y="654" width="620" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="leg4" value="▸ DisplayName 让 GE 在编辑器里像「搭积木」" style="text;html=1;fontSize=11;fontColor=#333;align=left;" parent="1" vertex="1">
+                    <mxGeometry x="720" y="680" width="620" height="20" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
