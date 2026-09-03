@@ -1,0 +1,38 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.0",
+	"FriendlyName": "战斗框架",
+	"Description": "回合制战斗框架插件 - 包含战斗管理器子系统、回合协调器、数据层、回合计时器、角色回合组件、配置资产与战斗场景点。",
+	"Category": "Gameplay",
+	"CreatedBy": "Cat Team",
+	"CanContainContent": true,
+	"IsBetaVersion": false,
+	"IsExperimentalVersion": false,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "CatCombatFramework",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "GameplayAbilities",
+			"Enabled": true
+		},
+		{
+			"Name": "GameplayTags",
+			"Enabled": true
+		},
+		{
+			"Name": "GameplayTasks",
+			"Enabled": true
+		},
+		{
+			"Name": "UMG",
+			"Enabled": true
+		}
+	]
+}
