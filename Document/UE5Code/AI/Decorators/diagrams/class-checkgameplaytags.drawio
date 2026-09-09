@@ -1,0 +1,74 @@
+<mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+
+    <!-- UBTNode (abstract) -->
+    <mxCell id="10" value="UBTNode" style="swimlane;fontStyle=2;align=center;startSize=30;fontSize=14;fillColor=#D6E8FA;strokeColor=#4A90D9;fontColor=#1A1A2E;fontFamily=Consolas;" vertex="1" parent="1">
+      <mxGeometry x="60" y="40" width="340" height="30" as="geometry"/>
+    </mxCell>
+
+    <!-- UBTAuxiliaryNode (abstract) -->
+    <mxCell id="11" value="UBTAuxiliaryNode" style="swimlane;fontStyle=2;align=center;startSize=30;fontSize=14;fillColor=#D6E8FA;strokeColor=#4A90D9;fontColor=#1A1A2E;fontFamily=Consolas;" vertex="1" parent="1">
+      <mxGeometry x="60" y="150" width="340" height="30" as="geometry"/>
+    </mxCell>
+
+    <!-- UBTDecorator (abstract) -->
+    <mxCell id="12" value="UBTDecorator" style="swimlane;fontStyle=2;align=center;startSize=30;fontSize=14;fillColor=#D6E8FA;strokeColor=#4A90D9;fontColor=#1A1A2E;fontFamily=Consolas;" vertex="1" parent="1">
+      <mxGeometry x="60" y="260" width="340" height="190" as="geometry"/>
+    </mxCell>
+    <mxCell id="13" value="- bInverseCondition : bool&#xa;# FlowAbortMode : EBTFlowAbortMode&#xa;# bAllowAbortNone/LowerPri/ChildNodes" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;fontSize=11;fontFamily=Consolas;fontColor=#1A1A2E;" vertex="1" parent="12">
+      <mxGeometry y="30" width="340" height="90" as="geometry"/>
+    </mxCell>
+    <mxCell id="14" value="" style="line;strokeWidth=1;strokeColor=#4A90D9;" vertex="1" parent="12">
+      <mxGeometry y="120" width="340" height="10" as="geometry"/>
+    </mxCell>
+    <mxCell id="15" value="+ WrappedCanExecute() : bool&#xa;# CalculateRawConditionValue() : bool&#xa;+ IsInversed() : bool" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;fontSize=11;fontFamily=Consolas;fontColor=#1A1A2E;" vertex="1" parent="12">
+      <mxGeometry y="130" width="340" height="60" as="geometry"/>
+    </mxCell>
+
+    <!-- UBTDecorator_CheckGameplayTagsOnActor -->
+    <mxCell id="16" value="UBTDecorator_CheckGameplayTagsOnActor" style="swimlane;fontStyle=1;align=center;startSize=30;fontSize=13;fillColor=#D5F5E3;strokeColor=#27AE60;fontColor=#1A1A2E;fontFamily=Consolas;" vertex="1" parent="1">
+      <mxGeometry x="60" y="540" width="340" height="200" as="geometry"/>
+    </mxCell>
+    <mxCell id="17" value="# ActorToCheck : FBlackboardKeySelector&#xa;# TagsToMatch : EGameplayContainerMatchType&#xa;# GameplayTags : FGameplayTagContainer&#xa;- CachedDescription : FString" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;fontSize=11;fontFamily=Consolas;fontColor=#1A1A2E;" vertex="1" parent="16">
+      <mxGeometry y="30" width="340" height="90" as="geometry"/>
+    </mxCell>
+    <mxCell id="18" value="" style="line;strokeWidth=1;strokeColor=#27AE60;" vertex="1" parent="16">
+      <mxGeometry y="120" width="340" height="10" as="geometry"/>
+    </mxCell>
+    <mxCell id="19" value="# CalculateRawConditionValue() : bool&#xa;+ GetStaticDescription() : FString&#xa;# InitializeFromAsset(Asset) : void" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;fontSize=11;fontFamily=Consolas;fontColor=#1A1A2E;" vertex="1" parent="16">
+      <mxGeometry y="130" width="340" height="70" as="geometry"/>
+    </mxCell>
+
+    <!-- interface -->
+    <mxCell id="20" value="«interface»&#xa;IGameplayTagAssetInterface" style="swimlane;fontStyle=2;align=center;startSize=40;fontSize=13;fillColor=#FCF3CF;strokeColor=#F1C40F;fontColor=#1A1A2E;fontFamily=Consolas;" vertex="1" parent="1">
+      <mxGeometry x="620" y="540" width="320" height="140" as="geometry"/>
+    </mxCell>
+    <mxCell id="21" value="+ GetOwnedGameplayTags(Container) : void&#xa;+ HasAllMatchingGameplayTags(Container) : bool&#xa;+ HasAnyMatchingGameplayTags(Container) : bool" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;fontSize=11;fontFamily=Consolas;fontColor=#1A1A2E;" vertex="1" parent="20">
+      <mxGeometry y="40" width="320" height="100" as="geometry"/>
+    </mxCell>
+
+    <!-- implementer note -->
+    <mxCell id="22" value="实现者（引擎侧）&#xa;UAbilitySystemComponent&#xa;UGameplayEffect" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=middle;spacingLeft=8;fontSize=11;fillColor=#F4F6F6;strokeColor=#BDC3C7;fontColor=#7F8C8D;fontFamily=Microsoft YaHei;" vertex="1" parent="1">
+      <mxGeometry x="620" y="260" width="320" height="110" as="geometry"/>
+    </mxCell>
+
+    <!-- inheritance edges (child -> parent, hollow triangle at parent) -->
+    <mxCell id="30" value="" style="edgeStyle=orthogonalEdgeStyle;endArrow=block;endFill=0;startArrow=none;exitX=0.5;exitY=0;entryX=0.5;entryY=1;strokeColor=#7F8C8D;strokeWidth=1.5;" edge="1" parent="1" source="11" target="10">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="31" value="" style="edgeStyle=orthogonalEdgeStyle;endArrow=block;endFill=0;startArrow=none;exitX=0.5;exitY=0;entryX=0.5;entryY=1;strokeColor=#7F8C8D;strokeWidth=1.5;" edge="1" parent="1" source="12" target="11">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="32" value="" style="edgeStyle=orthogonalEdgeStyle;endArrow=block;endFill=0;startArrow=none;exitX=0.5;exitY=0;entryX=0.5;entryY=1;strokeColor=#7F8C8D;strokeWidth=1.5;" edge="1" parent="1" source="16" target="12">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- dependency: our node -> interface -->
+    <mxCell id="33" value="Cast&lt;IGameplayTagAssetInterface&gt;()" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;endFill=0;startArrow=none;dashed=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;strokeColor=#E67E22;strokeWidth=1.5;fontSize=11;fontFamily=Consolas;labelBackgroundColor=#FFFFFF;" edge="1" parent="1" source="16" target="20">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+  </root>
+</mxGraphModel>

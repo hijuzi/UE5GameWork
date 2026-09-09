@@ -1,0 +1,90 @@
+<mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+
+    <!-- participant headers -->
+    <mxCell id="10" value=":UBehaviorTreeComponent" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#D6E8FA;strokeColor=#4A90D9;fontStyle=1;fontSize=12;fontFamily=Consolas;fontColor=#1A1A2E;" vertex="1" parent="1">
+      <mxGeometry x="40" y="40" width="180" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="11" value=":Cooldown 装饰器" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#D5F5E3;strokeColor=#27AE60;fontStyle=1;fontSize=12;fontFamily=Microsoft YaHei;fontColor=#1A1A2E;" vertex="1" parent="1">
+      <mxGeometry x="320" y="40" width="180" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="12" value=":NodeMemory&#xa;（每 AI 独立）" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FCF3CF;strokeColor=#F1C40F;fontStyle=1;fontSize=12;fontFamily=Microsoft YaHei;fontColor=#1A1A2E;" vertex="1" parent="1">
+      <mxGeometry x="600" y="40" width="180" height="40" as="geometry"/>
+    </mxCell>
+
+    <!-- lifelines -->
+    <mxCell id="20" value="" style="edgeStyle=none;dashed=1;endArrow=none;startArrow=none;strokeColor=#4A90D9;strokeWidth=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="130" y="80" as="sourcePoint"/>
+        <mxPoint x="130" y="620" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="21" value="" style="edgeStyle=none;dashed=1;endArrow=none;startArrow=none;strokeColor=#27AE60;strokeWidth=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="410" y="80" as="sourcePoint"/>
+        <mxPoint x="410" y="620" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="22" value="" style="edgeStyle=none;dashed=1;endArrow=none;startArrow=none;strokeColor=#F1C40F;strokeWidth=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="690" y="80" as="sourcePoint"/>
+        <mxPoint x="690" y="620" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- activation boxes -->
+    <mxCell id="30" value="" style="fillColor=#D5F5E3;strokeColor=#27AE60;" vertex="1" parent="1">
+      <mxGeometry x="404" y="150" width="12" height="420" as="geometry"/>
+    </mxCell>
+    <mxCell id="31" value="" style="fillColor=#FCF3CF;strokeColor=#F1C40F;" vertex="1" parent="1">
+      <mxGeometry x="684" y="220" width="12" height="280" as="geometry"/>
+    </mxCell>
+
+    <!-- messages -->
+    <mxCell id="40" value="1: CalculateRawConditionValue()" style="edgeStyle=none;endArrow=block;endFill=1;startArrow=none;strokeColor=#27AE60;strokeWidth=1.5;fontSize=11;fontFamily=Consolas;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="130" y="150" as="sourcePoint"/>
+        <mxPoint x="404" y="150" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="41" value="2: 读 LastUseTimestamp" style="edgeStyle=none;endArrow=block;endFill=1;startArrow=none;strokeColor=#27AE60;strokeWidth=1.5;fontSize=11;fontFamily=Microsoft YaHei;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="416" y="220" as="sourcePoint"/>
+        <mxPoint x="684" y="220" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="42" value="3: return true（冷却结束）" style="edgeStyle=none;endArrow=open;endFill=0;dashed=1;startArrow=none;strokeColor=#27AE60;strokeWidth=1.5;fontSize=11;fontFamily=Microsoft YaHei;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="404" y="290" as="sourcePoint"/>
+        <mxPoint x="130" y="290" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="43" value="4: 分支执行完 OnNodeDeactivation" style="edgeStyle=none;endArrow=block;endFill=1;startArrow=none;strokeColor=#27AE60;strokeWidth=1.5;fontSize=11;fontFamily=Microsoft YaHei;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="130" y="360" as="sourcePoint"/>
+        <mxPoint x="404" y="360" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="44" value="5: 写 LastUseTimestamp = Now" style="edgeStyle=none;endArrow=block;endFill=1;startArrow=none;strokeColor=#27AE60;strokeWidth=1.5;fontSize=11;fontFamily=Microsoft YaHei;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="416" y="430" as="sourcePoint"/>
+        <mxPoint x="684" y="430" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="45" value="6: [配了 Abort] TickNode 查冷却" style="edgeStyle=none;endArrow=block;endFill=1;startArrow=none;strokeColor=#E67E22;strokeWidth=1.5;fontSize=11;fontFamily=Microsoft YaHei;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="416" y="500" as="sourcePoint"/>
+        <mxPoint x="684" y="500" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="46" value="7: 冷却结束 → RequestExecution" style="edgeStyle=none;endArrow=block;endFill=1;startArrow=none;strokeColor=#E67E22;strokeWidth=1.5;fontSize=11;fontFamily=Microsoft YaHei;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="404" y="570" as="sourcePoint"/>
+        <mxPoint x="130" y="570" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+  </root>
+</mxGraphModel>
