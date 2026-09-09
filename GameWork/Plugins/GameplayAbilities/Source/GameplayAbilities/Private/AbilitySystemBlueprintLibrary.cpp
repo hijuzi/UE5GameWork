@@ -1559,6 +1559,15 @@ bool UAbilitySystemBlueprintLibrary::HasAnyAbilitiesByPredicate(
 
 		TArray<UGameplayAbility*> AbilitiesToCheck;
 
+		// =====================================================================
+		// ===== [GAS_MOD_04] START=====
+		// ---- 修改前 (引擎原版) ----
+		//   if (!bOnlyRunPredicateOnAbilityCDOs && Spec.Ability->GetInstancingPolicy() != EGameplayAbilityInstancingPolicy::NonInstanced)
+		//   // 问题: UE5.8 已将 GetInstancingPolicy() 标记为废弃(Deprecated), 直接调用会产生弃用告警。
+		// ---- 修改后 (本项目, 下方为实际生效代码) ----
+		// 用 PRAGMA_DISABLE_DEPRECATION_WARNINGS / PRAGMA_ENABLE_DEPRECATION_WARNINGS
+		// 包裹该调用, 屏蔽 UE5.8 的弃用告警, 保持向后兼容。
+		PRAGMA_DISABLE_DEPRECATION_WARNINGS
 		if (!bOnlyRunPredicateOnAbilityCDOs && Spec.Ability->GetInstancingPolicy() != EGameplayAbilityInstancingPolicy::NonInstanced)
 		{
 			AbilitiesToCheck.Append(Spec.GetAbilityInstances());
@@ -1567,6 +1576,9 @@ bool UAbilitySystemBlueprintLibrary::HasAnyAbilitiesByPredicate(
 		{
 			AbilitiesToCheck.Add(Spec.Ability);
 		}
+		PRAGMA_ENABLE_DEPRECATION_WARNINGS
+		// ===== [GAS_MOD_04] END =====
+		// =====================================================================
 
 		for (UGameplayAbility* AbilityToCheck : AbilitiesToCheck)
 		{
