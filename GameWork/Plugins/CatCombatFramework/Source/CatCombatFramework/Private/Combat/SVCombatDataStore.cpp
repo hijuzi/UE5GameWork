@@ -10,6 +10,7 @@
 #include "AbilitySystemComponent.h"
 #include "Abilities/GameplayAbility.h"
 #include "GameplayEffectTypes.h"
+#include "Combat/Component/SVCharacterTurnComponent.h"
 #include "Combat/DataAsset/SVCombatCharacterDataAsset.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/PlayerController.h"
@@ -178,6 +179,12 @@ void USVCombatDataStore::AddCharacter(ECombatTeamType TeamType, ACharacter* Char
 		Owner->OnCombatCharacterChanged.Broadcast(true, TeamType, Character);
 	}
 
+	// 角色加入战斗时，清理其能力激活次数计数（重新开始计数）
+	if (USVCharacterTurnComponent* TurnComp = USVCharacterTurnComponent::GetSVCharacterTurnComponent(Character))
+	{
+		TurnComp->ResetAllActivationCounts();
+	}
+
 	UE_LOG(LogCatCombatDataStore, Verbose, TEXT("AddCombatCharacter: Team=%s, Name=%s, Count=%d"),
 		*UEnum::GetValueAsString(TeamType),
 		*Character->GetName(), GetCharacters(TeamType).Num());
@@ -281,6 +288,15 @@ void USVCombatDataStore::AdvanceToNextRound()
 	// 推进到下一回合：切回起始阵营（先手阵营），回合数 +1
 	SetCurrentTurnTeam(StartingTeam);
 	IncrementRoundNumber();
+
+	// 单次回合结束：清理所有角色「单个回合内（PerTurn）」的能力激活次数（WholeBattle 计数保留）
+	for (ACharacter* Character : GetAllCharacters())
+	{
+		if (USVCharacterTurnComponent* TurnComp = USVCharacterTurnComponent::GetSVCharacterTurnComponent(Character))
+		{
+			TurnComp->ResetPerTurnActivationCounts();
+		}
+	}
 
 	UE_LOG(LogCatCombatDataStore, Verbose, TEXT("DataStore::AdvanceToNextRound: 切换到下一回合，CurrentTurnTeam=%s, RoundNumber=%d"),
 		*UEnum::GetValueAsString(CurrentTurnTeam), RoundNumber);

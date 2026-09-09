@@ -81,6 +81,63 @@ enum class ECombatTurnRole : uint8
 	Defender UMETA(DisplayName = "防守方（被动响应）"),
 };
 
+// ============================================================================
+// 回合行动能力类型与数据（原 SVCombatTurnActionAbility.h，已合并至此）
+// ============================================================================
+
+/** TurnAction 类型：行动能力归属的战斗方 */
+UENUM(BlueprintType)
+enum class ESVTurnActionType : uint8
+{
+	Attacker UMETA(DisplayName = "攻击方"),
+	Defender UMETA(DisplayName = "防御方"),
+	Both     UMETA(DisplayName = "攻击与防御方"),
+};
+
+/** 可激活次数限制类型 */
+UENUM(BlueprintType)
+enum class ESVActivationLimitType : uint8
+{
+	Limited     UMETA(DisplayName = "限制次数"),
+	Unlimited   UMETA(DisplayName = "无限次数"),
+	IgnoreLimit UMETA(DisplayName = "忽略限制"),
+};
+
+/** 有限次数生效时机 */
+UENUM(BlueprintType)
+enum class ESVActivationLimitScope : uint8
+{
+	PerTurn     UMETA(DisplayName = "单个回合内"),
+	WholeBattle UMETA(DisplayName = "整场战斗内"),
+};
+
+/** TurnAction 数据：描述一个回合行动能力的类型与激活次数限制 */
+USTRUCT(BlueprintType)
+struct FSVTurnActionData
+{
+	GENERATED_BODY()
+
+	/** TurnAction 类型 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TurnAction")
+	ESVTurnActionType TurnActionType = ESVTurnActionType::Attacker;
+
+	/** 可激活次数限制类型 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TurnAction")
+	ESVActivationLimitType LimitType = ESVActivationLimitType::Unlimited;
+
+	/** 有限次数生效时机（仅当 LimitType 为「限制次数」时显示） */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TurnAction", meta = (EditCondition = "LimitType == ESVActivationLimitType::Limited", EditConditionHides))
+	ESVActivationLimitScope LimitScope = ESVActivationLimitScope::PerTurn;
+
+	/** 限制次数（仅当 LimitType 为「限制次数」时显示） */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TurnAction", meta = (EditCondition = "LimitType == ESVActivationLimitType::Limited", EditConditionHides))
+	int32 LimitCount = 1;
+
+	/** 当该能力的本次限制次数用尽时，是否立即结束当前回合（true=用尽即收尾；false=仅该能力不再可用，仍可从其余能力中继续行动） */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TurnAction", meta = (EditCondition = "LimitType == ESVActivationLimitType::Limited", EditConditionHides))
+	bool bEndTurnWhenLimitReached = true;
+};
+
 /**
  * 单次行动请求。
  * 玩家输入桥接与敌人 AI 决策统一产出此结构，由 SVCombatActionRequester 激活对应 Ability。

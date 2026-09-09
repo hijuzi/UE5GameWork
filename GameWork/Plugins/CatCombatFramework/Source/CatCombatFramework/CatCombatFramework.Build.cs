@@ -14,6 +14,7 @@ public class CatCombatFramework : ModuleRules
 			"CoreUObject",
 			"Engine",
 			"InputCore",
+			"EnhancedInput",
 			"GameplayAbilities",
 			"GameplayTags",
 			"GameplayTasks",
@@ -21,7 +22,8 @@ public class CatCombatFramework : ModuleRules
 			"Slate",
 			"SlateCore",
 			"DeveloperSettings",
-			"AIModule"
+			"AIModule",
+			"CommonInput"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[]
