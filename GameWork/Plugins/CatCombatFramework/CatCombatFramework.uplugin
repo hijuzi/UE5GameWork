@@ -23,18 +23,6 @@
 			"Enabled": true
 		},
 		{
-			"Name": "GameplayTags",
-			"Enabled": true
-		},
-		{
-			"Name": "GameplayTasks",
-			"Enabled": true
-		},
-		{
-			"Name": "UMG",
-			"Enabled": true
-		},
-		{
 			"Name": "EnhancedInput",
 			"Enabled": true
 		},
