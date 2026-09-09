@@ -3705,7 +3705,19 @@ bool FActiveGameplayEffectsContainer::HandleActiveGameplayEffectStackOverflow(co
 	
 	// allow refreshing duration and context if the new application would cause us to overflow but we're not currently at max stacks
 	using namespace UE::GameplayEffect;
-	const bool bAtStackLimit = OldSpec.GetStackCount() == StackedGE->StackLimitCount;
+
+	// =====================================================================
+	// ===== [GAS_MOD_03] START=====
+	// ---- 修改前 (引擎原版) ----
+	//   const bool bAtStackLimit = OldSpec.GetStackCount() == StackedGE->StackLimitCount;
+	//   // 缺陷:
+	//   //   1) GE 未配置堆叠上限(StackLimitCount==0)且当前层数为 0 时, 会被误判为已到上限;
+	//   //   2) 用 == 而非 >=, 在层数被 FMath::Min() 截断/归并的路径下不够健壮。
+	// ---- 修改后 (本项目, 下方为实际生效代码) ----
+	const bool bHasStackLimit = StackedGE->StackLimitCount > 0;
+	const bool bAtStackLimit = bHasStackLimit && OldSpec.GetStackCount() >= StackedGE->StackLimitCount;
+	// ===== [GAS_MOD_03] END =====
+	// =====================================================================
 	const bool bRefreshToLimit = !bAtStackLimit && !StackedGE->bClearStackOnOverflow && HasActiveGameplayEffectOverflowBehavior(EActiveGameplayEffectOverflowBehavior::ApplyRemainingStacksWhenOverflow);
 
 	for (TSubclassOf<UGameplayEffect> OverflowEffect : StackedGE->OverflowEffects)
@@ -4729,8 +4741,48 @@ PRAGMA_ENABLE_DEPRECATION_WARNINGS
 
 				if (bInvokePredictedEffects)
 				{
-					Owner->InvokeGameplayCueEvent(Effect.Spec, EGameplayCueEvent::OnActive);
-					Owner->InvokeGameplayCueEvent(Effect.Spec, EGameplayCueEvent::WhileActive);
+					// =====================================================================
+					// ===== [GAS_MOD_01] START=====
+					// ---- 修改前 (引擎原版) ----
+					//   Owner->InvokeGameplayCueEvent(Effect.Spec, EGameplayCueEvent::OnActive);
+					//   Owner->InvokeGameplayCueEvent(Effect.Spec, EGameplayCueEvent::WhileActive);
+					//   // 缺陷: InvokeGameplayCueEvent(Spec) 内部会再次遍历 Def->GameplayCues 全部 Cue,
+					//   //       而外层 for 已遍历每个 Cue => 外层 x 内层 = N*N 次触发。
+					// ---- 修改后 (本项目, 下方为实际生效代码)
+					FGameplayCueParameters CueParameters(Effect.Spec);
+					if (Cue.MagnitudeAttribute.IsValid())
+					{
+						if (const FGameplayEffectModifiedAttribute* ModifiedAttribute = Effect.Spec.GetModifiedAttribute(Cue.MagnitudeAttribute))
+						{
+							CueParameters.RawMagnitude = ModifiedAttribute->TotalMagnitude;
+						}
+						else
+						{
+							CueParameters.RawMagnitude = 0.0f;
+						}
+					}
+					else
+					{
+						CueParameters.RawMagnitude = 0.0f;
+					}
+					{
+						const float Level = Effect.Spec.GetLevel();
+						const float Range = Cue.MaxLevel - Cue.MinLevel;
+						CueParameters.NormalizedMagnitude = (Range > KINDA_SMALL_NUMBER) ? ((Level - Cue.MinLevel) / Range) : 1.f;
+					}
+
+					FGameplayEffectQuery EffectQuery;
+					EffectQuery.EffectDefinition = Effect.Spec.Def->GetClass();
+					CueParameters.bGameplayEffectActive = Effect.Spec.Def->DurationPolicy == EGameplayEffectDurationType::Instant || GetActiveEffectCount(EffectQuery) > 0;
+
+					if (AActor* ActorAvatar = Owner->AbilityActorInfo.IsValid() ? Owner->AbilityActorInfo->AvatarActor.Get() : nullptr)
+					{
+						UGameplayCueManager* CueManager = UAbilitySystemGlobals::Get().GetGameplayCueManager();
+						CueManager->HandleGameplayCues(ActorAvatar, Cue.GameplayCueTags, EGameplayCueEvent::OnActive, CueParameters);
+						CueManager->HandleGameplayCues(ActorAvatar, Cue.GameplayCueTags, EGameplayCueEvent::WhileActive, CueParameters);
+					}
+					// ===== [GAS_MOD_01] END =====
+					// =====================================================================
 				}
 			}
 		}
@@ -5041,7 +5093,46 @@ PRAGMA_ENABLE_DEPRECATION_WARNINGS
 
 				if (bInvokePredictedEffects)
 				{
-					Owner->InvokeGameplayCueEvent(Effect.Spec, EGameplayCueEvent::Removed);
+					// =====================================================================
+					// ===== [GAS_MOD_02] START=====
+					// ---- 修改前 (引擎原版) ----
+					//   Owner->InvokeGameplayCueEvent(Effect.Spec, EGameplayCueEvent::Removed);
+					//   // 缺陷: InvokeGameplayCueEvent(Spec) 内部会再次遍历 Def->GameplayCues 全部 Cue,
+					//   //       而外层 for 已遍历每个 Cue => 外层 x 内层 = N*N 次触发。
+					// ---- 修改后 (本项目, 下方为实际生效代码)
+					FGameplayCueParameters CueParameters(Effect.Spec);
+					if (Cue.MagnitudeAttribute.IsValid())
+					{
+						if (const FGameplayEffectModifiedAttribute* ModifiedAttribute = Effect.Spec.GetModifiedAttribute(Cue.MagnitudeAttribute))
+						{
+							CueParameters.RawMagnitude = ModifiedAttribute->TotalMagnitude;
+						}
+						else
+						{
+							CueParameters.RawMagnitude = 0.0f;
+						}
+					}
+					else
+					{
+						CueParameters.RawMagnitude = 0.0f;
+					}
+					{
+						const float Level = Effect.Spec.GetLevel();
+						const float Range = Cue.MaxLevel - Cue.MinLevel;
+						CueParameters.NormalizedMagnitude = (Range > KINDA_SMALL_NUMBER) ? ((Level - Cue.MinLevel) / Range) : 1.f;
+					}
+
+					FGameplayEffectQuery EffectQuery;
+					EffectQuery.EffectDefinition = Effect.Spec.Def->GetClass();
+					CueParameters.bGameplayEffectActive = Effect.Spec.Def->DurationPolicy == EGameplayEffectDurationType::Instant || GetActiveEffectCount(EffectQuery) > 0;
+
+					if (AActor* ActorAvatar = Owner->AbilityActorInfo.IsValid() ? Owner->AbilityActorInfo->AvatarActor.Get() : nullptr)
+					{
+						UGameplayCueManager* CueManager = UAbilitySystemGlobals::Get().GetGameplayCueManager();
+						CueManager->HandleGameplayCues(ActorAvatar, Cue.GameplayCueTags, EGameplayCueEvent::Removed, CueParameters);
+					}
+					// ===== [GAS_MOD_02] END =====
+					// =====================================================================
 				}
 			}
 		}
