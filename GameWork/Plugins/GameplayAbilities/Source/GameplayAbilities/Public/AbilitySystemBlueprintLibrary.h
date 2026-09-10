@@ -658,6 +658,19 @@ public:
 	 */
 	UFUNCTION(BlueprintPure, Category="ScalableFloat", meta=(DisplayName="Get Value At Level (double-precision)", BlueprintAutocast, IgnoreTypePromotion))
 	static UE_API double Conv_ScalableFloatToDouble(const FScalableFloat& Input, float Level = 0.0f);
+
+	//=====================================================================
+	// ===== [GAS_MOD_08] START=====
+	// TurnBased Support: 回合推进蓝图入口
+	// 开启 ASC 的 bTurnBased 后，调用本函数推进其回合，驱动 GE 的 Duration/Period。
+	//=====================================================================
+
+	/** 推进指定 ASC 的回合数（回合制下替代世界时间驱动 GE 的 Duration/Period） */
+	UFUNCTION(BlueprintCallable, Category = "Ability|TurnBased")
+	static UE_API void TickTurn(UAbilitySystemComponent* AbilitySystemComponent, int32 Delta = 1);
+
+	// ===== [GAS_MOD_08] END =====
+	//=====================================================================
 };
 
 #undef UE_API

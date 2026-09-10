@@ -16,6 +16,9 @@
 class UAbilitySystemComponent;
 class UGameplayCueManager;
 class UGameplayTagReponseTable;
+// ===== [GAS_MOD_05] START=====
+class FAbilityTimerManager;
+// ===== [GAS_MOD_05] END =====
 struct FGameplayAbilityActorInfo;
 struct FGameplayEffectSpec;
 struct FGameplayEffectSpecForRPC;
@@ -67,6 +70,23 @@ class UAbilitySystemGlobals : public UObject
 	}
 	/** Will be called once on first use to load global data tables and tags (see FGameplayAbilitiesModule::GetAbilitySystemGlobals) */
 	UE_API virtual void InitGlobalData();
+
+	//=====================================================================
+	// ===== [GAS_MOD_05] START=====
+	// TurnBased Support: 全局回合 Timer 管理器（懒加载创建、销毁与生命周期清理）
+	//=====================================================================
+
+	/** 获取全局回合 Timer 管理器（懒加载创建） */
+	UE_API FAbilityTimerManager& GetAbilityTimerManager();
+
+	/** 销毁全局回合 Timer 管理器并释放内存 */
+	UE_API void DestroyAbilityTimerManager();
+
+	/** UObject 销毁前清理回合 Timer 管理器，防止内存泄漏 */
+	UE_API virtual void FinishDestroy() override;
+
+	// ===== [GAS_MOD_05] END =====
+	//=====================================================================
 
 	/** Returns true if InitGlobalData has been called */
 	UE_API bool IsAbilitySystemGlobalsInitialized() const;
@@ -415,6 +435,11 @@ protected:
 
 private:
 	UE_API void PerformDeveloperSettingsUpgrade();
+
+	// ===== [GAS_MOD_05] START=====
+	// TurnBased Support: 全局回合 Timer 管理器（懒加载，见 GetAbilityTimerManager）
+	FAbilityTimerManager* AbilityTimerManager = nullptr;
+	// ===== [GAS_MOD_05] END =====
 
 	FDelegateHandle ModulesChangedHandle;
 	FDelegateHandle ModulesUnloadedHandle;

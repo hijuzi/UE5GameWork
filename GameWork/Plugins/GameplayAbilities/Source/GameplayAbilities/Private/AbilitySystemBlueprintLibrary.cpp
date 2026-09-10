@@ -3,6 +3,9 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemGlobals.h"
+// ===== [GAS_MOD_08] START=====
+#include "AbilityTimerManager.h"
+// ===== [GAS_MOD_08] END =====
 #include "AbilitySystemLog.h"
 #include "AbilitySystemPrivate.h"
 #include "Engine/World.h"
@@ -1559,13 +1562,21 @@ bool UAbilitySystemBlueprintLibrary::HasAnyAbilitiesByPredicate(
 
 		TArray<UGameplayAbility*> AbilitiesToCheck;
 
-		// =====================================================================
+		//=====================================================================
 		// ===== [GAS_MOD_04] START=====
-		// ---- 修改前 (引擎原版) ----
-		//   if (!bOnlyRunPredicateOnAbilityCDOs && Spec.Ability->GetInstancingPolicy() != EGameplayAbilityInstancingPolicy::NonInstanced)
-		//   // 问题: UE5.8 已将 GetInstancingPolicy() 标记为废弃(Deprecated), 直接调用会产生弃用告警。
-		// ---- 修改后 (本项目, 下方为实际生效代码) ----
-		// 用 PRAGMA_DISABLE_DEPRECATION_WARNINGS / PRAGMA_ENABLE_DEPRECATION_WARNINGS
+		// 修改前(引擎原版):
+		/*
+		if (!bOnlyRunPredicateOnAbilityCDOs && Spec.Ability->GetInstancingPolicy() != EGameplayAbilityInstancingPolicy::NonInstanced)
+		{
+			AbilitiesToCheck.Append(Spec.GetAbilityInstances());
+		}
+		else
+		{
+			AbilitiesToCheck.Add(Spec.Ability);
+		}
+		// 问题: UE5.8 已将 GetInstancingPolicy() 标记为废弃(Deprecated), 直接调用会产生弃用告警。
+		*/
+		// 修改后(本项目, 新建): 用 PRAGMA_DISABLE_DEPRECATION_WARNINGS / PRAGMA_ENABLE_DEPRECATION_WARNINGS
 		// 包裹该调用, 屏蔽 UE5.8 的弃用告警, 保持向后兼容。
 		PRAGMA_DISABLE_DEPRECATION_WARNINGS
 		if (!bOnlyRunPredicateOnAbilityCDOs && Spec.Ability->GetInstancingPolicy() != EGameplayAbilityInstancingPolicy::NonInstanced)
@@ -1578,7 +1589,7 @@ bool UAbilitySystemBlueprintLibrary::HasAnyAbilitiesByPredicate(
 		}
 		PRAGMA_ENABLE_DEPRECATION_WARNINGS
 		// ===== [GAS_MOD_04] END =====
-		// =====================================================================
+		//=====================================================================
 
 		for (UGameplayAbility* AbilityToCheck : AbilitiesToCheck)
 		{
@@ -1631,3 +1642,20 @@ double UAbilitySystemBlueprintLibrary::Conv_ScalableFloatToDouble(const FScalabl
 {
 	return static_cast<double>(Input.GetValueAtLevel(Level));
 }
+
+//=====================================================================
+// ===== [GAS_MOD_08] START=====
+// TurnBased Support: 回合推进蓝图入口
+// 开启 ASC 的 bTurnBased 后，调用本函数推进其回合，驱动 GE 的 Duration/Period。
+//=====================================================================
+void UAbilitySystemBlueprintLibrary::TickTurn(UAbilitySystemComponent* AbilitySystemComponent, int32 Delta)
+{
+	if (!AbilitySystemComponent)
+	{
+		return;
+	}
+
+	UAbilitySystemGlobals::Get().GetAbilityTimerManager().TickTurn(AbilitySystemComponent, Delta);
+}
+// ===== [GAS_MOD_08] END =====
+//=====================================================================

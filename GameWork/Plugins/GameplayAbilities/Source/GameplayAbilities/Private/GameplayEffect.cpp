@@ -11,6 +11,9 @@
 #include "AbilitySystemStats.h"
 #include "GameplayTagsModule.h"
 #include "AbilitySystemGlobals.h"
+// ===== [GAS_MOD_07] START=====
+#include "AbilityTimerManager.h"
+// ===== [GAS_MOD_07] END =====
 #include "GameplayEffectExtension.h"
 #include "AbilitySystemComponent.h"
 #include "GameplayModMagnitudeCalculation.h"
@@ -3706,18 +3709,21 @@ bool FActiveGameplayEffectsContainer::HandleActiveGameplayEffectStackOverflow(co
 	// allow refreshing duration and context if the new application would cause us to overflow but we're not currently at max stacks
 	using namespace UE::GameplayEffect;
 
-	// =====================================================================
+	//=====================================================================
 	// ===== [GAS_MOD_03] START=====
-	// ---- 修改前 (引擎原版) ----
-	//   const bool bAtStackLimit = OldSpec.GetStackCount() == StackedGE->StackLimitCount;
-	//   // 缺陷:
-	//   //   1) GE 未配置堆叠上限(StackLimitCount==0)且当前层数为 0 时, 会被误判为已到上限;
-	//   //   2) 用 == 而非 >=, 在层数被 FMath::Min() 截断/归并的路径下不够健壮。
-	// ---- 修改后 (本项目, 下方为实际生效代码) ----
+	// 修改前(引擎原版):
+	/*
+	const bool bAtStackLimit = OldSpec.GetStackCount() == StackedGE->StackLimitCount;
+	// 缺陷:
+	//   1) GE 未配置堆叠上限(StackLimitCount==0)且当前层数为 0 时, 会被误判为已到上限;
+	//   2) 用 == 而非 >=, 在层数被 FMath::Min() 截断/归并的路径下不够健壮。
+	*/
+	// 修改后(本项目, 新建): 先用 bHasStackLimit 兜底(未设上限则永不判到顶), 再以 >= 判定是否到达上限。
+	//=====================================================================
 	const bool bHasStackLimit = StackedGE->StackLimitCount > 0;
 	const bool bAtStackLimit = bHasStackLimit && OldSpec.GetStackCount() >= StackedGE->StackLimitCount;
 	// ===== [GAS_MOD_03] END =====
-	// =====================================================================
+	//=====================================================================
 	const bool bRefreshToLimit = !bAtStackLimit && !StackedGE->bClearStackOnOverflow && HasActiveGameplayEffectOverflowBehavior(EActiveGameplayEffectOverflowBehavior::ApplyRemainingStacksWhenOverflow);
 
 	for (TSubclassOf<UGameplayEffect> OverflowEffect : StackedGE->OverflowEffects)
@@ -4492,6 +4498,10 @@ PRAGMA_ENABLE_DEPRECATION_WARNINGS
 		// Register duration callbacks with the timer manager
 		if (Owner && bSetDurationTimer)
 		{
+			//=====================================================================
+			// ===== [GAS_MOD_07a] START=====
+			// 修改前(引擎原版):
+			/*
 			FTimerManager& TimerManager = Owner->GetWorld()->GetTimerManager();
 			FTimerDelegate Delegate = FTimerDelegate::CreateUObject(Owner, &UAbilitySystemComponent::CheckDurationExpired, AppliedActiveGE->Handle);
 			TimerManager.SetTimer(AppliedActiveGE->DurationHandle, Delegate, FinalDuration, false);
@@ -4501,12 +4511,46 @@ PRAGMA_ENABLE_DEPRECATION_WARNINGS
 				// Force this off next frame
 				TimerManager.SetTimerForNextTick(Delegate);
 			}
+			*/
+			// 修改后(本项目, 新建): 以下代码全新重写，回合制下改用 FAbilityTimerManager 注册，
+			// Duration 语义从"秒"变为"回合"，兜底分支回合制下改为 1 回合后触发。
+			//=====================================================================
+			FTimerDelegate Delegate = FTimerDelegate::CreateUObject(Owner, &UAbilitySystemComponent::CheckDurationExpired, AppliedActiveGE->Handle);
+
+			if (!Owner->IsTurnBased())
+			{
+				FTimerManager& TimerManager = Owner->GetWorld()->GetTimerManager();
+				TimerManager.SetTimer(AppliedActiveGE->DurationHandle, Delegate, FinalDuration, false);
+			}
+			else
+			{
+				FAbilityTimerManager& AbilityTimerManager = UAbilitySystemGlobals::Get().GetAbilityTimerManager();
+				AbilityTimerManager.SetAbilityTimer(Owner, AppliedActiveGE->DurationHandle, Delegate, FinalDuration, false);
+			}
+			if (!ensureMsgf(AppliedActiveGE->DurationHandle.IsValid(), TEXT("Invalid Duration Handle after attempting to set duration for GE (%s) @ %.2f"), 
+				*AppliedActiveGE->GetDebugString(), FinalDuration))
+			{
+				// 兜底：DurationHandle 无效时，实时制下一帧触发 / 回合制 1 回合后触发
+				if (!Owner->IsTurnBased())
+				{
+					Owner->GetWorld()->GetTimerManager().SetTimerForNextTick(Delegate);
+				}
+				else
+				{
+					UAbilitySystemGlobals::Get().GetAbilityTimerManager().SetAbilityTimer(Owner, AppliedActiveGE->DurationHandle, Delegate, 1.f, false);
+				}
+			}
+			// ===== [GAS_MOD_07a] END =====
 		}
 	}
 	
 	// Register period callbacks with the timer manager
 	if (bSetPeriodTimer && Owner && (AppliedEffectSpec.GetPeriod() > UGameplayEffect::NO_PERIOD))
 	{
+		//=====================================================================
+		// ===== [GAS_MOD_07b] START=====
+		// 修改前(引擎原版):
+		/*
 		FTimerManager& TimerManager = Owner->GetWorld()->GetTimerManager();
 		FTimerDelegate Delegate = FTimerDelegate::CreateUObject(Owner, &UAbilitySystemComponent::ExecutePeriodicEffect, AppliedActiveGE->Handle);
 			
@@ -4517,6 +4561,36 @@ PRAGMA_ENABLE_DEPRECATION_WARNINGS
 		}
 
 		TimerManager.SetTimer(AppliedActiveGE->PeriodHandle, Delegate, AppliedEffectSpec.GetPeriod(), true);
+		*/
+		// 修改后(本项目, 新建): 以下代码全新重写，回合制下改用 FAbilityTimerManager 注册，
+		// Period 语义从"秒"变为"回合"，"应用即触发"改为直接执行 delegate。
+		//=====================================================================
+		FTimerDelegate Delegate = FTimerDelegate::CreateUObject(Owner, &UAbilitySystemComponent::ExecutePeriodicEffect, AppliedActiveGE->Handle);
+		if (!Owner->IsTurnBased())
+		{
+			FTimerManager& TimerManager = Owner->GetWorld()->GetTimerManager();
+
+			// The timer manager moves things from the pending list to the active list after checking the active list on the first tick so we need to execute here
+			if (AppliedEffectSpec.Def->bExecutePeriodicEffectOnApplication)
+			{
+				TimerManager.SetTimerForNextTick(Delegate);
+			}
+
+			TimerManager.SetTimer(AppliedActiveGE->PeriodHandle, Delegate, AppliedEffectSpec.GetPeriod(), true);
+		}
+		else
+		{
+			FAbilityTimerManager& AbilityTimerManager = UAbilitySystemGlobals::Get().GetAbilityTimerManager();
+
+			// 回合制下无"下一帧"概念，"应用时立即执行一次"改为直接执行 delegate
+			if (AppliedEffectSpec.Def->bExecutePeriodicEffectOnApplication)
+			{
+				Delegate.ExecuteIfBound();
+			}
+
+			AbilityTimerManager.SetAbilityTimer(Owner, AppliedActiveGE->PeriodHandle, Delegate, AppliedEffectSpec.GetPeriod(), true);
+		}
+		// ===== [GAS_MOD_07b] END =====
 	}
 
 	if (InPredictionKey.IsLocalClientKey() == false || IsNetAuthority())	// Clients predicting a GameplayEffect must not call MarkItemDirty
@@ -4654,6 +4728,10 @@ void FActiveGameplayEffectsContainer::AddActiveGameplayEffectGrantedTagsAndModif
 	{
 		if (Effect.Spec.Def->PeriodicInhibitionPolicy != EGameplayEffectPeriodInhibitionRemovedPolicy::NeverReset && Owner->IsOwnerActorAuthoritative())
 		{
+			//=====================================================================
+			// ===== [GAS_MOD_07e] START=====
+			// 修改前(引擎原版):
+			/*
 			FTimerManager& TimerManager = Owner->GetWorld()->GetTimerManager();
 			FTimerDelegate Delegate = FTimerDelegate::CreateUObject(Owner, &UAbilitySystemComponent::ExecutePeriodicEffect, Effect.Handle);
 
@@ -4664,6 +4742,36 @@ void FActiveGameplayEffectsContainer::AddActiveGameplayEffectGrantedTagsAndModif
 			}
 
 			TimerManager.SetTimer(Effect.PeriodHandle, Delegate, Effect.Spec.GetPeriod(), true);
+			*/
+			// 修改后(本项目, 新建): 以下代码全新重写，回合制下改用 FAbilityTimerManager 注册，
+			// Period 语义从"秒"变为"回合"，"立即执行并重置周期"改为直接执行 delegate。
+			//=====================================================================
+			FTimerDelegate Delegate = FTimerDelegate::CreateUObject(Owner, &UAbilitySystemComponent::ExecutePeriodicEffect, Effect.Handle);
+			if (!Owner->IsTurnBased())
+			{
+				FTimerManager& TimerManager = Owner->GetWorld()->GetTimerManager();
+
+				// The timer manager moves things from the pending list to the active list after checking the active list on the first tick so we need to execute here
+				if (Effect.Spec.Def->PeriodicInhibitionPolicy == EGameplayEffectPeriodInhibitionRemovedPolicy::ExecuteAndResetPeriod)
+				{
+					TimerManager.SetTimerForNextTick(Delegate);
+				}
+
+				TimerManager.SetTimer(Effect.PeriodHandle, Delegate, Effect.Spec.GetPeriod(), true);
+			}
+			else
+			{
+				FAbilityTimerManager& AbilityTimerManager = UAbilitySystemGlobals::Get().GetAbilityTimerManager();
+
+				// 回合制下无"下一帧"概念，"立即执行并重置周期"改为直接执行 delegate
+				if (Effect.Spec.Def->PeriodicInhibitionPolicy == EGameplayEffectPeriodInhibitionRemovedPolicy::ExecuteAndResetPeriod)
+				{
+					Delegate.ExecuteIfBound();
+				}
+
+				AbilityTimerManager.SetAbilityTimer(Owner, Effect.PeriodHandle, Delegate, Effect.Spec.GetPeriod(), true);
+			}
+			// ===== [GAS_MOD_07e] END =====
 		}
 	}
 	
@@ -4741,14 +4849,17 @@ PRAGMA_ENABLE_DEPRECATION_WARNINGS
 
 				if (bInvokePredictedEffects)
 				{
-					// =====================================================================
+					//=====================================================================
 					// ===== [GAS_MOD_01] START=====
-					// ---- 修改前 (引擎原版) ----
-					//   Owner->InvokeGameplayCueEvent(Effect.Spec, EGameplayCueEvent::OnActive);
-					//   Owner->InvokeGameplayCueEvent(Effect.Spec, EGameplayCueEvent::WhileActive);
-					//   // 缺陷: InvokeGameplayCueEvent(Spec) 内部会再次遍历 Def->GameplayCues 全部 Cue,
-					//   //       而外层 for 已遍历每个 Cue => 外层 x 内层 = N*N 次触发。
-					// ---- 修改后 (本项目, 下方为实际生效代码)
+					// 修改前(引擎原版):
+					/*
+					Owner->InvokeGameplayCueEvent(Effect.Spec, EGameplayCueEvent::OnActive);
+					Owner->InvokeGameplayCueEvent(Effect.Spec, EGameplayCueEvent::WhileActive);
+					// 缺陷: InvokeGameplayCueEvent(Spec) 内部会再次遍历 Def->GameplayCues 全部 Cue,
+					//       而外层 for 已遍历每个 Cue => 外层 x 内层 = N*N 次触发。
+					*/
+					// 修改后(本项目, 新建): 仅对当前 Cue 内联构造参数并直接 HandleGameplayCues, 降为 O(N),
+					// 同时补全 RawMagnitude / NormalizedMagnitude / bGameplayEffectActive。
 					FGameplayCueParameters CueParameters(Effect.Spec);
 					if (Cue.MagnitudeAttribute.IsValid())
 					{
@@ -4782,7 +4893,7 @@ PRAGMA_ENABLE_DEPRECATION_WARNINGS
 						CueManager->HandleGameplayCues(ActorAvatar, Cue.GameplayCueTags, EGameplayCueEvent::WhileActive, CueParameters);
 					}
 					// ===== [GAS_MOD_01] END =====
-					// =====================================================================
+					//=====================================================================
 				}
 			}
 		}
@@ -4922,6 +5033,10 @@ bool FActiveGameplayEffectsContainer::InternalRemoveActiveGameplayEffect(int32 I
 		// Check world validity in case RemoveActiveGameplayEffect is called during world teardown
 		if (UWorld* World = Owner->GetWorld())
 		{
+			//=====================================================================
+			// ===== [GAS_MOD_07f] START=====
+			// 修改前(引擎原版):
+			/*
 			if (Effect.DurationHandle.IsValid())
 			{
 				World->GetTimerManager().ClearTimer(Effect.DurationHandle);
@@ -4930,6 +5045,36 @@ bool FActiveGameplayEffectsContainer::InternalRemoveActiveGameplayEffect(int32 I
 			{
 				World->GetTimerManager().ClearTimer(Effect.PeriodHandle);
 			}
+			*/
+			// 修改后(本项目, 新建): 回合制下改清理 FAbilityTimerManager 中的回合 Timer。
+			//=====================================================================
+			if (Effect.DurationHandle.IsValid())
+			{
+				if (!Owner->IsTurnBased())
+				{
+					World->GetTimerManager().ClearTimer(Effect.DurationHandle);
+				}
+				else
+				{
+					FAbilityTimerManager& AbilityTimerManager = UAbilitySystemGlobals::Get().GetAbilityTimerManager();
+					AbilityTimerManager.RemoveAbilityTimer(Owner, Effect.DurationHandle);
+					AbilityTimerManager.ClearTimer(Effect.DurationHandle);
+				}
+			}
+			if (Effect.PeriodHandle.IsValid())
+			{
+				if (!Owner->IsTurnBased())
+				{
+					World->GetTimerManager().ClearTimer(Effect.PeriodHandle);
+				}
+				else
+				{
+					FAbilityTimerManager& AbilityTimerManager = UAbilitySystemGlobals::Get().GetAbilityTimerManager();
+					AbilityTimerManager.RemoveAbilityTimer(Owner, Effect.PeriodHandle);
+					AbilityTimerManager.ClearTimer(Effect.PeriodHandle);
+				}
+			}
+			// ===== [GAS_MOD_07f] END =====
 		}
 
 		bool ModifiedArray = false;
@@ -5093,13 +5238,16 @@ PRAGMA_ENABLE_DEPRECATION_WARNINGS
 
 				if (bInvokePredictedEffects)
 				{
-					// =====================================================================
+					//=====================================================================
 					// ===== [GAS_MOD_02] START=====
-					// ---- 修改前 (引擎原版) ----
-					//   Owner->InvokeGameplayCueEvent(Effect.Spec, EGameplayCueEvent::Removed);
-					//   // 缺陷: InvokeGameplayCueEvent(Spec) 内部会再次遍历 Def->GameplayCues 全部 Cue,
-					//   //       而外层 for 已遍历每个 Cue => 外层 x 内层 = N*N 次触发。
-					// ---- 修改后 (本项目, 下方为实际生效代码)
+					// 修改前(引擎原版):
+					/*
+					Owner->InvokeGameplayCueEvent(Effect.Spec, EGameplayCueEvent::Removed);
+					// 缺陷: InvokeGameplayCueEvent(Spec) 内部会再次遍历 Def->GameplayCues 全部 Cue,
+					//       而外层 for 已遍历每个 Cue => 外层 x 内层 = N*N 次触发。
+					*/
+					// 修改后(本项目, 新建): 仅对当前 Cue 内联构造参数并直接 HandleGameplayCues, 降为 O(N),
+					// 同时补全 RawMagnitude / NormalizedMagnitude / bGameplayEffectActive。
 					FGameplayCueParameters CueParameters(Effect.Spec);
 					if (Cue.MagnitudeAttribute.IsValid())
 					{
@@ -5132,7 +5280,7 @@ PRAGMA_ENABLE_DEPRECATION_WARNINGS
 						CueManager->HandleGameplayCues(ActorAvatar, Cue.GameplayCueTags, EGameplayCueEvent::Removed, CueParameters);
 					}
 					// ===== [GAS_MOD_02] END =====
-					// =====================================================================
+					//=====================================================================
 				}
 			}
 		}
@@ -5407,6 +5555,10 @@ void FActiveGameplayEffectsContainer::Uninitialize()
 		RemoveCustomMagnitudeExternalDependencies(CurEffect);
 
 		// Remove any timer delegates that were scheduled to tick or end the gameplay effect
+		//=====================================================================
+		// ===== [GAS_MOD_07g] START=====
+		// 修改前(引擎原版):
+		/*
 		if (World)
 		{
 			if (CurEffect.DurationHandle.IsValid())
@@ -5418,6 +5570,39 @@ void FActiveGameplayEffectsContainer::Uninitialize()
 				World->GetTimerManager().ClearTimer(CurEffect.PeriodHandle);
 			}
 		}
+		*/
+		// 修改后(本项目, 新建): 回合制下改清理 FAbilityTimerManager 中的回合 Timer。
+		//=====================================================================
+		if (World)
+		{
+			if (CurEffect.DurationHandle.IsValid())
+			{
+				if (!Owner->IsTurnBased())
+				{
+					World->GetTimerManager().ClearTimer(CurEffect.DurationHandle);
+				}
+				else
+				{
+					FAbilityTimerManager& AbilityTimerManager = UAbilitySystemGlobals::Get().GetAbilityTimerManager();
+					AbilityTimerManager.RemoveAbilityTimer(Owner, CurEffect.DurationHandle);
+					AbilityTimerManager.ClearTimer(CurEffect.DurationHandle);
+				}
+			}
+			if (CurEffect.PeriodHandle.IsValid())
+			{
+				if (!Owner->IsTurnBased())
+				{
+					World->GetTimerManager().ClearTimer(CurEffect.PeriodHandle);
+				}
+				else
+				{
+					FAbilityTimerManager& AbilityTimerManager = UAbilitySystemGlobals::Get().GetAbilityTimerManager();
+					AbilityTimerManager.RemoveAbilityTimer(Owner, CurEffect.PeriodHandle);
+					AbilityTimerManager.ClearTimer(CurEffect.PeriodHandle);
+				}
+			}
+		}
+		// ===== [GAS_MOD_07g] END =====
 	}
 	ensure(CustomMagnitudeClassDependencies.Num() == 0);
 }
@@ -5495,9 +5680,27 @@ void FActiveGameplayEffectsContainer::CheckDuration(FActiveGameplayEffectHandle 
 		bool RefreshDurationTimer = false;
 		bool CheckForFinalPeriodicExec = false;
 
+		//=====================================================================
+		// ===== [GAS_MOD_07c] START=====
+		// 修改前(引擎原版):
+		/*
 		if (((Effect.StartWorldTime + Duration) < CurrentTime) || FMath::IsNearlyZero(CurrentTime - Duration - Effect.StartWorldTime, KINDA_SMALL_NUMBER))
 		{
 			// Figure out what to do based on the expiration policy
+		*/
+		// 修改后(本项目, 新建): 抽出 bDurationExpired 判定；回合制下本回调由 FAbilityTimerManager::TickTurn
+		// 在 DurationHandle 到期时精确触发，无需世界时间二次校验，直接按"已到期"处理。
+		bool bDurationExpired = ((Effect.StartWorldTime + Duration) < CurrentTime) || FMath::IsNearlyZero(CurrentTime - Duration - Effect.StartWorldTime, KINDA_SMALL_NUMBER);
+		if (Owner && Owner->IsTurnBased())
+		{
+			bDurationExpired = true;
+		}
+
+		if (bDurationExpired)
+		{
+			// Figure out what to do based on the expiration policy
+		// ===== [GAS_MOD_07c] END =====
+		//=====================================================================
 			switch(Effect.Spec.Def->GetStackExpirationPolicy())
 			{
 			case EGameplayEffectStackingExpirationPolicy::ClearEntireStack:
@@ -5526,6 +5729,10 @@ void FActiveGameplayEffectsContainer::CheckDuration(FActiveGameplayEffectHandle 
 		FTimerManager& TimerManager = Owner->GetWorld()->GetTimerManager();
 		if (CheckForFinalPeriodicExec)
 		{
+			//=====================================================================
+			// ===== [GAS_MOD_07h] START=====
+			// 修改前(引擎原版):
+			/*
 			// This gameplay effect has hit its duration. Check if it needs to execute one last time before removing it.
 			if (Effect.PeriodHandle.IsValid() && TimerManager.TimerExists(Effect.PeriodHandle))
 			{
@@ -5546,6 +5753,52 @@ void FActiveGameplayEffectsContainer::CheckDuration(FActiveGameplayEffectHandle 
 				// Forcibly clear the periodic ticks because this effect is going to be removed
 				TimerManager.ClearTimer(Effect.PeriodHandle);
 			}
+			*/
+			// 修改后(本项目, 新建): 回合制下改用 FAbilityTimerManager 判断/清理 PeriodHandle。
+			if (!Owner->IsTurnBased())
+			{
+				if (Effect.PeriodHandle.IsValid() && TimerManager.TimerExists(Effect.PeriodHandle))
+				{
+					float PeriodTimeRemaining = TimerManager.GetTimerRemaining(Effect.PeriodHandle);
+					if (PeriodTimeRemaining <= KINDA_SMALL_NUMBER && !Effect.bIsInhibited)
+					{
+						InternalExecutePeriodicGameplayEffect(Effect);
+
+						// The call to ExecuteActiveEffectsFrom in InternalExecutePeriodicGameplayEffect could cause this effect to be explicitly removed
+						// (for example it could kill the owner and cause the effect to be wiped via death).
+						// In that case, we need to early out instead of possibly continuing to the below calls to InternalRemoveActiveGameplayEffect
+						if ( Effect.IsPendingRemove )
+						{
+							break;
+						}
+					}
+
+					// Forcibly clear the periodic ticks because this effect is going to be removed
+					TimerManager.ClearTimer(Effect.PeriodHandle);
+				}
+			}
+			else
+			{
+				FAbilityTimerManager& AbilityTimerManager = UAbilitySystemGlobals::Get().GetAbilityTimerManager();
+				if (Effect.PeriodHandle.IsValid() && AbilityTimerManager.TimerExists(Effect.PeriodHandle))
+				{
+					float PeriodTimeRemaining = AbilityTimerManager.GetAbilityTimerRemaining(Owner, Effect.PeriodHandle);
+					if (PeriodTimeRemaining <= KINDA_SMALL_NUMBER && !Effect.bIsInhibited)
+					{
+						InternalExecutePeriodicGameplayEffect(Effect);
+
+						if ( Effect.IsPendingRemove )
+						{
+							break;
+						}
+					}
+
+					AbilityTimerManager.RemoveAbilityTimer(Owner, Effect.PeriodHandle);
+					AbilityTimerManager.ClearTimer(Effect.PeriodHandle);
+				}
+			}
+			// ===== [GAS_MOD_07h] END =====
+			//=====================================================================
 		}
 
 		if (StacksToRemove >= -1)
@@ -5564,6 +5817,10 @@ void FActiveGameplayEffectsContainer::CheckDuration(FActiveGameplayEffectHandle 
 
 		if (RefreshDurationTimer)
 		{
+			//=====================================================================
+			// ===== [GAS_MOD_07d] START=====
+			// 修改前(引擎原版):
+			/*
 			// Always reset the timer, since the duration might have been modified
 			FTimerDelegate Delegate = FTimerDelegate::CreateUObject(Owner, &UAbilitySystemComponent::CheckDurationExpired, Effect.Handle);
 
@@ -5579,6 +5836,32 @@ void FActiveGameplayEffectsContainer::CheckDuration(FActiveGameplayEffectHandle 
 				}
 				check(Effect.IsPendingRemove);
 			}
+			*/
+			// 修改后(本项目, 新建): 以下代码全新重写，回合制下改用 FAbilityTimerManager 按"回合数"重新注册。
+			FTimerDelegate Delegate = FTimerDelegate::CreateUObject(Owner, &UAbilitySystemComponent::CheckDurationExpired, Effect.Handle);
+			if (!Owner->IsTurnBased())
+			{
+				float NewTimerDuration = (Effect.StartWorldTime + Duration) - CurrentTime;
+				TimerManager.SetTimer(Effect.DurationHandle, Delegate, NewTimerDuration, false);
+			}
+			else
+			{
+				FAbilityTimerManager& AbilityTimerManager = UAbilitySystemGlobals::Get().GetAbilityTimerManager();
+				AbilityTimerManager.SetAbilityTimer(Owner, Effect.DurationHandle, Delegate, Duration, false);
+			}
+			// ===== [GAS_MOD_07d] END =====
+
+			if (Effect.DurationHandle.IsValid() == false)
+			{
+				UE_LOGF(LogGameplayEffects, Warning, "Failed to set new timer in ::CheckDuration. Timer trying to be set for: %.2f. Removing GE instead", Duration);
+				if (!Effect.IsPendingRemove)
+				{
+					InternalRemoveActiveGameplayEffect(ActiveGEIdx, -1, false);
+				}
+				check(Effect.IsPendingRemove);
+			}
+			// ===== [GAS_MOD_07d] END =====
+			//=====================================================================
 		}
 
 		break;

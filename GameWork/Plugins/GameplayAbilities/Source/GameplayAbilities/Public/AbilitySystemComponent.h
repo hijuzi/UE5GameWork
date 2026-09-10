@@ -294,6 +294,27 @@ class UAbilitySystemComponent : public UGameplayTasksComponent, public IGameplay
 	/** Returns true if this component's actor has authority */
 	UE_API virtual bool IsOwnerActorAuthoritative() const;
 
+	//=====================================================================
+	// ===== [GAS_MOD_06] START=====
+	// TurnBased Support: 回合制开关
+	// 开启后，该 ASC 应用的 GameplayEffect 的 Duration / Period 将按"回合数"而非秒数推进。
+	//=====================================================================
+
+	/** 是否启用回合制（默认关闭，保持原行为） */
+	UPROPERTY(EditAnywhere, Category = "TurnBased")
+	bool bTurnBased = false;
+
+	/** 该 ASC 是否处于回合制模式 */
+	UFUNCTION(BlueprintCallable, Category = "TurnBased")
+	bool IsTurnBased() const { return bTurnBased; }
+
+	/** 运行时切换回合制 / 实时制 */
+	UFUNCTION(BlueprintCallable, Category = "TurnBased")
+	void SetTurnBasedEnabled(bool bEnabled = false) { bTurnBased = bEnabled; }
+
+	// ===== [GAS_MOD_06] END =====
+	//=====================================================================
+
 	/** Returns true if this component should record montage replication info. */
 	UE_API virtual bool ShouldRecordMontageReplication() const;
 

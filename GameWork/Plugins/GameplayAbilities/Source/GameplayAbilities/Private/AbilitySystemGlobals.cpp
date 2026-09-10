@@ -1,6 +1,9 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "AbilitySystemGlobals.h"
+// ===== [GAS_MOD_05] START=====
+#include "AbilityTimerManager.h"
+// ===== [GAS_MOD_05] END =====
 #include "Abilities/GameplayAbilityTypes.h"
 #include "AbilitySystemStats.h"
 #include "Engine/Blueprint.h"
@@ -59,6 +62,37 @@ bool UAbilitySystemGlobals::ShouldUseDebugTargetFromHud()
 {
 	return GetDefault<UGameplayAbilitiesDeveloperSettings>()->bUseDebugTargetFromHud;
 }
+
+//=====================================================================
+// ===== [GAS_MOD_05] START=====
+// TurnBased Support: 全局回合 Timer 管理器的懒加载创建、销毁与生命周期清理。
+//=====================================================================
+FAbilityTimerManager& UAbilitySystemGlobals::GetAbilityTimerManager()
+{
+	if (!AbilityTimerManager)
+	{
+		AbilityTimerManager = new FAbilityTimerManager();
+	}
+	return *AbilityTimerManager;
+}
+
+void UAbilitySystemGlobals::DestroyAbilityTimerManager()
+{
+	if (AbilityTimerManager)
+	{
+		delete AbilityTimerManager;
+		AbilityTimerManager = nullptr;
+	}
+}
+
+void UAbilitySystemGlobals::FinishDestroy()
+{
+	// 销毁回合 Timer 管理器，防止内存泄漏
+	DestroyAbilityTimerManager();
+	Super::FinishDestroy();
+}
+// ===== [GAS_MOD_05] END =====
+//=====================================================================
 
 void UAbilitySystemGlobals::InitGlobalData()
 {
