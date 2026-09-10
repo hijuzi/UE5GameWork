@@ -50,7 +50,12 @@
 #include "Framework/MultiBox/MultiBoxBuilder.h"
 #include "GameplayTagsEditorModule.h"
 #include "LevelEditor.h"
-#include "SAddNewGameplayTagWidget.h"
+// ===== [GAS_MOD_13] START=====
+// 修改前(引擎原版): #include "SAddNewGameplayTagWidget.h"
+// 修改后(本项目): 补全模块路径。该头在 GameplayTagsEditor 插件的 Internal 目录，
+//   插件形式编译时 UBT 不暴露它，直接短名 include 会报 C1083。
+#include "GameplayTagsEditor/Internal/SAddNewGameplayTagWidget.h"
+// ===== [GAS_MOD_13] END =====
 
 #include "SGameplayCueEditor_Picker.h"
 #include "Subsystems/AssetEditorSubsystem.h"

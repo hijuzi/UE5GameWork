@@ -2003,8 +2003,16 @@ private:
 
 	UE_API void UpdateAggregatorModMagnitudes(const TSet<FGameplayAttribute>& AttributesToUpdate, FActiveGameplayEffect& ActiveEffect);
 
+	// ===== [GAS_MOD_14] START=====
+	// 修改前(引擎原版): 位于 private 段，外部无法调用。
+	// 修改后(本项目): 提升为 public（仅访问级别变化，签名/实现/ABI 不变）。
+public:
 	/** Helper function to find the active GE that the specified spec can stack with, if any */
 	UE_API FActiveGameplayEffect* FindStackableActiveGameplayEffect(const FGameplayEffectSpec& Spec);
+
+private:
+	// ===== [GAS_MOD_14] END =====
+
 	
 	/** Helper function to handle the case of same-effect stacking overflow; Returns true if the overflow application should apply, false if it should not */
 	UE_API bool HandleActiveGameplayEffectStackOverflow(const FActiveGameplayEffect& ActiveStackableGE, const FGameplayEffectSpec& OldSpec, const FGameplayEffectSpec& OverflowingSpec, FPredictionKey PredictionKey = {});

@@ -488,7 +488,7 @@ void FAggregator::AddAggregatorMod(float EvaluatedMagnitude, TEnumAsByte<EGamepl
 {
 	FAggregatorModChannel& ModChannelToAddTo = ModChannels.FindOrAddModChannel(ModifierChannel);
 	ModChannelToAddTo.AddMod(EvaluatedMagnitude, ModifierOp, SourceTagReqs, TargetTagReqs, IsPredicted, ActiveHandle);
-
+	
 	BroadcastOnDirty();
 }
 

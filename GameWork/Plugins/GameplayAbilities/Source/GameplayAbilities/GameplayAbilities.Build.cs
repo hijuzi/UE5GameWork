@@ -36,7 +36,7 @@ namespace UnrealBuildTool.Rules
 					"DeveloperSettings",
 					"DataRegistry"
 				}
-				);
+			);
 
 			// Niagara support for gameplay cue notifies.
 			{

@@ -3,7 +3,14 @@
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemLog.h"
 #include "UObject/UObjectIterator.h"
+// ===== [GAS_MOD_13] START=====
+// 修改前(引擎原版): #include "UObject/UObjectMigrationContext.h"
+// 修改后(本项目): 该头在 CoreUObject/Internal（插件形式需 Build.cs 补路径）；
+//   本文件未直接用 FUObjectMigrationContext，故按引擎惯例条件包含。
+#if UE_WITH_REMOTE_OBJECT_HANDLE
 #include "UObject/UObjectMigrationContext.h"
+#endif
+// ===== [GAS_MOD_13] END =====
 #include "Engine/Canvas.h"
 #include "DisplayDebugHelpers.h"
 #include "Engine/Engine.h"
