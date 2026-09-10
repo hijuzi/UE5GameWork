@@ -11,6 +11,22 @@
 // 多时间轴改造已并入本编号 GAS_MOD_09。
 //=====================================================================
 
+namespace
+{
+	/**
+	 * 单次 TickTimeline 允许的最大步进次数。
+	 * Delta 语义是"步进次数"，正常玩法恒为 1；过大的 Delta 会按 O(Delta × 轴数)
+	 * 空转主线程，并可能把 Axis.Counter 直接推过 int32 上限。
+	 */
+	constexpr int32 MaxDeltaPerCall = 256;
+
+	/**
+	 * 刻度归一化阈值：Axis.Counter 达到该值时，把整条轴整体平移回去。
+	 * 取 1<<30（约 10.7 亿）而非 INT32_MAX，是为了给 "Counter + Rate" 留足余量。
+	 */
+	constexpr int32 TimelineRebaseThreshold = 1 << 30;
+}
+
 FAbilityTimerContainer& FAbilityTimerManager::GetAbilityTimerContainer(UAbilitySystemComponent* ASC)
 {
 	return AbilityTimerContainers.FindOrAdd(TWeakObjectPtr<UAbilitySystemComponent>(ASC));
@@ -27,6 +43,17 @@ void FAbilityTimerManager::TickTimeline(UAbilitySystemComponent* ASC, FGameplayT
 	if (!ASC || !InTiming.IsValid())
 	{
 		return;
+	}
+
+	// 防御：Delta <= 0 无意义（原实现会静默不动），过大的 Delta 则钳制后继续。
+	if (Delta <= 0)
+	{
+		return;
+	}
+	if (Delta > MaxDeltaPerCall)
+	{
+		UE_LOG(LogGameplayEffects, Warning, TEXT("[GAS_MOD_09] TickTimeline 收到过大的 Delta=%d，已钳制为 %d。ASC=%s Timing=%s"), Delta, MaxDeltaPerCall, *GetNameSafe(ASC), *InTiming.ToString());
+		Delta = MaxDeltaPerCall;
 	}
 
 	FAbilityTimerContainer& Container = GetAbilityTimerContainer(ASC);
@@ -53,6 +80,14 @@ void FAbilityTimerManager::TickTimeline(UAbilitySystemComponent* ASC, FGameplayT
 			{
 				// 轴在本步进内已被移除
 				continue;
+			}
+
+			// 归一化：判定只看 (ExpireTime - Counter) 的差值，因此把整条轴同步平移是语义等价的。
+			// 在逼近 int32 上限前先平移一次，避免下面 ++Counter 触发有符号溢出（UB）——
+			// 一旦溢出环绕，溢出前已注册的 Timer 会因 ExpireTime(正) > Counter(负) 而永久不再触发。
+			if (Axis->Counter >= TimelineRebaseThreshold)
+			{
+				RebaseAxis(*Axis, TimelineRebaseThreshold);
 			}
 
 			// 推进该轴刻度
@@ -104,6 +139,27 @@ void FAbilityTimerManager::TickTimeline(UAbilitySystemComponent* ASC, FGameplayT
 			}
 		}
 	}
+}
+
+void FAbilityTimerManager::RebaseAxis(FAbilityTimerAxis& InAxis, int32 InRebase)
+{
+	// 整条轴同步平移：Counter 与轴上所有 Timer 的 ExpireTime 同减 InRebase。
+	// 判定条件 (ExpireTime <= Counter) 与剩余量 (ExpireTime - Counter) 都不受影响，
+	// 所以触发时机、触发顺序、返回值全部保持不变，只是刻度被拉回小值区间。
+	//
+	// 不变式：任一时刻轴上所有 Timer 都有 ExpireTime >= Counter（未到期的等待中，
+	// 循环 Timer 顺延到 Counter + Rate），因此平移后 ExpireTime 不会变成负数。
+	const double Offset = static_cast<double>(InRebase);
+
+	for (FTimerHandle Handle : InAxis.TimerHandles)
+	{
+		if (FTimerData* Data = FindTimer(Handle))
+		{
+			Data->ExpireTime -= Offset;
+		}
+	}
+
+	InAxis.Counter -= InRebase;
 }
 
 void FAbilityTimerManager::SetAbilityTimer(UAbilitySystemComponent* ASC, FGameplayTag InTiming, FTimerHandle& OutHandle, const FTimerDelegate& InDelegate, float InRate, bool bInLoop, float InFirstDelay)

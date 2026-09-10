@@ -5,10 +5,10 @@
 > 对比基于逐文件字节级 Hash 校验与源码级 `git diff`，而非仅看文件是否同名。
 >
 > ⚠️ **本文为早期快照**：描述的是 `GAS_MOD_01~04` 时期的状态（当时为自研 `ERoundType` 回合制）。
-> 之后插件又经历了 **回合制改造**（`GAS_MOD_05~09`，见 `GameWork/Plugins/GameplayAbilities/回合制改造方案.md`）
-> 与 **多时间轴（时机 Tag）改造**（`GAS_MOD_10~12`，见 `GameWork/Plugins/GameplayAbilities/回合制改造方案.md`）。
+> 之后插件又经历了 **回合制改造**（`GAS_MOD_05~09`）与 **多时间轴（时机 Tag）改造**（`GAS_MOD_10~12`），
+> 见 `GameWork/Plugins/GameplayAbilities/Docs/回合制改造方案.md`。
 > 现行实现为 `bTurnBased` + `FAbilityTimerManager`（按 `TimeAxis.*` 时机分轴），
-> 完整改动前/后对照以 `GameWork/Plugins/GameplayAbilities/源码修改记录.md` 为准。
+> 完整改动前/后对照以 `GameWork/Plugins/GameplayAbilities/Docs/源码修改记录.md` 为准。
 
 ## 1. 结论速览
 

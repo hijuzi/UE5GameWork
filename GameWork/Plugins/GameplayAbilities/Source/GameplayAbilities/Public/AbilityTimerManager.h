@@ -92,6 +92,13 @@ private:
 
 	/** 在全部轴中按句柄查找并移除（用于注册前清理旧句柄，或时机未知时的兜底移除） */
 	void RemoveAbilityTimerByHandle(UAbilitySystemComponent* ASC, FTimerHandle& InHandle);
+
+	/**
+	 * 整条轴同步平移：Counter 与轴上所有 Timer 的 ExpireTime 同减 InRebase。
+	 * 判定只看 (ExpireTime - Counter) 的差值，平移后触发行为完全不变；
+	 * 用于在 Axis.Counter 逼近 int32 上限前把刻度拉回小值，规避有符号溢出。
+	 */
+	void RebaseAxis(FAbilityTimerAxis& InAxis, int32 InRebase);
 };
 
 // ===== [GAS_MOD_09] END =====
