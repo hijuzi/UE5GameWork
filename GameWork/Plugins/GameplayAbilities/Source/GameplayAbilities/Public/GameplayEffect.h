@@ -682,16 +682,25 @@ struct FInheritedTagContainer
 };
 
 /** Gameplay effect duration policies */
+//=====================================================================
+// ===== [GAS_MOD_11] START=====
+// 补充中文说明与显示名（英文保留，中文续写在同一文档注释里，编辑器下拉/悬停可见）。
+// 这三个选项决定效果"能活多久"；回合制下时长按"回合（时机刻度）"计，而不是秒。
+//=====================================================================
 UENUM()
 enum class EGameplayEffectDurationType : uint8
 {
-	/** This effect applies instantly */
-	Instant,
-	/** This effect lasts forever */
-	Infinite,
-	/** The duration of this effect will be specified by a magnitude */
-	HasDuration
+	/** This effect applies instantly. 瞬时：生效一次就结束，不留余效（如：立刻造成 100 伤害）。 */
+	Instant UMETA(DisplayName = "瞬时"),
+
+	/** This effect lasts forever. 永久：一直生效，直到被手动移除（如：永久 +10 攻击力）；不需要填时长。 */
+	Infinite UMETA(DisplayName = "永久"),
+
+	/** The duration of this effect will be specified by a magnitude. 指定时长：持续一段时间后自动结束（如：中毒 3 回合）；时长填在下方 Duration，回合制下填的就是回合数。 */
+	HasDuration UMETA(DisplayName = "指定时长")
 };
+// ===== [GAS_MOD_11] END =====
+//=====================================================================
 
 /** Enumeration of policies for dealing with duration of a gameplay effect while stacking */
 UENUM()
@@ -2255,15 +2264,30 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category=Duration)
 	EGameplayEffectDurationType DurationPolicy;
 
+	//=====================================================================
+	// ===== [GAS_MOD_11] START=====
+	// 【本项目新增，仅回合制生效】这个效果"挂在哪条时间轴上"——决定它的时长/周期按哪种时机推进。
+	//   · 留空 = 回合结束（最常用，Buff / Debuff 都用它）
+	//   · 回合开始 / 回合结束 → 按"回合"倒计时
+	//   · 任意出手 / 攻击出手 / 防御出手 → 按"出手次数"倒计时（如"每 3 次攻击触发一次"）
+	//=====================================================================
+	UPROPERTY(EditDefaultsOnly, Category = Duration, meta = (Categories = "TimeAxis", EditCondition = "DurationPolicy != EGameplayEffectDurationType::Instant", EditConditionHides))
+	FGameplayTag Timing;
+	// ===== [GAS_MOD_11] END =====
+	//=====================================================================
+
 	/** Duration in seconds. 0.0 for instantaneous effects; -1.0 for infinite duration. When applying stacks onto an existing active effect, the new spec's Duration is considered. */
+	// [回合制] 这里填"能持续几回合"（实时制下才是秒）：填 3 = 生效 3 回合后自动结束。
 	UPROPERTY(EditDefaultsOnly, Category=Duration, meta=(EditCondition="DurationPolicy == EGameplayEffectDurationType::HasDuration", EditConditionHides))
 	FGameplayEffectModifierMagnitude DurationMagnitude;
 
 	/** MaxDuration in seconds. <= 0.0 for unlimited. When applying stacks onto an existing active effect, the new spec's MaxDuration is considered. */
+	// [回合制] 这里填"最长能续到几回合"（防止被反复刷新无限延长）；填 0 或负数 = 不限。
 	UPROPERTY(EditDefaultsOnly, Category = Duration, meta = (EditCondition = "DurationPolicy == EGameplayEffectDurationType::HasDuration", EditConditionHides))
 	FGameplayEffectModifierMagnitude MaxDurationMagnitude;
 
 	/** Period in seconds. 0.0 for non-periodic effects */
+	// [回合制] 这里填"每几回合触发一次"：填 1 = 每回合触发；填 2 = 每 2 回合触发；留 0 = 只生效一次、不重复触发。
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Duration|Period", meta=(EditCondition="DurationPolicy != EGameplayEffectDurationType::Instant", EditConditionHides))
 	FScalableFloat	Period;
 	

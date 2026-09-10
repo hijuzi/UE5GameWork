@@ -3,9 +3,10 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemGlobals.h"
-// ===== [GAS_MOD_08] START=====
+// ===== [GAS_MOD_12] START=====
 #include "AbilityTimerManager.h"
-// ===== [GAS_MOD_08] END =====
+#include "AbilityTimingTags.h"
+// ===== [GAS_MOD_12] END =====
 #include "AbilitySystemLog.h"
 #include "AbilitySystemPrivate.h"
 #include "Engine/World.h"
@@ -1644,18 +1645,18 @@ double UAbilitySystemBlueprintLibrary::Conv_ScalableFloatToDouble(const FScalabl
 }
 
 //=====================================================================
-// ===== [GAS_MOD_08] START=====
-// TurnBased Support: 回合推进蓝图入口
-// 开启 ASC 的 bTurnBased 后，调用本函数推进其回合，驱动 GE 的 Duration/Period。
+// ===== [GAS_MOD_12] START=====
+// TurnBased Support: 时间轴推进蓝图入口（取代 GAS_MOD_08 的 TickTurn）
+// 开启 ASC 的 bTurnBased 后，调用本函数推进其指定时机（Timing），驱动 GE 的 Duration/Period。
 //=====================================================================
-void UAbilitySystemBlueprintLibrary::TickTurn(UAbilitySystemComponent* AbilitySystemComponent, int32 Delta)
+void UAbilitySystemBlueprintLibrary::TickTimeline(UAbilitySystemComponent* AbilitySystemComponent, FGameplayTag Timing, int32 Delta)
 {
 	if (!AbilitySystemComponent)
 	{
 		return;
 	}
 
-	UAbilitySystemGlobals::Get().GetAbilityTimerManager().TickTurn(AbilitySystemComponent, Delta);
+	UAbilitySystemGlobals::Get().GetAbilityTimerManager().TickTimeline(AbilitySystemComponent, Timing, Delta);
 }
-// ===== [GAS_MOD_08] END =====
+// ===== [GAS_MOD_12] END =====
 //=====================================================================

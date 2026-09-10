@@ -12,7 +12,9 @@
 #include "GameplayTagsModule.h"
 #include "AbilitySystemGlobals.h"
 // ===== [GAS_MOD_07] START=====
+// GAS_MOD_07：Timer 回合化（07a~07h）+ 按时机（Timing）路由；多时间轴改造已并入本编号。
 #include "AbilityTimerManager.h"
+#include "AbilityTimingTags.h"
 // ===== [GAS_MOD_07] END =====
 #include "GameplayEffectExtension.h"
 #include "AbilitySystemComponent.h"
@@ -4513,9 +4515,14 @@ PRAGMA_ENABLE_DEPRECATION_WARNINGS
 			}
 			*/
 			// 修改后(本项目, 新建): 以下代码全新重写，回合制下改用 FAbilityTimerManager 注册，
-			// Duration 语义从"秒"变为"回合"，兜底分支回合制下改为 1 回合后触发。
+			// Duration 语义从"秒"变为"回合"，兜底分支回合制下改为 1 回合后触发；
+			// 注册时按 GE 的 Timing（未配置时默认 TimeAxis.Round.End）路由到对应时间轴
+			// （07a~07h 各调用点同理，均并入本编号 GAS_MOD_07）。
 			//=====================================================================
 			FTimerDelegate Delegate = FTimerDelegate::CreateUObject(Owner, &UAbilitySystemComponent::CheckDurationExpired, AppliedActiveGE->Handle);
+
+			// 读取该 GE 所属的时机（未配置时默认 TimeAxis.Round.End）
+			const FGameplayTag Timing = AbilityTimingTags::ResolveOrDefault(AppliedEffectSpec.Def ? AppliedEffectSpec.Def->Timing : FGameplayTag());
 
 			if (!Owner->IsTurnBased())
 			{
@@ -4525,7 +4532,7 @@ PRAGMA_ENABLE_DEPRECATION_WARNINGS
 			else
 			{
 				FAbilityTimerManager& AbilityTimerManager = UAbilitySystemGlobals::Get().GetAbilityTimerManager();
-				AbilityTimerManager.SetAbilityTimer(Owner, AppliedActiveGE->DurationHandle, Delegate, FinalDuration, false);
+				AbilityTimerManager.SetAbilityTimer(Owner, Timing, AppliedActiveGE->DurationHandle, Delegate, FinalDuration, false);
 			}
 			if (!ensureMsgf(AppliedActiveGE->DurationHandle.IsValid(), TEXT("Invalid Duration Handle after attempting to set duration for GE (%s) @ %.2f"), 
 				*AppliedActiveGE->GetDebugString(), FinalDuration))
@@ -4537,7 +4544,7 @@ PRAGMA_ENABLE_DEPRECATION_WARNINGS
 				}
 				else
 				{
-					UAbilitySystemGlobals::Get().GetAbilityTimerManager().SetAbilityTimer(Owner, AppliedActiveGE->DurationHandle, Delegate, 1.f, false);
+					UAbilitySystemGlobals::Get().GetAbilityTimerManager().SetAbilityTimer(Owner, Timing, AppliedActiveGE->DurationHandle, Delegate, 1.f, false);
 				}
 			}
 			// ===== [GAS_MOD_07a] END =====
@@ -4566,6 +4573,10 @@ PRAGMA_ENABLE_DEPRECATION_WARNINGS
 		// Period 语义从"秒"变为"回合"，"应用即触发"改为直接执行 delegate。
 		//=====================================================================
 		FTimerDelegate Delegate = FTimerDelegate::CreateUObject(Owner, &UAbilitySystemComponent::ExecutePeriodicEffect, AppliedActiveGE->Handle);
+
+		// 读取该 GE 所属的时机（未配置时默认 TimeAxis.Round.End）
+		const FGameplayTag Timing = AbilityTimingTags::ResolveOrDefault(AppliedEffectSpec.Def ? AppliedEffectSpec.Def->Timing : FGameplayTag());
+
 		if (!Owner->IsTurnBased())
 		{
 			FTimerManager& TimerManager = Owner->GetWorld()->GetTimerManager();
@@ -4588,7 +4599,7 @@ PRAGMA_ENABLE_DEPRECATION_WARNINGS
 				Delegate.ExecuteIfBound();
 			}
 
-			AbilityTimerManager.SetAbilityTimer(Owner, AppliedActiveGE->PeriodHandle, Delegate, AppliedEffectSpec.GetPeriod(), true);
+			AbilityTimerManager.SetAbilityTimer(Owner, Timing, AppliedActiveGE->PeriodHandle, Delegate, AppliedEffectSpec.GetPeriod(), true);
 		}
 		// ===== [GAS_MOD_07b] END =====
 	}
@@ -4747,6 +4758,10 @@ void FActiveGameplayEffectsContainer::AddActiveGameplayEffectGrantedTagsAndModif
 			// Period 语义从"秒"变为"回合"，"立即执行并重置周期"改为直接执行 delegate。
 			//=====================================================================
 			FTimerDelegate Delegate = FTimerDelegate::CreateUObject(Owner, &UAbilitySystemComponent::ExecutePeriodicEffect, Effect.Handle);
+
+			// 读取该 GE 所属的时机（未配置时默认 TimeAxis.Round.End）
+			const FGameplayTag Timing = AbilityTimingTags::ResolveOrDefault(Effect.Spec.Def ? Effect.Spec.Def->Timing : FGameplayTag());
+
 			if (!Owner->IsTurnBased())
 			{
 				FTimerManager& TimerManager = Owner->GetWorld()->GetTimerManager();
@@ -4769,7 +4784,7 @@ void FActiveGameplayEffectsContainer::AddActiveGameplayEffectGrantedTagsAndModif
 					Delegate.ExecuteIfBound();
 				}
 
-				AbilityTimerManager.SetAbilityTimer(Owner, Effect.PeriodHandle, Delegate, Effect.Spec.GetPeriod(), true);
+				AbilityTimerManager.SetAbilityTimer(Owner, Timing, Effect.PeriodHandle, Delegate, Effect.Spec.GetPeriod(), true);
 			}
 			// ===== [GAS_MOD_07e] END =====
 		}
@@ -5048,6 +5063,9 @@ bool FActiveGameplayEffectsContainer::InternalRemoveActiveGameplayEffect(int32 I
 			*/
 			// 修改后(本项目, 新建): 回合制下改清理 FAbilityTimerManager 中的回合 Timer。
 			//=====================================================================
+			// 读取该 GE 所属的时机（未配置时默认 TimeAxis.Round.End）
+			const FGameplayTag Timing = AbilityTimingTags::ResolveOrDefault(Effect.Spec.Def ? Effect.Spec.Def->Timing : FGameplayTag());
+
 			if (Effect.DurationHandle.IsValid())
 			{
 				if (!Owner->IsTurnBased())
@@ -5057,7 +5075,7 @@ bool FActiveGameplayEffectsContainer::InternalRemoveActiveGameplayEffect(int32 I
 				else
 				{
 					FAbilityTimerManager& AbilityTimerManager = UAbilitySystemGlobals::Get().GetAbilityTimerManager();
-					AbilityTimerManager.RemoveAbilityTimer(Owner, Effect.DurationHandle);
+					AbilityTimerManager.RemoveAbilityTimer(Owner, Timing, Effect.DurationHandle);
 					AbilityTimerManager.ClearTimer(Effect.DurationHandle);
 				}
 			}
@@ -5070,7 +5088,7 @@ bool FActiveGameplayEffectsContainer::InternalRemoveActiveGameplayEffect(int32 I
 				else
 				{
 					FAbilityTimerManager& AbilityTimerManager = UAbilitySystemGlobals::Get().GetAbilityTimerManager();
-					AbilityTimerManager.RemoveAbilityTimer(Owner, Effect.PeriodHandle);
+					AbilityTimerManager.RemoveAbilityTimer(Owner, Timing, Effect.PeriodHandle);
 					AbilityTimerManager.ClearTimer(Effect.PeriodHandle);
 				}
 			}
@@ -5573,6 +5591,9 @@ void FActiveGameplayEffectsContainer::Uninitialize()
 		*/
 		// 修改后(本项目, 新建): 回合制下改清理 FAbilityTimerManager 中的回合 Timer。
 		//=====================================================================
+		// 读取该 GE 所属的时机（未配置时默认 TimeAxis.Round.End）
+		const FGameplayTag Timing = AbilityTimingTags::ResolveOrDefault(CurEffect.Spec.Def ? CurEffect.Spec.Def->Timing : FGameplayTag());
+
 		if (World)
 		{
 			if (CurEffect.DurationHandle.IsValid())
@@ -5584,7 +5605,7 @@ void FActiveGameplayEffectsContainer::Uninitialize()
 				else
 				{
 					FAbilityTimerManager& AbilityTimerManager = UAbilitySystemGlobals::Get().GetAbilityTimerManager();
-					AbilityTimerManager.RemoveAbilityTimer(Owner, CurEffect.DurationHandle);
+					AbilityTimerManager.RemoveAbilityTimer(Owner, Timing, CurEffect.DurationHandle);
 					AbilityTimerManager.ClearTimer(CurEffect.DurationHandle);
 				}
 			}
@@ -5597,7 +5618,7 @@ void FActiveGameplayEffectsContainer::Uninitialize()
 				else
 				{
 					FAbilityTimerManager& AbilityTimerManager = UAbilitySystemGlobals::Get().GetAbilityTimerManager();
-					AbilityTimerManager.RemoveAbilityTimer(Owner, CurEffect.PeriodHandle);
+					AbilityTimerManager.RemoveAbilityTimer(Owner, Timing, CurEffect.PeriodHandle);
 					AbilityTimerManager.ClearTimer(CurEffect.PeriodHandle);
 				}
 			}
@@ -5688,7 +5709,7 @@ void FActiveGameplayEffectsContainer::CheckDuration(FActiveGameplayEffectHandle 
 		{
 			// Figure out what to do based on the expiration policy
 		*/
-		// 修改后(本项目, 新建): 抽出 bDurationExpired 判定；回合制下本回调由 FAbilityTimerManager::TickTurn
+		// 修改后(本项目, 新建): 抽出 bDurationExpired 判定；回合制下本回调由 FAbilityTimerManager::TickTimeline
 		// 在 DurationHandle 到期时精确触发，无需世界时间二次校验，直接按"已到期"处理。
 		bool bDurationExpired = ((Effect.StartWorldTime + Duration) < CurrentTime) || FMath::IsNearlyZero(CurrentTime - Duration - Effect.StartWorldTime, KINDA_SMALL_NUMBER);
 		if (Owner && Owner->IsTurnBased())
@@ -5779,10 +5800,13 @@ void FActiveGameplayEffectsContainer::CheckDuration(FActiveGameplayEffectHandle 
 			}
 			else
 			{
+				// 读取该 GE 所属的时机（未配置时默认 TimeAxis.Round.End）
+				const FGameplayTag Timing = AbilityTimingTags::ResolveOrDefault(Effect.Spec.Def ? Effect.Spec.Def->Timing : FGameplayTag());
+
 				FAbilityTimerManager& AbilityTimerManager = UAbilitySystemGlobals::Get().GetAbilityTimerManager();
 				if (Effect.PeriodHandle.IsValid() && AbilityTimerManager.TimerExists(Effect.PeriodHandle))
 				{
-					float PeriodTimeRemaining = AbilityTimerManager.GetAbilityTimerRemaining(Owner, Effect.PeriodHandle);
+					float PeriodTimeRemaining = AbilityTimerManager.GetAbilityTimerRemaining(Owner, Timing, Effect.PeriodHandle);
 					if (PeriodTimeRemaining <= KINDA_SMALL_NUMBER && !Effect.bIsInhibited)
 					{
 						InternalExecutePeriodicGameplayEffect(Effect);
@@ -5793,7 +5817,7 @@ void FActiveGameplayEffectsContainer::CheckDuration(FActiveGameplayEffectHandle 
 						}
 					}
 
-					AbilityTimerManager.RemoveAbilityTimer(Owner, Effect.PeriodHandle);
+					AbilityTimerManager.RemoveAbilityTimer(Owner, Timing, Effect.PeriodHandle);
 					AbilityTimerManager.ClearTimer(Effect.PeriodHandle);
 				}
 			}
@@ -5839,6 +5863,10 @@ void FActiveGameplayEffectsContainer::CheckDuration(FActiveGameplayEffectHandle 
 			*/
 			// 修改后(本项目, 新建): 以下代码全新重写，回合制下改用 FAbilityTimerManager 按"回合数"重新注册。
 			FTimerDelegate Delegate = FTimerDelegate::CreateUObject(Owner, &UAbilitySystemComponent::CheckDurationExpired, Effect.Handle);
+
+			// 读取该 GE 所属的时机（未配置时默认 TimeAxis.Round.End）
+			const FGameplayTag Timing = AbilityTimingTags::ResolveOrDefault(Effect.Spec.Def ? Effect.Spec.Def->Timing : FGameplayTag());
+
 			if (!Owner->IsTurnBased())
 			{
 				float NewTimerDuration = (Effect.StartWorldTime + Duration) - CurrentTime;
@@ -5847,7 +5875,7 @@ void FActiveGameplayEffectsContainer::CheckDuration(FActiveGameplayEffectHandle 
 			else
 			{
 				FAbilityTimerManager& AbilityTimerManager = UAbilitySystemGlobals::Get().GetAbilityTimerManager();
-				AbilityTimerManager.SetAbilityTimer(Owner, Effect.DurationHandle, Delegate, Duration, false);
+				AbilityTimerManager.SetAbilityTimer(Owner, Timing, Effect.DurationHandle, Delegate, Duration, false);
 			}
 			// ===== [GAS_MOD_07d] END =====
 
