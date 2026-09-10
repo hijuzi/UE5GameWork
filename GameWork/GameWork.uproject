@@ -30,6 +30,10 @@
 		{
 			"Name": "GameplayStateTree",
 			"Enabled": true
+		},
+		{
+			"Name": "GASAttachEditor",
+			"Enabled": true
 		}
 	]
 }
