@@ -3,10 +3,6 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemGlobals.h"
-// ===== [GAS_MOD_12] START=====
-#include "AbilityTimerManager.h"
-#include "AbilityTimingTags.h"
-// ===== [GAS_MOD_12] END =====
 #include "AbilitySystemLog.h"
 #include "AbilitySystemPrivate.h"
 #include "Engine/World.h"
@@ -1644,19 +1640,5 @@ double UAbilitySystemBlueprintLibrary::Conv_ScalableFloatToDouble(const FScalabl
 	return static_cast<double>(Input.GetValueAtLevel(Level));
 }
 
-//=====================================================================
-// ===== [GAS_MOD_12] START=====
-// TurnBased Support: 时间轴推进蓝图入口（取代 GAS_MOD_08 的 TickTurn）
-// 开启 ASC 的 bTurnBased 后，调用本函数推进其指定时机（Timing），驱动 GE 的 Duration/Period。
-//=====================================================================
-void UAbilitySystemBlueprintLibrary::TickTimeline(UAbilitySystemComponent* AbilitySystemComponent, FGameplayTag Timing, int32 Delta)
-{
-	if (!AbilitySystemComponent)
-	{
-		return;
-	}
-
-	UAbilitySystemGlobals::Get().GetAbilityTimerManager().TickTimeline(AbilitySystemComponent, Timing, Delta);
-}
-// ===== [GAS_MOD_12] END =====
-//=====================================================================
+// [GAS_MOD_12] 的蓝图 TickTimeline 入口已删除（由 GAS_MOD_16 的
+//   UTurnActionAbilitySystemComponent::TickTimeline 取代，不再保留兼容封装）。

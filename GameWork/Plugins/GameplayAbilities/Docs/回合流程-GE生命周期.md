@@ -225,15 +225,18 @@ FAbilityTimerManager
 ### 4.1 入口
 
 ```cpp
-// C++
+// 蓝图 / 游戏侧（GAS_MOD_16，唯一推荐入口）
+UTurnActionAbilitySystemComponent* TurnASC = /* 角色的 ASC */;
+TurnASC->TickTimeline(AbilityTimingTags::TAG_TIMEAXIS_ROUND_END.GetTag(), /*Delta=*/1);
+
+// C++（仅当 ASC 不是 UTurnActionAbilitySystemComponent 时才这样用）
 UAbilitySystemGlobals::Get().GetAbilityTimerManager()
     .TickTimeline(ASC, AbilityTimingTags::TAG_TIMEAXIS_ROUND_END, /*Delta=*/1);
-
-// 蓝图（GAS_MOD_12）
-UAbilitySystemBlueprintLibrary::TickTimeline(ASC, Timing, Delta);
 ```
 
-`TickTimeline` 只是取全局管理器转调，管理器**不会**被 `World->Tick` 驱动（`FAbilityTimerManager` 从不调用父类 `Tick`），因此「什么时候算回合结束 / 一次出手」完全由玩法侧决定。
+> **入口演进**：`UAbilitySystemBlueprintLibrary::TickTimeline`（`GAS_MOD_12`）**已删除**——它不经过子类，不会同步客户端刻度副本、也不会广播 `OnTimelineTicked`。详见 `源码修改记录.md` 的 `GAS_MOD_12` / `GAS_MOD_16`。
+
+管理器**不会**被 `World->Tick` 驱动（`FAbilityTimerManager` 从不调用父类 `Tick`），因此「什么时候算回合结束 / 一次出手」完全由玩法侧决定。
 
 ### 4.2 `TickTimeline` 逐行拆解
 
@@ -561,7 +564,8 @@ sequenceDiagram
 | 轴 / 容器结构体 | `Public/AbilityTimerManager.h:40-55` |
 | `RebaseAxis` 声明 | `Public/AbilityTimerManager.h:96-101` |
 | `CheckDurationExpired` / `ExecutePeriodicEffect` | `Private/AbilitySystemComponent.cpp:1203-1236` |
-| 蓝图推进入口 `TickTimeline` | `Private/AbilitySystemBlueprintLibrary.cpp:1652-1660` |
+| 推进入口 `TickTimeline`（子类，GAS_MOD_16） | `Public/TurnActionAbilitySystemComponent.h` + `Private/TurnActionAbilitySystemComponent.cpp` |
+| 蓝图推进入口 `UAbilitySystemBlueprintLibrary::TickTimeline` | **已删除**（`GAS_MOD_12`） |
 | 全局管理器持有与销毁 | `Private/AbilitySystemGlobals.cpp:66-95` |
 | 时机 Tag 定义与回落 | `Public/AbilityTimingTags.h:30-66` |
 

@@ -659,20 +659,10 @@ public:
 	UFUNCTION(BlueprintPure, Category="ScalableFloat", meta=(DisplayName="Get Value At Level (double-precision)", BlueprintAutocast, IgnoreTypePromotion))
 	static UE_API double Conv_ScalableFloatToDouble(const FScalableFloat& Input, float Level = 0.0f);
 
-	//=====================================================================
-	// ===== [GAS_MOD_12] START=====
-	// TurnBased Support: 时间轴推进蓝图入口（取代 GAS_MOD_08 的 TickTurn）
-	// 开启 ASC 的 bTurnBased 后，调用本函数推进其指定时机（Timing），驱动 GE 的 Duration/Period。
-	// Timing 取值见 AbilityTimingTags：TimeAxis.Round.Start / TimeAxis.Round.End /
-	// TimeAxis.Action（任意出手）/ TimeAxis.Action.Attack / TimeAxis.Action.Defense。
-	//=====================================================================
-
-	/** 推进指定 ASC 的某个时机（Timing 为 TimeAxis.* 标签），Delta 为步进次数 */
-	UFUNCTION(BlueprintCallable, Category = "Ability|TurnBased")
-	static UE_API void TickTimeline(UAbilitySystemComponent* AbilitySystemComponent, FGameplayTag Timing, int32 Delta = 1);
-
-	// ===== [GAS_MOD_12] END =====
-	//=====================================================================
+	// [GAS_MOD_12] 的蓝图 TickTimeline 入口已删除：由 GAS_MOD_16 的
+	//   UTurnActionAbilitySystemComponent::TickTimeline 取代，不再保留兼容封装。
+	//   C++ 侧若仍需推进非子类的 ASC，可直接调用
+	//   UAbilitySystemGlobals::Get().GetAbilityTimerManager().TickTimeline(ASC, Timing, Delta)。
 };
 
 #undef UE_API
