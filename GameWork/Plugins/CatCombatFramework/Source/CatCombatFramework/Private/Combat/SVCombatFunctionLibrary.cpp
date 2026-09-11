@@ -5,8 +5,11 @@
 
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
+#include "AI/CatAISkillDecisionData.h"
+#include "CatCombatGameplayTags.h"
 #include "CatCombatLog.h"
 #include "Combat/Actor/SVCombatScenePoint.h"
+#include "Combat/Component/SVCharacterTurnComponent.h"
 #include "Combat/SVCombatDataStore.h"
 #include "Combat/SVCombatDataTable.h"
 #include "Combat/SVCombatManagerSubsystem.h"
@@ -216,4 +219,196 @@ bool USVCombatFunctionLibrary::RequestAction(ACharacter* Actor, const FActionReq
 		*Actor->GetName(), *Request.AbilityTag.ToString(), bSuccess ? TEXT("成功") : TEXT("失败"));
 
 	return bSuccess;
+}
+
+bool USVCombatFunctionLibrary::GetCharacterTeam(ACharacter* Character, ECombatTeamType& OutTeamType)
+{
+	if (!IsValid(Character))
+	{
+		return false;
+	}
+
+	USVCombatManagerSubsystem* Subsystem = GetCombatManagerSubsystem(Character);
+	USVCombatDataStore* DataStore = Subsystem ? Subsystem->GetDataStore() : nullptr;
+	if (!DataStore)
+	{
+		return false;
+	}
+
+	// 从数据层反查 Character 真实所属队伍（而非协调器的当前行动队伍）
+	// 移植说明：源数据层提供 FindTeamByCharacter 反查；本框架数据层未提供该方法，改为遍历双方队伍列表反查（回合制低频调用，开销可接受）
+	if (DataStore->GetCharacters(ECombatTeamType::Player).Contains(Character))
+	{
+		OutTeamType = ECombatTeamType::Player;
+		return true;
+	}
+	if (DataStore->GetCharacters(ECombatTeamType::Enemy).Contains(Character))
+	{
+		OutTeamType = ECombatTeamType::Enemy;
+		return true;
+	}
+	return false;
+}
+
+ECombatTeamType USVCombatFunctionLibrary::GetOpponentTeam(ECombatTeamType TeamType)
+{
+	return TeamType == ECombatTeamType::Player ? ECombatTeamType::Enemy : ECombatTeamType::Player;
+}
+
+TArray<ACharacter*> USVCombatFunctionLibrary::GetOpponentCombatCharacterList(ACharacter* Character)
+{
+	// 反查 Character 所属队伍 → 取对方阵营 → 返回对方角色列表
+	ECombatTeamType MyTeam = ECombatTeamType::Player;
+	if (!GetCharacterTeam(Character, MyTeam))
+	{
+		return TArray<ACharacter*>();
+	}
+
+	return GetCombatCharacterList(Character, GetOpponentTeam(MyTeam));
+}
+
+ACharacter* USVCombatFunctionLibrary::GetMainOpponentCombatCharacter(ACharacter* Character)
+{
+	// 反查 Character 所属队伍 → 敌方阵营 → 敌方主战斗角色（列表中首个）
+	ECombatTeamType MyTeam = ECombatTeamType::Player;
+	if (!GetCharacterTeam(Character, MyTeam))
+	{
+		return nullptr;
+	}
+
+	const TArray<ACharacter*> Opponents = GetCombatCharacterList(Character, GetOpponentTeam(MyTeam));
+	return Opponents.Num() > 0 ? Opponents[0] : nullptr;
+}
+
+bool USVCombatFunctionLibrary::CanActivateTurnAbilityByTag(ACharacter* Character, const FGameplayTag& Tag, ECombatTurnRole Role)
+{
+	const USVCharacterTurnComponent* TurnComp = USVCharacterTurnComponent::GetSVCharacterTurnComponent(Character);
+	if (!TurnComp)
+	{
+		return false;
+	}
+
+	return TurnComp->CanActivateAbilityByTag(Tag, Role);
+}
+
+bool USVCombatFunctionLibrary::CanActivateTurnAbilityByTagAnyRole(ACharacter* Character, const FGameplayTag& Tag)
+{
+	const USVCharacterTurnComponent* TurnComp = USVCharacterTurnComponent::GetSVCharacterTurnComponent(Character);
+	if (!TurnComp)
+	{
+		return false;
+	}
+
+	// 攻击方或防守方任意职责可激活即返回 true
+	return TurnComp->CanActivateAbilityByTag(Tag, ECombatTurnRole::Attacker)
+		|| TurnComp->CanActivateAbilityByTag(Tag, ECombatTurnRole::Defender);
+}
+
+bool USVCombatFunctionLibrary::CanActivateTurnAbilityByTagWithCurrentRole(ACharacter* Character, const FGameplayTag& Tag)
+{
+	const USVCharacterTurnComponent* TurnComp = USVCharacterTurnComponent::GetSVCharacterTurnComponent(Character);
+	if (!TurnComp)
+	{
+		return false;
+	}
+
+	// Role 从回合组件当前职责（TurnRole）取，调用方无需感知当前是攻还是防
+	return TurnComp->CanActivateAbilityByTag(Tag, TurnComp->GetTurnRole());
+}
+
+bool USVCombatFunctionLibrary::IsEmptyActionTag(const FGameplayTag& SkillTag)
+{
+	// 家族匹配：等于 Ability.TurnAction.EmptyAction 本身，或为其子 Tag（未来细分变体）
+	static const FGameplayTag EmptyActionTag = CatCombatGameplayTags::TAG_ABILITY_TURNACTION_EMPTYACTION;
+	return SkillTag.IsValid()
+		&& (SkillTag == EmptyActionTag || EmptyActionTag.MatchesTag(SkillTag));
+}
+
+void USVCombatFunctionLibrary::CollectSkillCandidates(const TArray<FAISkillWeight>& Source, ACharacter* Character,
+	USVCharacterTurnComponent* TurnComp, ECombatTurnRole Role, TArray<FAISkillWeight>& OutCandidates)
+{
+	const UAbilitySystemComponent* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(Character);
+
+	for (const FAISkillWeight& Item : Source)
+	{
+		if (!Item.SkillTag.IsValid())
+		{
+			continue;
+		}
+
+		// 状态匹配：条目未指定状态 Tag（留空则忽略判定），或角色当前持有该状态 Tag（如 Status.Health.Low）
+		const bool bStateMatch = !Item.RequiredStateTag.IsValid()
+			|| (ASC && ASC->HasMatchingGameplayTag(Item.RequiredStateTag));
+		if (!bStateMatch)
+		{
+			continue;
+		}
+
+		// 空技能：纯占位（Ability.TurnAction.EmptyAction 家族），不校验是否可激活，直接入候选
+		if (IsEmptyActionTag(Item.SkillTag))
+		{
+			OutCandidates.Add(Item);
+			continue;
+		}
+
+		// 可激活过滤
+		if (TurnComp && !TurnComp->CanActivateAbilityByTag(Item.SkillTag, Role))
+		{
+			continue;
+		}
+
+		OutCandidates.Add(Item);
+	}
+}
+
+bool USVCombatFunctionLibrary::PickWeightedSkill(const TArray<FAISkillWeight>& Candidates, FGameplayTag& OutTag)
+{
+	if (Candidates.Num() == 0)
+	{
+		return false;
+	}
+
+	float TotalWeight = 0.f;
+	for (const FAISkillWeight& Item : Candidates)
+	{
+		TotalWeight += FMath::Max(0.f, Item.Weight);
+	}
+
+	// 全 0 权重：退化为等概率随机
+	if (TotalWeight <= 0.f)
+	{
+		const int32 Index = FMath::RandRange(0, Candidates.Num() - 1);
+		OutTag = Candidates[Index].SkillTag;
+		return true;
+	}
+
+	const float Roll = FMath::FRandRange(0.f, TotalWeight);
+	float Accum = 0.f;
+	for (const FAISkillWeight& Item : Candidates)
+	{
+		Accum += FMath::Max(0.f, Item.Weight);
+		if (Roll <= Accum)
+		{
+			OutTag = Item.SkillTag;
+			return true;
+		}
+	}
+
+	// 浮点精度兜底
+	OutTag = Candidates.Last().SkillTag;
+	return true;
+}
+
+bool USVCombatFunctionLibrary::PickSkillFromWeightTable(ACharacter* Character, ECombatTurnRole Role,
+	const TArray<FAISkillWeight>& SkillTable, FGameplayTag& OutTag)
+{
+	USVCharacterTurnComponent* TurnComp = USVCharacterTurnComponent::GetSVCharacterTurnComponent(Character);
+	if (!TurnComp)
+	{
+		return false;
+	}
+
+	TArray<FAISkillWeight> Candidates;
+	CollectSkillCandidates(SkillTable, Character, TurnComp, Role, Candidates);
+	return PickWeightedSkill(Candidates, OutTag);
 }

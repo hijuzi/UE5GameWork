@@ -15,4 +15,7 @@ namespace CatCombatGameplayTags
 	// 战斗 Ability（Ability.Combat.*）
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(TAG_ABILITY_COMBAT_JOIN, "Ability.Combat.Join", "进入战斗 Ability 标签 — 标识角色加入战斗的 Ability");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(TAG_ABILITY_COMBAT_LEAVE, "Ability.Combat.Leave", "离开战斗 Ability 标签 — 标识角色脱离战斗的 Ability");
+
+	// 回合行动占位技能（Ability.TurnAction.*）
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(TAG_ABILITY_TURNACTION_EMPTYACTION, "Ability.TurnAction.EmptyAction", "回合行动占位技能 — 空技能/等待行动，AI 选技能时跳过可激活校验");
 }
