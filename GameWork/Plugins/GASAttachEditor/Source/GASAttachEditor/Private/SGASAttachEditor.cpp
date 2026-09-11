@@ -1134,7 +1134,7 @@ void SGASAttachEditorImpl::UpdateGameplayCueListItems()
 
 			for (FActiveGameplayEffect& ActiveGE : ActiveGameplayEffectsPtr)
 			{
-				GameplayEffectTreeRoot.Add(FGASGameplayEffectNode::Create(GetWorld(), ActiveGE));
+				GameplayEffectTreeRoot.Add(FGASGameplayEffectNode::Create(ASC, GetWorld(), ActiveGE));
 
 				GameplayEffectTree->SetItemExpansion(GameplayEffectTreeRoot.Top(), bGASTreeExpand);
 			}
@@ -1757,27 +1757,41 @@ TSharedPtr<SWidget> SGASAttachEditorImpl::CreateGameplayEffectToolWidget()
 				.HAlignHeader(EHorizontalAlignment::HAlign_Center)
 				//.DefaultTooltip(LOCTEXT("GAGameplayEffectToolTip", "GE名称 / 加成属性"))
 				.DefaultTooltip(LOCTEXT("GAGameplayEffectToolTip", "GameplayEffect Name / Bonus Attribute"))
-				.FillWidth(0.2f)
+				.FillWidth(0.15f)
 
 				+ SHeaderRow::Column(NAME_GAGameplayEffectDuration)
 				//.DefaultLabel(LOCTEXT("GAGameplayEffectDuration", "时间"))
 				.DefaultLabel(LOCTEXT("GAGameplayEffectDuration", "Time"))
 				.HAlignHeader(EHorizontalAlignment::HAlign_Center)
 				//.DefaultTooltip(LOCTEXT("GAGameplayEffectDurationToolTip", "GE时间详细叙述"))
-				.DefaultTooltip(LOCTEXT("GAGameplayEffectDurationToolTip", "GameplayEffect Time"))
-				.FillWidth(0.4f)
+				.DefaultTooltip(LOCTEXT("GAGameplayEffectDurationToolTip", "GameplayEffect Time（回合制显示 [Turn] 刻度）"))
+				.FillWidth(0.28f)
+
+				+ SHeaderRow::Column(NAME_GAGameplayEffectPeriod)
+				//.DefaultLabel(LOCTEXT("GAGameplayEffectPeriod", "周期"))
+				.DefaultLabel(LOCTEXT("GAGameplayEffectPeriod", "Period"))
+				.HAlignHeader(EHorizontalAlignment::HAlign_Center)
+				.DefaultTooltip(LOCTEXT("GAGameplayEffectPeriodToolTip", "GameplayEffect Period（回合制为刻度，实时制为秒）"))
+				.FillWidth(0.12f)
+
+				+ SHeaderRow::Column(NAME_GAGameplayEffectTiming)
+				//.DefaultLabel(LOCTEXT("GAGameplayEffectTiming", "时机"))
+				.DefaultLabel(LOCTEXT("GAGameplayEffectTiming", "Timing"))
+				.HAlignHeader(EHorizontalAlignment::HAlign_Center)
+				.DefaultTooltip(LOCTEXT("GAGameplayEffectTimingToolTip", "GameplayEffect Timing Tag（TimeAxis.*，仅回合制生效）"))
+				.FillWidth(0.18f)
 
 				+ SHeaderRow::Column(NAME_GAGameplayEffectStack)
 				.HAlignHeader(EHorizontalAlignment::HAlign_Center)
 				//.DefaultLabel(LOCTEXT("GAGameplayEffectStack", "堆栈信息"))
 				.DefaultLabel(LOCTEXT("GAGameplayEffectStack", "GameplayEffectStack"))
-				.FillWidth(0.1f)
+				.FillWidth(0.09f)
 
 				+ SHeaderRow::Column(NAME_GAGameplayEffectLevel)
 				.HAlignHeader(EHorizontalAlignment::HAlign_Center)
 				//.DefaultLabel(LOCTEXT("GAGameplayEffectLevel", "等级"))
 				.DefaultLabel(LOCTEXT("GAGameplayEffectLevel", "Level"))
-				.FillWidth(0.1f)
+				.FillWidth(0.06f)
 
 				+ SHeaderRow::Column(NAME_GAGameplayEffectGrantedTags)
 				.HAlignHeader(EHorizontalAlignment::HAlign_Center)
@@ -1785,7 +1799,7 @@ TSharedPtr<SWidget> SGASAttachEditorImpl::CreateGameplayEffectToolWidget()
 				//.DefaultTooltip(LOCTEXT("GAGameplayEffectToolTip", "含有的所有标签"))
 				.DefaultLabel(LOCTEXT("GAGameplayEffectGrantedTags", "Tags"))
 				.DefaultTooltip(LOCTEXT("GAGameplayEffectToolTip", "GameplayEffect Own Tags"))
-				.FillWidth(0.2f)
+				.FillWidth(0.12f)
 			)
 			]
 		];

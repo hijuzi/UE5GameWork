@@ -59,8 +59,12 @@ struct FAbilityTimerContainer
  * 使 GE 的 Duration / Period 从"秒"切换为"时机刻度"，由 TickTimeline 手动推进。
  * 注意：本管理器不会主动调用父类 FTimerManager::Tick（即不随世界时间走），
  *      各轴 Timer 的到期完全由 TickTimeline 按刻度触发。
+ *
+ * [GAS_MOD_09] 跨模块导出：本类定义在插件 Public 目录，外部模块（如 GASAttachEditor）
+ * 需要调用查询/推进接口（GetAbilityTimerRemaining / GetTimelineCounter 等），
+ * 因此必须带模块导出宏，否则跨 DLL 调用报 LNK2019（无法解析的外部符号）。
  */
-class FAbilityTimerManager : public FTimerManager
+class GAMEPLAYABILITIES_API FAbilityTimerManager : public FTimerManager
 {
 public:
 	FAbilityTimerManager() : FTimerManager(nullptr) {}
