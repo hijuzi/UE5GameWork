@@ -2,8 +2,6 @@
 
 #include "CatPostureAttributeSet.h"
 
-#include "Net/UnrealNetwork.h"
-
 UCatPostureAttributeSet::UCatPostureAttributeSet()
 {
 	InitBreak(0.f);
@@ -50,34 +48,4 @@ void UCatPostureAttributeSet::PostAttributeChange(const FGameplayAttribute& Attr
 			bBreakReady = false;
 		}
 	}
-}
-
-void UCatPostureAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	DOREPLIFETIME_CONDITION_NOTIFY(UCatPostureAttributeSet, Break, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UCatPostureAttributeSet, MaxBreak, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UCatPostureAttributeSet, BreakRegen, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UCatPostureAttributeSet, StunTurns, COND_None, REPNOTIFY_Always);
-}
-
-void UCatPostureAttributeSet::OnRep_Break(const FGameplayAttributeData& OldBreak)
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UCatPostureAttributeSet, Break, OldBreak);
-}
-
-void UCatPostureAttributeSet::OnRep_MaxBreak(const FGameplayAttributeData& OldMaxBreak)
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UCatPostureAttributeSet, MaxBreak, OldMaxBreak);
-}
-
-void UCatPostureAttributeSet::OnRep_BreakRegen(const FGameplayAttributeData& OldBreakRegen)
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UCatPostureAttributeSet, BreakRegen, OldBreakRegen);
-}
-
-void UCatPostureAttributeSet::OnRep_StunTurns(const FGameplayAttributeData& OldStunTurns)
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UCatPostureAttributeSet, StunTurns, OldStunTurns);
 }

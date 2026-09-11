@@ -2,8 +2,6 @@
 
 #include "CatGradientAttributeSet.h"
 
-#include "Net/UnrealNetwork.h"
-
 UCatGradientAttributeSet::UCatGradientAttributeSet()
 {
 	InitGradientCharges(0.f);
@@ -50,28 +48,4 @@ void UCatGradientAttributeSet::PostAttributeChange(const FGameplayAttribute& Att
 			OnGradientChargeGained.Broadcast();
 		}
 	}
-}
-
-void UCatGradientAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	DOREPLIFETIME_CONDITION_NOTIFY(UCatGradientAttributeSet, GradientCharges, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UCatGradientAttributeSet, MaxGradientCharges, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UCatGradientAttributeSet, GradientProgress, COND_None, REPNOTIFY_Always);
-}
-
-void UCatGradientAttributeSet::OnRep_GradientCharges(const FGameplayAttributeData& OldGradientCharges)
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UCatGradientAttributeSet, GradientCharges, OldGradientCharges);
-}
-
-void UCatGradientAttributeSet::OnRep_MaxGradientCharges(const FGameplayAttributeData& OldMaxGradientCharges)
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UCatGradientAttributeSet, MaxGradientCharges, OldMaxGradientCharges);
-}
-
-void UCatGradientAttributeSet::OnRep_GradientProgress(const FGameplayAttributeData& OldGradientProgress)
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UCatGradientAttributeSet, GradientProgress, OldGradientProgress);
 }

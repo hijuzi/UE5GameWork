@@ -4,7 +4,6 @@
 
 #include "Curves/CurveFloat.h"
 #include "GameplayEffectExtension.h"
-#include "Net/UnrealNetwork.h"
 #include "GameWork.h"
 
 UCatGrowthAttributeSet::UCatGrowthAttributeSet()
@@ -158,79 +157,4 @@ void UCatGrowthAttributeSet::ResolveExperienceGain(float GainedExperience)
 			TEXT("[CatGrowth] 升级循环达到迭代上限 %d，请检查 ExperienceCurve / 经验公式配置。"),
 			MaxLevelUpIterations);
 	}
-}
-
-void UCatGrowthAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	// 等级 / 经验 / 点数
-	DOREPLIFETIME_CONDITION_NOTIFY(UCatGrowthAttributeSet, Level, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UCatGrowthAttributeSet, MaxLevel, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UCatGrowthAttributeSet, Experience, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UCatGrowthAttributeSet, ExperienceToNextLevel, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UCatGrowthAttributeSet, AttributePoints, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UCatGrowthAttributeSet, SkillPoints, COND_None, REPNOTIFY_Always);
-
-	// 加点属性
-	DOREPLIFETIME_CONDITION_NOTIFY(UCatGrowthAttributeSet, Vitality, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UCatGrowthAttributeSet, Might, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UCatGrowthAttributeSet, Agility, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UCatGrowthAttributeSet, Defense, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UCatGrowthAttributeSet, Luck, COND_None, REPNOTIFY_Always);
-}
-
-void UCatGrowthAttributeSet::OnRep_Level(const FGameplayAttributeData& OldLevel)
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UCatGrowthAttributeSet, Level, OldLevel);
-}
-
-void UCatGrowthAttributeSet::OnRep_MaxLevel(const FGameplayAttributeData& OldMaxLevel)
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UCatGrowthAttributeSet, MaxLevel, OldMaxLevel);
-}
-
-void UCatGrowthAttributeSet::OnRep_Experience(const FGameplayAttributeData& OldExperience)
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UCatGrowthAttributeSet, Experience, OldExperience);
-}
-
-void UCatGrowthAttributeSet::OnRep_ExperienceToNextLevel(const FGameplayAttributeData& OldExperienceToNextLevel)
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UCatGrowthAttributeSet, ExperienceToNextLevel, OldExperienceToNextLevel);
-}
-
-void UCatGrowthAttributeSet::OnRep_AttributePoints(const FGameplayAttributeData& OldAttributePoints)
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UCatGrowthAttributeSet, AttributePoints, OldAttributePoints);
-}
-
-void UCatGrowthAttributeSet::OnRep_SkillPoints(const FGameplayAttributeData& OldSkillPoints)
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UCatGrowthAttributeSet, SkillPoints, OldSkillPoints);
-}
-
-void UCatGrowthAttributeSet::OnRep_Vitality(const FGameplayAttributeData& OldVitality)
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UCatGrowthAttributeSet, Vitality, OldVitality);
-}
-
-void UCatGrowthAttributeSet::OnRep_Might(const FGameplayAttributeData& OldMight)
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UCatGrowthAttributeSet, Might, OldMight);
-}
-
-void UCatGrowthAttributeSet::OnRep_Agility(const FGameplayAttributeData& OldAgility)
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UCatGrowthAttributeSet, Agility, OldAgility);
-}
-
-void UCatGrowthAttributeSet::OnRep_Defense(const FGameplayAttributeData& OldDefense)
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UCatGrowthAttributeSet, Defense, OldDefense);
-}
-
-void UCatGrowthAttributeSet::OnRep_Luck(const FGameplayAttributeData& OldLuck)
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UCatGrowthAttributeSet, Luck, OldLuck);
 }

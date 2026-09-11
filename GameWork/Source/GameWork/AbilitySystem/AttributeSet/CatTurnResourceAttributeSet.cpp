@@ -2,8 +2,6 @@
 
 #include "CatTurnResourceAttributeSet.h"
 
-#include "Net/UnrealNetwork.h"
-
 UCatTurnResourceAttributeSet::UCatTurnResourceAttributeSet()
 {
 	InitAP(0.f);
@@ -36,22 +34,4 @@ void UCatTurnResourceAttributeSet::PostAttributeChange(const FGameplayAttribute&
 	{
 		OnAPChanged.Broadcast(GetAP(), GetMaxAP());
 	}
-}
-
-void UCatTurnResourceAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	DOREPLIFETIME_CONDITION_NOTIFY(UCatTurnResourceAttributeSet, AP, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UCatTurnResourceAttributeSet, MaxAP, COND_None, REPNOTIFY_Always);
-}
-
-void UCatTurnResourceAttributeSet::OnRep_AP(const FGameplayAttributeData& OldAP)
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UCatTurnResourceAttributeSet, AP, OldAP);
-}
-
-void UCatTurnResourceAttributeSet::OnRep_MaxAP(const FGameplayAttributeData& OldMaxAP)
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UCatTurnResourceAttributeSet, MaxAP, OldMaxAP);
 }

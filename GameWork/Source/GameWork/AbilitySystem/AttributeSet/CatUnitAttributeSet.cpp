@@ -3,7 +3,6 @@
 #include "CatUnitAttributeSet.h"
 
 #include "GameplayEffectExtension.h"
-#include "Net/UnrealNetwork.h"
 
 UCatUnitAttributeSet::UCatUnitAttributeSet()
 {
@@ -121,8 +120,8 @@ void UCatUnitAttributeSet::PostAttributeChange(const FGameplayAttribute& Attribu
 		ClampCurrentValueToMax(GetHealthAttribute(), NewValue);
 	}
 
-	// 倒地 / 复活标记在此派生：PostAttributeChange 在客户端经 OnRep 重聚合时同样会触发，
-	// 因此服务器与客户端状态天然一致，无需额外复制该标记。
+	// 倒地标记在这里派生而不是在 PostGameplayEffectExecute 里，因为这条回调覆盖所有写入路径
+	// （GE 结算、直接 SetNumericAttributeBase、叠层变化），不会漏。
 	if (Attribute == GetHealthAttribute() || Attribute == GetMaxHealthAttribute())
 	{
 		OnHealthChanged.Broadcast(GetHealth(), GetMaxHealth());
@@ -210,97 +209,4 @@ void UCatUnitAttributeSet::ResolveShieldBreak()
 	{
 		SetShieldLayers(FMath::Clamp(GetShieldLayers() - LocalShieldBreak, 0.f, GetMaxShieldLayers()));
 	}
-}
-
-void UCatUnitAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	// 生命组
-	DOREPLIFETIME_CONDITION_NOTIFY(UCatUnitAttributeSet, Health, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UCatUnitAttributeSet, MaxHealth, COND_None, REPNOTIFY_Always);
-
-	// 护盾组
-	DOREPLIFETIME_CONDITION_NOTIFY(UCatUnitAttributeSet, ShieldLayers, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UCatUnitAttributeSet, MaxShieldLayers, COND_None, REPNOTIFY_Always);
-
-	// 进攻组
-	DOREPLIFETIME_CONDITION_NOTIFY(UCatUnitAttributeSet, Attack, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UCatUnitAttributeSet, CritRate, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UCatUnitAttributeSet, CritDamage, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UCatUnitAttributeSet, DamageMultiplier, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UCatUnitAttributeSet, BreakPower, COND_None, REPNOTIFY_Always);
-
-	// 防御组
-	DOREPLIFETIME_CONDITION_NOTIFY(UCatUnitAttributeSet, DamageReduction, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UCatUnitAttributeSet, ParryEfficiency, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UCatUnitAttributeSet, DodgeEfficiency, COND_None, REPNOTIFY_Always);
-
-	// 行动组
-	DOREPLIFETIME_CONDITION_NOTIFY(UCatUnitAttributeSet, Speed, COND_None, REPNOTIFY_Always);
-}
-
-void UCatUnitAttributeSet::OnRep_Health(const FGameplayAttributeData& OldHealth)
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UCatUnitAttributeSet, Health, OldHealth);
-}
-
-void UCatUnitAttributeSet::OnRep_MaxHealth(const FGameplayAttributeData& OldMaxHealth)
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UCatUnitAttributeSet, MaxHealth, OldMaxHealth);
-}
-
-void UCatUnitAttributeSet::OnRep_ShieldLayers(const FGameplayAttributeData& OldShieldLayers)
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UCatUnitAttributeSet, ShieldLayers, OldShieldLayers);
-}
-
-void UCatUnitAttributeSet::OnRep_MaxShieldLayers(const FGameplayAttributeData& OldMaxShieldLayers)
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UCatUnitAttributeSet, MaxShieldLayers, OldMaxShieldLayers);
-}
-
-void UCatUnitAttributeSet::OnRep_Attack(const FGameplayAttributeData& OldAttack)
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UCatUnitAttributeSet, Attack, OldAttack);
-}
-
-void UCatUnitAttributeSet::OnRep_CritRate(const FGameplayAttributeData& OldCritRate)
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UCatUnitAttributeSet, CritRate, OldCritRate);
-}
-
-void UCatUnitAttributeSet::OnRep_CritDamage(const FGameplayAttributeData& OldCritDamage)
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UCatUnitAttributeSet, CritDamage, OldCritDamage);
-}
-
-void UCatUnitAttributeSet::OnRep_DamageMultiplier(const FGameplayAttributeData& OldDamageMultiplier)
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UCatUnitAttributeSet, DamageMultiplier, OldDamageMultiplier);
-}
-
-void UCatUnitAttributeSet::OnRep_BreakPower(const FGameplayAttributeData& OldBreakPower)
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UCatUnitAttributeSet, BreakPower, OldBreakPower);
-}
-
-void UCatUnitAttributeSet::OnRep_DamageReduction(const FGameplayAttributeData& OldDamageReduction)
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UCatUnitAttributeSet, DamageReduction, OldDamageReduction);
-}
-
-void UCatUnitAttributeSet::OnRep_ParryEfficiency(const FGameplayAttributeData& OldParryEfficiency)
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UCatUnitAttributeSet, ParryEfficiency, OldParryEfficiency);
-}
-
-void UCatUnitAttributeSet::OnRep_DodgeEfficiency(const FGameplayAttributeData& OldDodgeEfficiency)
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UCatUnitAttributeSet, DodgeEfficiency, OldDodgeEfficiency);
-}
-
-void UCatUnitAttributeSet::OnRep_Speed(const FGameplayAttributeData& OldSpeed)
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UCatUnitAttributeSet, Speed, OldSpeed);
 }
