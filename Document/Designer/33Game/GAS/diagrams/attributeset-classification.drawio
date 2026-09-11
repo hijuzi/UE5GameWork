@@ -1,0 +1,54 @@
+<mxGraphModel dx="1422" dy="798" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1220" pageHeight="760" math="0" shadow="0">
+  <root>
+    <mxCell id="0" />
+    <mxCell id="1" parent="0" />
+
+    <mxCell id="10" value="UCatGrowthAttributeSet&#xa;成长 · 等级 / 经验 / 属性点 / 技能点 + 五大加点属性" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=14;fontStyle=1;fontFamily=Microsoft YaHei;" vertex="1" parent="1">
+      <mxGeometry x="440" y="50" width="320" height="80" as="geometry" />
+    </mxCell>
+    <mxCell id="11" value="UCatUnitAttributeSet&#xa;单位战斗数值（生命 / 护盾 / 进攻 / 防御 / 速度）&#xa;Health · ShieldLayers · Attack · Crit · DamageReduction · Speed&#xa;+ Damage / Healing / ShieldBreak" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;fontFamily=Microsoft YaHei;" vertex="1" parent="1">
+      <mxGeometry x="420" y="220" width="360" height="110" as="geometry" />
+    </mxCell>
+
+    <mxCell id="12" value="UCatTurnResourceAttributeSet&#xa;回合资源（玩家角色）&#xa;AP / MaxAP" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;fontFamily=Microsoft YaHei;" vertex="1" parent="1">
+      <mxGeometry x="80" y="450" width="230" height="80" as="geometry" />
+    </mxCell>
+    <mxCell id="13" value="UCatGradientAttributeSet&#xa;Gradient 充能（全队共享）&#xa;GradientCharges / MaxGradientCharges / Progress" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;fontFamily=Microsoft YaHei;" vertex="1" parent="1">
+      <mxGeometry x="440" y="450" width="320" height="80" as="geometry" />
+    </mxCell>
+    <mxCell id="14" value="UCatPostureAttributeSet&#xa;姿态（敌人）&#xa;Break / MaxBreak / BreakRegen / StunTurns" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=12;fontFamily=Microsoft YaHei;" vertex="1" parent="1">
+      <mxGeometry x="890" y="450" width="250" height="80" as="geometry" />
+    </mxCell>
+
+    <mxCell id="30" value="玩家角色（持久化 · 存档）" style="text;html=1;fontSize=13;fontStyle=1;fontFamily=Microsoft YaHei;fontColor=#d6b656;" vertex="1" parent="1">
+      <mxGeometry x="440" y="16" width="320" height="24" as="geometry" />
+    </mxCell>
+    <mxCell id="31" value="共用属性集 · 双方挂载（战斗即弃）" style="text;html=1;fontSize=13;fontStyle=1;fontFamily=Microsoft YaHei;fontColor=#666666;" vertex="1" parent="1">
+      <mxGeometry x="420" y="186" width="360" height="24" as="geometry" />
+    </mxCell>
+    <mxCell id="32" value="玩家角色（每角色一份）" style="text;html=1;fontSize=12;fontStyle=1;fontFamily=Microsoft YaHei;fontColor=#9673a6;" vertex="1" parent="1">
+      <mxGeometry x="80" y="536" width="240" height="24" as="geometry" />
+    </mxCell>
+    <mxCell id="33" value="全队共享（每队仅一份）" style="text;html=1;fontSize=12;fontStyle=1;fontFamily=Microsoft YaHei;fontColor=#9673a6;" vertex="1" parent="1">
+      <mxGeometry x="440" y="536" width="240" height="24" as="geometry" />
+    </mxCell>
+    <mxCell id="34" value="敌人专用" style="text;html=1;fontSize=12;fontStyle=1;fontFamily=Microsoft YaHei;fontColor=#d79b00;" vertex="1" parent="1">
+      <mxGeometry x="890" y="536" width="200" height="24" as="geometry" />
+    </mxCell>
+
+    <mxCell id="40" value="加点派生" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;fontSize=12;fontFamily=Microsoft YaHei;strokeColor=#666666;" edge="1" parent="1" source="10" target="11">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="41" value="消耗 AP 累积 Gradient" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;fontSize=11;fontFamily=Microsoft YaHei;strokeColor=#666666;" edge="1" parent="1" source="12" target="13">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="42" value="攻击积累 Break / 引爆眩晕" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;fontSize=11;fontFamily=Microsoft YaHei;strokeColor=#666666;" edge="1" parent="1" source="11" target="14">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="600" y="380" />
+          <mxPoint x="1015" y="380" />
+        </Array>
+      </mxGeometry>
+    </mxCell>
+  </root>
+</mxGraphModel>

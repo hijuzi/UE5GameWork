@@ -18,13 +18,19 @@ public class GameWork : ModuleRules
 			"StateTreeModule",
 			"GameplayStateTreeModule",
 			"UMG",
-			"Slate"
+			"Slate",
+			// GAS：UAttributeSet / FGameplayAttribute / GameplayEffect（属性集骨架的基类与依赖）
+			"GameplayAbilities",
+			"GameplayTags",
+			"GameplayTasks"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] { });
 
 		PublicIncludePaths.AddRange(new string[] {
 			"GameWork",
+			"GameWork/AbilitySystem",
+			"GameWork/AbilitySystem/AttributeSet",
 			"GameWork/Variant_Platforming",
 			"GameWork/Variant_Platforming/Animation",
 			"GameWork/Variant_Combat",

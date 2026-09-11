@@ -1,0 +1,45 @@
+<mxGraphModel dx="1422" dy="798" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1420" pageHeight="560" math="0" shadow="0">
+  <root>
+    <mxCell id="0" />
+    <mxCell id="1" parent="0" />
+
+    <mxCell id="10" value="战斗胜利结算" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=14;fontStyle=1;fontFamily=Microsoft YaHei;" vertex="1" parent="1">
+      <mxGeometry x="40" y="80" width="200" height="80" as="geometry" />
+    </mxCell>
+    <mxCell id="11" value="经验瞬时 GE&#xa;写入 Progression.ExperienceGain" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;fontStyle=1;fontFamily=Microsoft YaHei;" vertex="1" parent="1">
+      <mxGeometry x="360" y="80" width="240" height="80" as="geometry" />
+    </mxCell>
+    <mxCell id="12" value="PostGameplayEffectExecute&#xa;循环升级结算&#xa;（限次 + 溢出结转）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=14;fontStyle=1;fontFamily=Microsoft YaHei;" vertex="1" parent="1">
+      <mxGeometry x="720" y="80" width="260" height="80" as="geometry" />
+    </mxCell>
+    <mxCell id="13" value="Level++ &#xa;AttributePoints += 3&#xa;SkillPoints += 1&#xa;广播 OnLevelUp" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=13;fontStyle=1;fontFamily=Microsoft YaHei;" vertex="1" parent="1">
+      <mxGeometry x="1100" y="80" width="240" height="80" as="geometry" />
+    </mxCell>
+    <mxCell id="14" value="玩家加点&#xa;消费 AttributePoints&#xa;写入 Primary 五属性" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;fontStyle=1;fontFamily=Microsoft YaHei;" vertex="1" parent="1">
+      <mxGeometry x="1100" y="320" width="240" height="80" as="geometry" />
+    </mxCell>
+    <mxCell id="15" value="派生战斗数值&#xa;Health.MaxHealth / Offense.Attack&#xa;/ Defense.DamageReduction" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=14;fontStyle=1;fontFamily=Microsoft YaHei;" vertex="1" parent="1">
+      <mxGeometry x="720" y="320" width="260" height="80" as="geometry" />
+    </mxCell>
+
+    <mxCell id="20" value="结算奖励" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;fontSize=12;fontFamily=Microsoft YaHei;strokeColor=#666666;" edge="1" parent="1" source="10" target="11">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="21" value="元属性入账" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;fontSize=12;fontFamily=Microsoft YaHei;strokeColor=#666666;" edge="1" parent="1" source="11" target="12">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="22" value="满足升级条件" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;fontSize=12;fontFamily=Microsoft YaHei;strokeColor=#666666;" edge="1" parent="1" source="12" target="13">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="23" value="升级后加点" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;fontSize=12;fontFamily=Microsoft YaHei;strokeColor=#666666;" edge="1" parent="1" source="13" target="14">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="24" value="加点驱动派生" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;fontSize=12;fontFamily=Microsoft YaHei;strokeColor=#666666;" edge="1" parent="1" source="14" target="15">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <mxCell id="30" value="升级循环（每次经验入账执行）&#xa;&#xa;Experience += ExperienceGain&#xa;while (Level &lt; MaxLevel &amp;&amp; Experience &gt;= ExperienceToNextLevel):&#xa;    Experience -= ExperienceToNextLevel&#xa;    Level += 1&#xa;    ExperienceToNextLevel = 查曲线(Level)&#xa;    AttributePoints += PointsPerLevel&#xa;ExperienceGain = 0&#xa;&#xa;约束：循环必须受 Level &lt; MaxLevel 限制，防止经验表配错导致死循环。" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=12;fontFamily=Microsoft YaHei;align=left;spacingLeft=12;verticalAlign=top;spacingTop=10;" vertex="1" parent="1">
+      <mxGeometry x="40" y="260" width="600" height="240" as="geometry" />
+    </mxCell>
+  </root>
+</mxGraphModel>
