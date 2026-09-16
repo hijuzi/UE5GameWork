@@ -4,7 +4,7 @@
 
 #include "GameFramework/Character.h"
 
-#include "Combat/SVCombatFunctionLibrary.h"
+#include "Combat/CatCombatFunctionLibrary.h"
 
 UBTTask_Cat_ChooseLowestHealthTarget::UBTTask_Cat_ChooseLowestHealthTarget()
 {
@@ -25,8 +25,8 @@ EBTNodeResult::Type UBTTask_Cat_ChooseLowestHealthTarget::ExecuteTask(UBehaviorT
 		return EBTNodeResult::Failed;
 	}
 
-	// 攻击目标 = Owner 所在阵营的对方阵营角色（阵营判定已封装在 USVCombatFunctionLibrary::GetOpponentCombatCharacterList）
-	const TArray<ACharacter*> Targets = USVCombatFunctionLibrary::GetOpponentCombatCharacterList(Owner);
+	// 攻击目标 = Owner 所在阵营的对方阵营角色（阵营判定已封装在 UCatCombatFunctionLibrary::GetOpponentCombatCharacterList）
+	const TArray<ACharacter*> Targets = UCatCombatFunctionLibrary::GetOpponentCombatCharacterList(Owner);
 
 	ACharacter* Best = nullptr;
 	float BestHealth = TNumericLimits<float>::Max();

@@ -2,7 +2,7 @@
 
 #include "AI/SkillSelection/BTTask_Cat_ChooseAoEAbility.h"
 
-#include "Combat/Component/SVCharacterTurnComponent.h"
+#include "Combat/Component/CatCharacterTurnComponent.h"
 
 UBTTask_Cat_ChooseAoEAbility::UBTTask_Cat_ChooseAoEAbility()
 {
@@ -11,7 +11,7 @@ UBTTask_Cat_ChooseAoEAbility::UBTTask_Cat_ChooseAoEAbility()
 
 EBTNodeResult::Type UBTTask_Cat_ChooseAoEAbility::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* /*NodeMemory*/)
 {
-	USVCharacterTurnComponent* TurnComp = GetTurnComponent(OwnerComp);
+	UCatCharacterTurnComponent* TurnComp = GetTurnComponent(OwnerComp);
 	if (!TurnComp)
 	{
 		return EBTNodeResult::Failed;

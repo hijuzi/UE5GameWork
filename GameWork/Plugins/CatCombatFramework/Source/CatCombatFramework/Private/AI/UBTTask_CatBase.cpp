@@ -11,8 +11,8 @@
 
 #include "AI/CatAIControllerBase.h"
 #include "AI/CatAIControlData.h"
-#include "Combat/Component/SVCharacterTurnComponent.h"
-#include "Combat/SVCombatFunctionLibrary.h"
+#include "Combat/Component/CatCharacterTurnComponent.h"
+#include "Combat/CatCombatFunctionLibrary.h"
 
 ACharacter* UBTTask_CatBase::GetOwnerCharacter(UBehaviorTreeComponent& OwnerComp)
 {
@@ -21,9 +21,9 @@ ACharacter* UBTTask_CatBase::GetOwnerCharacter(UBehaviorTreeComponent& OwnerComp
 	return Cast<ACharacter>(Pawn);
 }
 
-USVCharacterTurnComponent* UBTTask_CatBase::GetTurnComponent(UBehaviorTreeComponent& OwnerComp)
+UCatCharacterTurnComponent* UBTTask_CatBase::GetTurnComponent(UBehaviorTreeComponent& OwnerComp)
 {
-	return USVCharacterTurnComponent::GetSVCharacterTurnComponent(GetOwnerCharacter(OwnerComp));
+	return UCatCharacterTurnComponent::GetCatCharacterTurnComponent(GetOwnerCharacter(OwnerComp));
 }
 
 UBlackboardComponent* UBTTask_CatBase::GetBlackboard(UBehaviorTreeComponent& OwnerComp)
@@ -64,7 +64,7 @@ bool UBTTask_CatBase::PickFirstActivatableTag(UBehaviorTreeComponent& OwnerComp,
 
 	for (const FGameplayTag& Tag : Tags)
 	{
-		if (Tag.IsValid() && USVCombatFunctionLibrary::CanActivateTurnAbilityByTag(Character, Tag, Role))
+		if (Tag.IsValid() && UCatCombatFunctionLibrary::CanActivateTurnAbilityByTag(Character, Tag, Role))
 		{
 			OutTag = Tag;
 			return true;

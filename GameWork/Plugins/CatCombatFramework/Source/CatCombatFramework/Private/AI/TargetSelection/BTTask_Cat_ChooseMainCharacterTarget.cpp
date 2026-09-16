@@ -4,7 +4,7 @@
 
 #include "GameFramework/Character.h"
 
-#include "Combat/SVCombatFunctionLibrary.h"
+#include "Combat/CatCombatFunctionLibrary.h"
 
 UBTTask_Cat_ChooseMainCharacterTarget::UBTTask_Cat_ChooseMainCharacterTarget()
 {
@@ -19,8 +19,8 @@ EBTNodeResult::Type UBTTask_Cat_ChooseMainCharacterTarget::ExecuteTask(UBehavior
 		return EBTNodeResult::Failed;
 	}
 
-	// 兜底选 Owner 所在阵营的敌方主战斗角色（阵营判定已封装在 USVCombatFunctionLibrary）
-	ACharacter* Main = USVCombatFunctionLibrary::GetMainOpponentCombatCharacter(Owner);
+	// 兜底选 Owner 所在阵营的敌方主战斗角色（阵营判定已封装在 UCatCombatFunctionLibrary）
+	ACharacter* Main = UCatCombatFunctionLibrary::GetMainOpponentCombatCharacter(Owner);
 	if (!Main)
 	{
 		return EBTNodeResult::Failed;

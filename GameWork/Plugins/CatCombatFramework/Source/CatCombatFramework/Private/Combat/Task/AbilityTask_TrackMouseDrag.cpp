@@ -2,7 +2,7 @@
 
 #include "Combat/Task/AbilityTask_TrackMouseDrag.h"
 
-#include "Combat/SVCombatCoreInterface.h"
+#include "Combat/CatCombatCoreInterface.h"
 #include "AbilitySystemComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
@@ -603,13 +603,13 @@ bool UAbilityTask_TrackMouseDragTargetBox::CheckSuccessConditions(const FVector2
 	// 遍历目标列表，通过接口获取每个目标的世界空间受击范围 FBox，判定鼠标滑动线段是否与之相交
 	for (ACharacter* Target : TargetCharacters)
 	{
-		if (!Target || !Target->Implements<USVCombatCoreInterface>())
+		if (!Target || !Target->Implements<UCatCombatCoreInterface>())
 		{
 			continue;
 		}
 
 		FBox HitBox;
-		if (!ISVCombatCoreInterface::Execute_GetMainHitReactionRange(Target, HitBox))
+		if (!ICatCombatCoreInterface::Execute_GetMainHitReactionRange(Target, HitBox))
 		{
 			continue;
 		}
@@ -699,13 +699,13 @@ void UAbilityTask_TrackMouseDragTargetBox::DrawDebug(const FVector2D& CurrentPos
 	// 遍历目标列表，绘制每个目标的世界空间受击范围 FBox
 	for (ACharacter* Target : TargetCharacters)
 	{
-		if (!Target || !Target->Implements<USVCombatCoreInterface>())
+		if (!Target || !Target->Implements<UCatCombatCoreInterface>())
 		{
 			continue;
 		}
 
 		FBox HitBox;
-		if (ISVCombatCoreInterface::Execute_GetMainHitReactionRange(Target, HitBox))
+		if (ICatCombatCoreInterface::Execute_GetMainHitReactionRange(Target, HitBox))
 		{
 			DrawDebugBox(World, HitBox.GetCenter(), HitBox.GetExtent(), FColor::Yellow, false, DebugDrawDuration);
 		}

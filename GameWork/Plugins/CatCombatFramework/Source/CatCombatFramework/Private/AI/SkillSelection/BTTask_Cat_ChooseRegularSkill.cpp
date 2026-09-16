@@ -8,8 +8,8 @@
 #include "AI/CatAIControlData.h"
 #include "AI/CatAISkillDecisionData.h"
 #include "AI/UBTTask_CatBase.h"
-#include "Combat/Component/SVCharacterTurnComponent.h"
-#include "Combat/SVCombatFunctionLibrary.h"
+#include "Combat/Component/CatCharacterTurnComponent.h"
+#include "Combat/CatCombatFunctionLibrary.h"
 
 UBTTask_Cat_ChooseRegularSkill::UBTTask_Cat_ChooseRegularSkill()
 {
@@ -37,7 +37,7 @@ EBTNodeResult::Type UBTTask_Cat_ChooseRegularSkill::ExecuteTask(UBehaviorTreeCom
 		return EBTNodeResult::Failed;
 	}
 
-	USVCharacterTurnComponent* TurnComp = USVCharacterTurnComponent::GetSVCharacterTurnComponent(Character);
+	UCatCharacterTurnComponent* TurnComp = UCatCharacterTurnComponent::GetCatCharacterTurnComponent(Character);
 	if (!TurnComp)
 	{
 		return EBTNodeResult::Failed;
@@ -54,16 +54,16 @@ EBTNodeResult::Type UBTTask_Cat_ChooseRegularSkill::ExecuteTask(UBehaviorTreeCom
 	if (bFirstAction)
 	{
 		// 第 1 次行动：高优先级表优先，命中即用；否则回退常规表
-		bPicked = USVCombatFunctionLibrary::PickSkillFromWeightTable(Character, Role, DecisionData->HighPrioritySkills, ChosenTag);
+		bPicked = UCatCombatFunctionLibrary::PickSkillFromWeightTable(Character, Role, DecisionData->HighPrioritySkills, ChosenTag);
 		if (!bPicked)
 		{
-			bPicked = USVCombatFunctionLibrary::PickSkillFromWeightTable(Character, Role, DecisionData->LowPrioritySkills, ChosenTag);
+			bPicked = UCatCombatFunctionLibrary::PickSkillFromWeightTable(Character, Role, DecisionData->LowPrioritySkills, ChosenTag);
 		}
 	}
 	else
 	{
 		// 第 2 次行动：只用常规优先级表
-		bPicked = USVCombatFunctionLibrary::PickSkillFromWeightTable(Character, Role, DecisionData->LowPrioritySkills, ChosenTag);
+		bPicked = UCatCombatFunctionLibrary::PickSkillFromWeightTable(Character, Role, DecisionData->LowPrioritySkills, ChosenTag);
 	}
 
 	if (!bPicked)

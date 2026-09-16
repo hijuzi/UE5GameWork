@@ -7,8 +7,8 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "GameplayTagContainer.h"
 
-#include "Combat/SVCombatFunctionLibrary.h"
-#include "Combat/SVCombatManagerSubsystem.h"
+#include "Combat/CatCombatFunctionLibrary.h"
+#include "Combat/CatCombatManagerSubsystem.h"
 #include "Engine/GameInstance.h"
 #include "GameFramework/Character.h"
 
@@ -36,13 +36,13 @@ EBTNodeResult::Type UBTTask_Cat_EndTurnAction::ExecuteTask(UBehaviorTreeComponen
 	const FGameplayTag AbilityTag = FGameplayTag::RequestGameplayTag(TagName);
 
 	// 当前选择的技能可激活：不结束回合，交后续激活流程执行
-	if (AbilityTag.IsValid() && USVCombatFunctionLibrary::CanActivateTurnAbilityByTagWithCurrentRole(Character, AbilityTag))
+	if (AbilityTag.IsValid() && UCatCombatFunctionLibrary::CanActivateTurnAbilityByTagWithCurrentRole(Character, AbilityTag))
 	{
 		return EBTNodeResult::Failed;
 	}
 
 	// 未选择技能或技能不可激活：经战斗管理器推进战斗回合（协调器判断切队伍或进入下一回合）
-	USVCombatManagerSubsystem* CombatManager = Character->GetGameInstance() ? Character->GetGameInstance()->GetSubsystem<USVCombatManagerSubsystem>() : nullptr;
+	UCatCombatManagerSubsystem* CombatManager = Character->GetGameInstance() ? Character->GetGameInstance()->GetSubsystem<UCatCombatManagerSubsystem>() : nullptr;
 	if (!CombatManager)
 	{
 		return EBTNodeResult::Failed;

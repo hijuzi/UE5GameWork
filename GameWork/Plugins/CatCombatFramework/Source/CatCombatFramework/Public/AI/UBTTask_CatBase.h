@@ -6,20 +6,20 @@
 #include "AttributeSet.h"
 #include "BehaviorTree/BTTaskNode.h"
 #include "GameplayTagContainer.h"
-#include "Combat/SVCombatTypes.h"
+#include "Combat/CatCombatTypes.h"
 #include "UBTTask_CatBase.generated.h"
 
 class ACharacter;
 class UBlackboardComponent;
 class UCatAIControlData;
-class USVCharacterTurnComponent;
+class UCatCharacterTurnComponent;
 
 /**
  * Cat 行为树 Task 公共基类：提供 Owner / 回合组件 / 黑板 / 目标 / 技能 Tag 等读写辅助。
  *
  * 移植说明：
  *  - 源项目基类面向 ASVCharacterBase 强类型角色，本框架抽象为 ACharacter，
- *    角色能力/状态查询统一走角色 ASC 与 USVCharacterTurnComponent（与框架其它部分一致）；
+ *    角色能力/状态查询统一走角色 ASC 与 UCatCharacterTurnComponent（与框架其它部分一致）；
  *  - AI 控制数据由角色扩展组件（USVCharacterExtensionComponent）改为 AI 控制器（ACatAIControllerBase）持有；
  *  - 目标血量由源项目 USVHealthComponent 改为按可配置的 GAS 属性读取（框架层不绑定具体 AttributeSet）。
  */
@@ -33,7 +33,7 @@ public:
 	static ACharacter* GetOwnerCharacter(UBehaviorTreeComponent& OwnerComp);
 
 	/** 取角色回合组件 */
-	static USVCharacterTurnComponent* GetTurnComponent(UBehaviorTreeComponent& OwnerComp);
+	static UCatCharacterTurnComponent* GetTurnComponent(UBehaviorTreeComponent& OwnerComp);
 
 	/** 取黑板组件 */
 	static UBlackboardComponent* GetBlackboard(UBehaviorTreeComponent& OwnerComp);

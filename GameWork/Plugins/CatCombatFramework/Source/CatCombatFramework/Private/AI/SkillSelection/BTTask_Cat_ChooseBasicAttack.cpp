@@ -2,7 +2,7 @@
 
 #include "AI/SkillSelection/BTTask_Cat_ChooseBasicAttack.h"
 
-#include "Combat/Component/SVCharacterTurnComponent.h"
+#include "Combat/Component/CatCharacterTurnComponent.h"
 
 UBTTask_Cat_ChooseBasicAttack::UBTTask_Cat_ChooseBasicAttack()
 {
@@ -11,7 +11,7 @@ UBTTask_Cat_ChooseBasicAttack::UBTTask_Cat_ChooseBasicAttack()
 
 EBTNodeResult::Type UBTTask_Cat_ChooseBasicAttack::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* /*NodeMemory*/)
 {
-	USVCharacterTurnComponent* TurnComp = GetTurnComponent(OwnerComp);
+	UCatCharacterTurnComponent* TurnComp = GetTurnComponent(OwnerComp);
 	if (!TurnComp)
 	{
 		return EBTNodeResult::Failed;

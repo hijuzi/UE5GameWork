@@ -156,7 +156,7 @@ public:
 	 * 一份官方指南称顺序由队伍排列决定，速度只决定出手次数；玩家实测的说法是排列只决定
 	 * 第一轮，速度会影响后续轮次的行动频率，甚至能连续行动。
 	 *
-	 * 项目暂时按「速度参与行动顺序计算」处理，因为 `USVCombatTurnCoordinator` 排 Timeline
+	 * 项目暂时按「速度参与行动顺序计算」处理，因为 `UCatCombatTurnCoordinator` 排 Timeline
 	 * 时需要读它。若实机验证后确认无关，把读取点去掉即可，属性本身不受影响。
 	 */
 	UPROPERTY(BlueprintReadOnly, Category = "Cat|Unit|Speed")

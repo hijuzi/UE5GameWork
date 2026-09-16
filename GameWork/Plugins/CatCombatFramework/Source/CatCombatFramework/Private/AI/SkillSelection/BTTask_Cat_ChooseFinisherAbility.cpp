@@ -4,7 +4,7 @@
 
 #include "GameFramework/Character.h"
 
-#include "Combat/Component/SVCharacterTurnComponent.h"
+#include "Combat/Component/CatCharacterTurnComponent.h"
 
 UBTTask_Cat_ChooseFinisherAbility::UBTTask_Cat_ChooseFinisherAbility()
 {
@@ -24,7 +24,7 @@ EBTNodeResult::Type UBTTask_Cat_ChooseFinisherAbility::ExecuteTask(UBehaviorTree
 		}
 	}
 
-	USVCharacterTurnComponent* TurnComp = GetTurnComponent(OwnerComp);
+	UCatCharacterTurnComponent* TurnComp = GetTurnComponent(OwnerComp);
 	if (!TurnComp)
 	{
 		return EBTNodeResult::Failed;

@@ -2,33 +2,33 @@
 	"folders": [
 		{
 			"path": "."
+		},
+		{
+			"path": "../LyraStarterGame",
+			"name": "LyraStarterGame"
 		}
 	],
 	"settings": {
 		"search.useIgnoreFiles": false,
 		"files.exclude": {
-			"LyraStarterGame/Binaries": true,
-			"LyraStarterGame/Build": true,
-			"LyraStarterGame/DerivedDataCache": true,
-			"LyraStarterGame/Intermediate": true,
-			"LyraStarterGame/Platforms": true,
-			"LyraStarterGame/Saved": true,
-			"LyraStarterGame/Plugins/*/Binaries": true,
-			"LyraStarterGame/Plugins/*/Intermediate": true,
-			"LyraStarterGame/*.sln": true,
-			"LyraStarterGame/*.slnx": true
+			"**/Binaries": true,
+			"**/Build": true,
+			"**/DerivedDataCache": true,
+			"**/Intermediate": true,
+			"**/Platforms": true,
+			"**/Saved": true,
+			"**/*.sln": true,
+			"**/*.slnx": true
 		},
 		"search.exclude": {
-			"LyraStarterGame/Binaries": true,
-			"LyraStarterGame/Build": true,
-			"LyraStarterGame/DerivedDataCache": true,
-			"LyraStarterGame/Intermediate": true,
-			"LyraStarterGame/Platforms": true,
-			"LyraStarterGame/Saved": true,
-			"LyraStarterGame/Plugins/*/Binaries": true,
-			"LyraStarterGame/Plugins/*/Intermediate": true,
-			"LyraStarterGame/*.sln": true,
-			"LyraStarterGame/*.slnx": true
+			"**/Binaries": true,
+			"**/Build": true,
+			"**/DerivedDataCache": true,
+			"**/Intermediate": true,
+			"**/Platforms": true,
+			"**/Saved": true,
+			"**/*.sln": true,
+			"**/*.slnx": true
 		}
 	}
 }

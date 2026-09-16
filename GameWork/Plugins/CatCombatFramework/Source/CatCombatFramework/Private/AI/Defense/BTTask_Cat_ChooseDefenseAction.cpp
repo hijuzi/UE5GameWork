@@ -7,8 +7,8 @@
 
 #include "AI/CatAIControlData.h"
 #include "AI/CatAISkillDecisionData.h"
-#include "Combat/Component/SVCharacterTurnComponent.h"
-#include "Combat/SVCombatFunctionLibrary.h"
+#include "Combat/Component/CatCharacterTurnComponent.h"
+#include "Combat/CatCombatFunctionLibrary.h"
 
 UBTTask_Cat_ChooseDefenseAction::UBTTask_Cat_ChooseDefenseAction()
 {
@@ -31,7 +31,7 @@ EBTNodeResult::Type UBTTask_Cat_ChooseDefenseAction::ExecuteTask(UBehaviorTreeCo
 	}
 
 	ACharacter* Character = GetOwnerCharacter(OwnerComp);
-	USVCharacterTurnComponent* TurnComp = GetTurnComponent(OwnerComp);
+	UCatCharacterTurnComponent* TurnComp = GetTurnComponent(OwnerComp);
 	if (!Character || !TurnComp)
 	{
 		return EBTNodeResult::Failed;
@@ -40,7 +40,7 @@ EBTNodeResult::Type UBTTask_Cat_ChooseDefenseAction::ExecuteTask(UBehaviorTreeCo
 	const ECombatTurnRole Role = TurnComp->GetTurnRole();
 
 	FGameplayTag Tag;
-	if (!USVCombatFunctionLibrary::PickSkillFromWeightTable(Character, Role, DecisionData->DefenderSkills, Tag))
+	if (!UCatCombatFunctionLibrary::PickSkillFromWeightTable(Character, Role, DecisionData->DefenderSkills, Tag))
 	{
 		return EBTNodeResult::Failed;
 	}

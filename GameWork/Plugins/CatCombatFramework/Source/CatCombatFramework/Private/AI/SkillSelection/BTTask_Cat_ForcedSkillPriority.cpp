@@ -7,7 +7,7 @@
 
 #include "AI/CatAIControlData.h"
 #include "AI/CatAISkillDecisionData.h"
-#include "Combat/SVCombatFunctionLibrary.h"
+#include "Combat/CatCombatFunctionLibrary.h"
 
 UBTTask_Cat_ForcedSkillPriority::UBTTask_Cat_ForcedSkillPriority()
 {
@@ -60,7 +60,7 @@ EBTNodeResult::Type UBTTask_Cat_ForcedSkillPriority::ExecuteTask(UBehaviorTreeCo
 		}
 
 		// 技能可激活（按当前职责判定），可激活才必发；不可激活则跳过该规则看下一条
-		if (!USVCombatFunctionLibrary::CanActivateTurnAbilityByTagWithCurrentRole(Character, Rule.SkillTag))
+		if (!UCatCombatFunctionLibrary::CanActivateTurnAbilityByTagWithCurrentRole(Character, Rule.SkillTag))
 		{
 			continue;
 		}

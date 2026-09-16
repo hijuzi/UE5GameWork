@@ -7,7 +7,7 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "GameFramework/Character.h"
 
-#include "Combat/Component/SVCharacterTurnComponent.h"
+#include "Combat/Component/CatCharacterTurnComponent.h"
 
 UBTTask_Cat_ActivateAbility::UBTTask_Cat_ActivateAbility()
 {
@@ -18,7 +18,7 @@ EBTNodeResult::Type UBTTask_Cat_ActivateAbility::ExecuteTask(UBehaviorTreeCompon
 {
 	AAIController* AIOwner = OwnerComp.GetAIOwner();
 	ACharacter* Character = AIOwner ? Cast<ACharacter>(AIOwner->GetPawn()) : nullptr;
-	USVCharacterTurnComponent* TurnComp = USVCharacterTurnComponent::GetSVCharacterTurnComponent(Character);
+	UCatCharacterTurnComponent* TurnComp = UCatCharacterTurnComponent::GetCatCharacterTurnComponent(Character);
 	if (!TurnComp)
 	{
 		return EBTNodeResult::Failed;

@@ -7,7 +7,7 @@
 
 #include "AI/CatAIControlData.h"
 #include "AI/CatAISkillDecisionData.h"
-#include "Combat/SVCombatFunctionLibrary.h"
+#include "Combat/CatCombatFunctionLibrary.h"
 
 const FName UBTTask_Cat_PeriodicSkillPriority::BBKey_PeriodicSkillCounter(TEXT("PeriodicSkillCounter"));
 
@@ -58,7 +58,7 @@ EBTNodeResult::Type UBTTask_Cat_PeriodicSkillPriority::ExecuteTask(UBehaviorTree
 
 	// 满周期但目标技能不可激活（次数用尽等）：保留计数，交常规决策，等成功触发才清零
 	// 按角色回合组件当前职责（TurnRole）判定，职责由库函数内部查询
-	if (!Character || !USVCombatFunctionLibrary::CanActivateTurnAbilityByTagWithCurrentRole(Character, PeriodicTag))
+	if (!Character || !UCatCombatFunctionLibrary::CanActivateTurnAbilityByTagWithCurrentRole(Character, PeriodicTag))
 	{
 		return EBTNodeResult::Failed;
 	}

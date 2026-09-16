@@ -6,7 +6,7 @@
 #include "BehaviorTree/BehaviorTreeComponent.h"
 #include "GameFramework/Character.h"
 
-#include "Combat/Component/SVCharacterTurnComponent.h"
+#include "Combat/Component/CatCharacterTurnComponent.h"
 
 UBTTask_Cat_FinishTurn::UBTTask_Cat_FinishTurn()
 {
@@ -17,7 +17,7 @@ EBTNodeResult::Type UBTTask_Cat_FinishTurn::ExecuteTask(UBehaviorTreeComponent& 
 {
 	AAIController* AIOwner = OwnerComp.GetAIOwner();
 	ACharacter* Character = AIOwner ? Cast<ACharacter>(AIOwner->GetPawn()) : nullptr;
-	if (USVCharacterTurnComponent* TurnComp = USVCharacterTurnComponent::GetSVCharacterTurnComponent(Character))
+	if (UCatCharacterTurnComponent* TurnComp = UCatCharacterTurnComponent::GetCatCharacterTurnComponent(Character))
 	{
 		TurnComp->NotifyTurnFinished();
 	}
